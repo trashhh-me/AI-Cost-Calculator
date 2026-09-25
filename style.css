@@ -1,0 +1,42 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#Landing-Page-Prompting{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;  
+    align-items: center;
+    min-height: 100vh;         
+    gap: 20px;               
+}
+
+#Hero-Image{
+    display: flex;
+    justify-content: center;
+}
+#Hero-Image img{
+    max-width: 100%;
+    height: auto;
+
+#user-prompt {
+  width: 100%;
+  max-width: 400px;          
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;          
+}
+
+#submit-prompt {
+  padding: 10px 25px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+}
