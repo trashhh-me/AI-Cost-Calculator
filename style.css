@@ -67,3 +67,63 @@
   display: flex;
   justify-content: flex-start;
 }
+
+#Tokenization {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px auto;
+  gap: 20px;
+  max-width: 600px;
+}
+
+#header {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.token-card {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 15px;
+  background-color: #f9f9f9;
+}
+
+.token-card h3 {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+
+.token-display-box {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fff;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-content: flex-start;
+}
+
+/* Individual Token Pills */
+.token-pill {
+  background-color: #e2e8f0;
+  color: #1e293b;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  border: 1px solid #cbd5e1;
+}
+
+.tcount {
+  margin-top: 8px;
+  text-align: right;
+  font-weight: bold;
+  font-size: 0.9rem;
+}

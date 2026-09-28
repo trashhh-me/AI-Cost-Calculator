@@ -16,8 +16,28 @@
     <div id = "output-chat">
         <textarea id="response" class="prompt-output" name="message" rows="5" cols="30" readonly placeholder="Response"></textarea>
     </div>
-
 </section>
+<section id="Tokenization">
+        <h2 id="header">Your Words Tokenized</h2>
+        
+       
+        <article class="token-card">
+            <h3>Input Prompt Tokens</h3>
+            <div id="input-tokens-visual" class="token-display-box">
+            
+                <span class="token-pill">Tokens</span> <span class="token-pill">will</span> <span class="token-pill">appear</span> <span class="token-pill">here</span>
+            </div>
+            <p class="tcount">Input Count: <span id="input-token-count">0</span></p>
+        </article>
 
+        <!-- Output Tokens Box -->
+        <article class="token-card">
+            <h3>Output Response Tokens</h3>
+            <div id="output-tokens-visual" class="token-display-box">
+                <!-- JavaScript will inject colored span pills here -->
+            </div>
+            <p class="tcount">Output Count: <span id="output-token-count">0</span></p>
+        </article>
+    </section>
 </body>
 </html>
