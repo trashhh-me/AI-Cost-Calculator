@@ -20,8 +20,9 @@
 #Hero-Image img{
     max-width: 100%;
     height: auto;
+}
 
-#user-prompt {
+.prompt-input, #response {
   width: 100%;
   max-width: 400px;          
   padding: 10px;
@@ -30,7 +31,10 @@
   resize: vertical;          
 }
 
-#submit-prompt {
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  text-align: center;
   padding: 10px 25px;
   background-color: #007bff;
   color: white;
@@ -39,4 +43,27 @@
   cursor: pointer;
   font-weight: bold;
 }
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+#Chat-Page {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+#input-chat {
+  display: flex;
+  justify-content: flex-end;
+}
+
+#output-chat {
+  display: flex;
+  justify-content: flex-start;
 }
