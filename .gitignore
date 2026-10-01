@@ -1,0 +1,8 @@
+# Secrets: the API key lives only here, never in the repository
+.env
+
+# Daily spend ledger written by the server
+data/
+
+node_modules/
+.DS_Store

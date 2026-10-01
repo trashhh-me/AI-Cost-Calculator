@@ -1,0 +1,67 @@
+// The visitor's numbers, calculated from exact token counts and the
+// coefficients in config.js. Nothing here is hard-coded.
+import { CONFIG, costUSD } from './config.js';
+import * as f from './format.js';
+
+/**
+ * turns: [{ input, output, costUSD, live, priceModel }]
+ * Returns totals, low/central/high estimates and everyday comparisons.
+ */
+export function calculate(turns) {
+  const input = turns.reduce((s, t) => s + t.input, 0);
+  const output = turns.reduce((s, t) => s + t.output, 0);
+  const { energy, water, carbon, comparisons: c } = CONFIG;
+
+  const whMid = input * energy.inputWhPerToken + output * energy.outputWhPerToken;
+  const wh = { low: whMid * energy.lowFactor, mid: whMid, high: whMid * energy.highFactor };
+
+  const both = water.onSiteMlPerWh + water.generationMlPerWh;
+  const ml = { low: wh.low * water.onSiteMlPerWh, mid: wh.mid * both, high: wh.high * both };
+
+  const gMid = carbon.venueGrid?.gPerWh ?? carbon.centralGPerWh;
+  const g = { low: wh.low * carbon.lowGPerWh, mid: wh.mid * gMid, high: wh.high * carbon.highGPerWh };
+
+  const j = { low: wh.low * CONFIG.joulesPerWh, mid: wh.mid * CONFIG.joulesPerWh, high: wh.high * CONFIG.joulesPerWh };
+
+  // Money: the actual charge for live answers; sample answers are priced at
+  // the configured model's rate and labelled as such.
+  const allLive = turns.length > 0 && turns.every((t) => t.live);
+  const anyLive = turns.some((t) => t.live);
+  const money = turns.reduce(
+    (s, t) => s + (t.live && t.costUSD != null ? t.costUSD : costUSD(t.priceModel, t.input, t.output) ?? 0),
+    0,
+  );
+
+  return { input, output, total: input + output, wh, j, ml, g, money, allLive, anyLive };
+}
+
+/** Everyday comparisons for the central estimate. */
+export function comparisons(r) {
+  const c = CONFIG.comparisons;
+  const phonePct = (r.wh.mid / c.phoneBatteryWh) * 100;
+  const bulbSeconds = (r.wh.mid * 3600) / c.bulbWatts;
+  const carMetres = (r.g.mid / c.carGPerKm) * 1000;
+  return {
+    phone: `${f.sig(phonePct, 2)}%`,
+    phoneText: `of a full phone charge (a ${c.phoneBatteryWh} Wh battery)`,
+    bulb: f.duration(bulbSeconds),
+    bulbText: `of a ${c.bulbWatts} W light bulb`,
+    water: waterComparison(r.ml.mid),
+    car: f.distance(carMetres),
+    carText: 'driven by a typical petrol car',
+    perDollar: r.money > 0 ? Math.floor(1 / r.money) : null,
+  };
+}
+
+// Drops, teaspoons or fractions of a glass, whichever is meaningful.
+function waterComparison(ml) {
+  const c = CONFIG.comparisons;
+  const drops = ml / c.dropMl;
+  if (drops < 1) return { value: f.sig(drops, 2), text: 'of a drop of water' };
+  if (drops < 60) return { value: f.sig(drops, 2), text: drops < 1.5 ? 'drop of water' : 'drops of water' };
+  const tsp = ml / c.teaspoonMl;
+  if (tsp < 15) return { value: f.sig(tsp, 2), text: tsp < 1.5 ? 'teaspoon of water' : 'teaspoons of water' };
+  const glasses = ml / c.glassMl;
+  if (glasses < 1) return { value: `${f.sig(glasses * 100, 2)}%`, text: `of a ${c.glassMl} mL glass of water` };
+  return { value: f.sig(glasses, 2), text: `${c.glassMl} mL glasses of water` };
+}
