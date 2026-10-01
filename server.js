@@ -113,10 +113,16 @@ function classifyError(err) {
   const status = err?.status ?? err?.code;
   const msg = String(err?.message || '').toLowerCase();
   if (/credit balance|billing|quota|insufficient|payment/.test(msg) || status === 402) return 'credit';
-  if (status === 429) return 'rate';
+  if (status === 429 || isOverloaded(err)) return 'rate';
   if (status === 401 || status === 403) return 'auth';
   if (status === undefined || /fetch failed|network|enotfound|econn|etimedout|socket/.test(msg)) return 'network';
   return 'error';
+}
+
+// The provider is temporarily overloaded (Gemini 503, Anthropic 529, ...).
+function isOverloaded(err) {
+  const status = err?.status ?? err?.code;
+  return status === 503 || status === 529 || /high demand|overloaded|unavailable/i.test(String(err?.message));
 }
 
 function validMessages(messages) {
@@ -198,7 +204,18 @@ async function handleChat(req, res) {
     }, CONFIG.limits.firstWordsTimeoutSeconds * 1000);
     try {
       const adapter = await ADAPTERS[PROVIDER]();
-      await run(adapter, { ...baseOpts, apiKey: API_KEY, options: CONFIG.providerOptions[PROVIDER], usage });
+      const opts = { ...baseOpts, apiKey: API_KEY, options: CONFIG.providerOptions[PROVIDER], usage };
+      try {
+        await run(adapter, opts);
+      } catch (err) {
+        // A busy provider often recovers within a second or two: retry once,
+        // but only if nothing has been shown to the visitor yet.
+        if (text || job.stopped || controller.signal.aborted || !isOverloaded(err)) throw err;
+        console.warn('[ai-dex] provider busy, retrying once…');
+        await new Promise((r) => setTimeout(r, 1500));
+        if (job.stopped || controller.signal.aborted) throw err;
+        await run(adapter, opts);
+      }
     } catch (err) {
       if (!job.stopped) {
         // The live AI failed: record anything already generated, then answer
