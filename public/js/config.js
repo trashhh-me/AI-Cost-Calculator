@@ -22,7 +22,7 @@ export const CONFIG = {
   models: {
     anthropic: 'claude-opus-5-5',
     openai: 'gpt-5.4-mini',
-    gemini: 'gemini-2.5-flash',
+    gemini: 'gemini-3.8-flash', // gemini-2.5-flash is closed to new accounts
   },
 
   // Friendly names shown in small text on the start screen and receipt.
@@ -47,9 +47,10 @@ export const CONFIG = {
     // (for example 'minimal', 'low' or 'none'; check the model's docs).
     // null = do not send the setting (needed for non-reasoning models).
     openai: { reasoningEffort: null },
-    // Gemini 2.5: thinkingBudget 0 turns thinking off. For Gemini 3.5+ models
-    // use { thinkingLevel: 'MINIMAL' } instead (thinkingBudget is rejected there).
-    gemini: { thinkingConfig: { thinkingBudget: 0 } },
+    // Gemini 3.5+: thinkingLevel 'MINIMAL' keeps thinking short. For Gemini 2.5
+    // use { thinkingConfig: { thinkingBudget: 0 } } instead. If a model rejects
+    // the setting, the server retries once without it.
+    gemini: { thinkingConfig: { thinkingLevel: 'MINIMAL' } },
   },
 
   /*
