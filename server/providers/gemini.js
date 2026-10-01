@@ -19,21 +19,29 @@ export async function* streamChat({ apiKey, model, system, messages, maxTokens, 
       },
     });
 
-  let stream;
+  // Open the stream and read its first chunk: Gemini reports a rejected
+  // setting either when the request is sent or on that first read.
+  const open = async (config) => {
+    const it = (await request(config))[Symbol.asyncIterator]();
+    return { it, first: await it.next() };
+  };
+
+  let opened;
   try {
-    stream = await request(options || {});
+    opened = await open(options || {});
   } catch (err) {
     // Gemini model families take different "thinking" settings. If this model
     // rejects ours, try once with the model's default instead.
     if (!options?.thinkingConfig || !/thinking/i.test(String(err?.message))) throw err;
-    const { thinkingConfig, ...rest } = options;
-    void thinkingConfig;
-    console.warn('[ai-dex] Gemini rejected thinkingConfig; using the model default.');
-    stream = await request(rest);
+    const rest = { ...options };
+    delete rest.thinkingConfig;
+    console.warn('[ai-dex] Gemini rejected the thinking setting; using the model default.');
+    opened = await open(rest);
   }
   usage.model = model;
 
-  for await (const chunk of stream) {
+  for (let step = opened.first; !step.done; step = await opened.it.next()) {
+    const chunk = step.value;
     const text = chunk.text;
     if (text) yield text;
     // Usage metadata is reported on the stream's chunks; the last one is final.

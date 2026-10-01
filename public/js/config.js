@@ -47,10 +47,10 @@ export const CONFIG = {
     // (for example 'minimal', 'low' or 'none'; check the model's docs).
     // null = do not send the setting (needed for non-reasoning models).
     openai: { reasoningEffort: null },
-    // Gemini 3.5+: thinkingLevel 'MINIMAL' keeps thinking short. For Gemini 2.5
+    // Gemini 3.5+: thinkingLevel 'LOW' keeps thinking short (3.8 Flash rejects 'MINIMAL'). For Gemini 2.5
     // use { thinkingConfig: { thinkingBudget: 0 } } instead. If a model rejects
     // the setting, the server retries once without it.
-    gemini: { thinkingConfig: { thinkingLevel: 'MINIMAL' } },
+    gemini: { thinkingConfig: { thinkingLevel: 'LOW' } },
   },
 
   /*
