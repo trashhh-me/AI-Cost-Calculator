@@ -378,4 +378,27 @@ server.listen(PORT, HOST, () => {
   console.log(`AI DEX running at http://${HOST}:${PORT}`);
   console.log(`Mode: ${mode} · model: ${modelLabel(MODEL)}`);
   console.log(`Daily cap: $${CONFIG.limits.dailySpendCapUSD.toFixed(2)} · spent today: $${ledger.spentToday().toFixed(4)}`);
+  if (!DEMO_FORCED && !API_KEY) explainMissingKey();
 });
+
+// Say exactly why no key was found, so it is easy to fix at the venue.
+function explainMissingKey() {
+  const keyName = KEY_NAMES[PROVIDER];
+  const envFile = path.join(ROOT, '.env');
+  console.log(`\nNo ${keyName} found. The provider in public/js/config.js is "${PROVIDER}".`);
+  if (!fs.existsSync(envFile)) {
+    console.log(`There is no .env file at ${envFile}`);
+    for (const wrong of ['.env.txt', '.env.rtf', 'env', 'env.txt', '.env.example']) {
+      if (wrong !== '.env.example' && fs.existsSync(path.join(ROOT, wrong))) {
+        console.log(`Found "${wrong}" instead: rename it to exactly ".env" (plain text).`);
+      }
+    }
+  } else {
+    const text = fs.readFileSync(envFile, 'utf8');
+    const other = Object.entries(KEY_NAMES).find(([p, k]) => p !== PROVIDER && new RegExp(`^\\s*${k}\\s*=\\s*\\S`, 'm').test(text));
+    if (other) console.log(`.env has ${other[1]}: did you mean provider: '${other[0]}' in config.js?`);
+    else if (text.includes('{\\rtf')) console.log('.env was saved as rich text: save it as plain text.');
+    else console.log(`.env exists but has no line like: ${keyName}=your-key`);
+  }
+  console.log('Then stop (Ctrl + C) and run npm start again.\n');
+}
