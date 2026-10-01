@@ -44,16 +44,11 @@ export function renderReceipt(turns, r) {
     .join('');
 
   const moneyLabel = r.allLive ? 'ACTUAL API COST' : 'PRICE OF THESE TOKENS';
-  const moneySub = r.allLive
-    ? 'Charged by the AI provider for your exact tokens'
-    : r.anyLive
-      ? 'Live answers at their actual cost; sample answers at the live price'
-      : 'Sample answers were not charged. This is the live price.';
+  const moneySub = r.allLive ? '' : 'Sample answers were not charged.';
 
   $('thermal-receipt').innerHTML = `
     <header class="receipt-header">
       <h3>AI DEX</h3>
-      <p>Itemised resource bill</p>
       <p>${escapeHTML(when)}</p>
       <p>Model: ${label}</p>
       <p>${status}</p>
@@ -68,7 +63,7 @@ export function renderReceipt(turns, r) {
     ${line('Total tokens', f.int(r.total), { id: 'receipt-total-tokens', cls: 'sub-total' })}
     <hr class="receipt-divider">
 
-    <p class="receipt-section-title">Estimated use (range)</p>
+    <p class="receipt-section-title">Estimated use</p>
     ${line('Electricity', f.str(f.energy(r.wh.mid)), {
       id: 'receipt-wh',
       resource: 'electricity',
@@ -78,17 +73,17 @@ export function renderReceipt(turns, r) {
     ${line('Water', f.str(f.water(r.ml.mid)), {
       id: 'receipt-ml',
       resource: 'water',
-      sub: `${f.range(f.water, r.ml.low, r.ml.high)} · cooling + power plants`,
+      sub: f.range(f.water, r.ml.low, r.ml.high),
     })}
     ${line('Carbon', `${f.str(f.carbon(r.g.mid))} CO2e`, {
       id: 'receipt-co2',
       resource: 'carbon',
-      sub: `${f.range(f.carbon, r.g.low, r.g.high)} · ${CONFIG.carbon.venueGrid ? escapeHTML(CONFIG.carbon.venueGrid.label) : 'world-average'} grid`,
+      sub: f.range(f.carbon, r.g.low, r.g.high),
     })}
     <hr class="receipt-divider receipt-divider--double">
 
     ${line(moneyLabel, f.usd(r.money), { id: 'receipt-cost', cls: 'total-line', resource: 'money' })}
-    <p class="receipt-note">${moneySub}</p>
+    ${moneySub ? `<p class="receipt-note">${moneySub}</p>` : ''}
     ${
       price
         ? line(`${f.int(r.input)} in × $${price.input}/M`, f.usd(costUSD(model, r.input, 0)), { cls: 'sub-total' }) +
@@ -98,7 +93,7 @@ export function renderReceipt(turns, r) {
     <hr class="receipt-divider">
 
     <div class="receipt-scale" id="receipt-at-scale">
-      <p class="receipt-section-title">If ${f.int(n)} people asked the same</p>
+      <p class="receipt-section-title">× ${f.int(n)} people</p>
       ${line('Money', f.usd(r.money * n))}
       ${line('Electricity', f.str(f.energy(r.wh.mid * n)))}
       ${line('Water', f.str(f.water(r.ml.mid * n)))}
@@ -107,9 +102,7 @@ export function renderReceipt(turns, r) {
     <hr class="receipt-divider">
 
     <footer class="receipt-footer">
-      <p>Physical values are estimates.</p>
-      <p>See “Sources and method” below.</p>
-      <p>*** THANK YOU FOR ASKING ***</p>
+      <p>*** THANK YOU ***</p>
     </footer>`;
 }
 

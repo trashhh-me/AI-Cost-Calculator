@@ -43,12 +43,9 @@ export function comparisons(r) {
   const carMetres = (r.g.mid / c.carGPerKm) * 1000;
   return {
     phone: `${f.sig(phonePct, 2)}%`,
-    phoneText: `of a full phone charge (a ${c.phoneBatteryWh} Wh battery)`,
     bulb: f.duration(bulbSeconds),
-    bulbText: `of a ${c.bulbWatts} W light bulb`,
     water: waterComparison(r.ml.mid),
     car: f.distance(carMetres),
-    carText: 'driven by a typical petrol car',
     perDollar: r.money > 0 ? Math.floor(1 / r.money) : null,
   };
 }
@@ -57,11 +54,11 @@ export function comparisons(r) {
 function waterComparison(ml) {
   const c = CONFIG.comparisons;
   const drops = ml / c.dropMl;
-  if (drops < 1) return { value: f.sig(drops, 2), text: 'of a drop of water' };
-  if (drops < 60) return { value: f.sig(drops, 2), text: drops < 1.5 ? 'drop of water' : 'drops of water' };
+  if (drops < 1) return { value: f.sig(drops, 2), text: 'of a drop' };
+  if (drops < 60) return { value: f.sig(drops, 2), text: drops < 1.5 ? 'drop' : 'drops' };
   const tsp = ml / c.teaspoonMl;
-  if (tsp < 15) return { value: f.sig(tsp, 2), text: tsp < 1.5 ? 'teaspoon of water' : 'teaspoons of water' };
+  if (tsp < 15) return { value: f.sig(tsp, 2), text: tsp < 1.5 ? 'teaspoon' : 'teaspoons' };
   const glasses = ml / c.glassMl;
-  if (glasses < 1) return { value: `${f.sig(glasses * 100, 2)}%`, text: `of a ${c.glassMl} mL glass of water` };
-  return { value: f.sig(glasses, 2), text: `${c.glassMl} mL glasses of water` };
+  if (glasses < 1) return { value: `${f.sig(glasses * 100, 2)}%`, text: 'of a glass' };
+  return { value: f.sig(glasses, 2), text: 'glasses' };
 }

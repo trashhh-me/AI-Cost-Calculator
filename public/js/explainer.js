@@ -1,6 +1,7 @@
 // Part 3: the explainer. Six "meter readings", each with plain-language
 // text, what research says, and the visitor's own number. The sticky meter
-// panel follows along; under 900px each card shows a compact meter instead.
+// panel follows along; under 900px the panel is hidden and each card's own
+// reading is enough.
 import { CONFIG } from './config.js';
 import { STEPS } from './content.js';
 import { cite, cardId } from './references.js';
@@ -44,18 +45,16 @@ export function moneyResearch() {
   if (!p) return [`No price is set for ${label} in config.js.`];
   const ratio = p.output / p.input;
   return [
-    `${label}: <b>$${p.input}</b> per million input tokens and <b>$${p.output}</b> per million output tokens, so writing costs ${f.sig(ratio, 2)} times as much as reading. {{ref:${ref}}}`,
-    `Your bill uses your exact token counts and these prices. Prices change; this exhibit lists the date each price was checked.`,
+    `${label}: <b>$${p.input}</b> per million tokens read, <b>$${p.output}</b> per million written (${f.sig(ratio, 2)}× more). {{ref:${ref}}}`,
   ];
 }
 
 export function buildExplainer() {
   const story = $('scrolling-story');
   const steps = $('meter-steps');
-  STEPS.forEach((step, i) => {
+  STEPS.forEach((step) => {
     const ids = VALUE_IDS[step.key];
     const research = step.key === 'money' ? moneyResearch() : step.research;
-    const next = STEPS[i + 1];
     const card = document.createElement('article');
     card.className = 'story-card';
     card.id = cardId(step.key);
@@ -65,32 +64,27 @@ export function buildExplainer() {
     card.innerHTML = `
       <p class="meter-tag"><span>${step.tag}</span><span>${NAMES[step.key]}</span></p>
       <h3 id="${card.id}-title">${step.headline}</h3>
-      <div class="compact-meter" aria-hidden="true">
-        <span class="compact-meter-label">Your reading</span>
-        <span class="compact-meter-value" data-compact="${step.key}">–</span>
-      </div>
-      <div class="story-body">${step.body.map((p) => `<p>${cite(p)}</p>`).join('')}</div>
-      ${
-        research.length
-          ? `<section class="research" aria-label="What research says about ${NAMES[step.key].toLowerCase()}">
-              <h4>What research says</h4>
-              <ul>${research.map((r) => `<li>${cite(r)}</li>`).join('')}</ul>
-              ${step.disagree ? `<p class="disagree">${cite(step.disagree)}</p>` : ''}
-            </section>`
-          : ''
-      }
       <div class="metric-feature">
-        <h4>${step.key === 'scale' ? 'If every ChatGPT prompt for a day were your conversation' : 'Your conversation'}</h4>
+        ${step.key === 'scale' ? '<p class="metric-caption">Your conversation × 2.5 billion, every day</p>' : ''}
         <p class="metric-value"><span id="${ids.value}" data-reading="${step.key}">–</span><small data-unit="${step.key}"></small></p>
         <p class="metric-range" data-range="${step.key}"></p>
         <p class="analogy-badge" id="${ids.analogy}-line"></p>
       </div>
+      <div class="story-body">${step.body.map((p) => `<p>${cite(p)}</p>`).join('')}</div>
       ${step.closing ? `<p class="closing-thought">${cite(step.closing)}</p>` : ''}
-      <p class="next-reading">${next ? `Next reading: ${NAMES[next.key].toLowerCase()} ↓` : 'Next: your bill ↓'}</p>`;
+      ${
+        research.length
+          ? `<details class="research">
+              <summary>What research says</summary>
+              <ul>${research.map((r) => `<li>${cite(r)}</li>`).join('')}</ul>
+              ${step.disagree ? `<p class="disagree">${cite(step.disagree)}</p>` : ''}
+            </details>`
+          : ''
+      }`;
     story.append(card);
 
     const li = document.createElement('li');
-    li.textContent = step.tag.replace('M-', '');
+    li.textContent = step.tag;
     li.title = NAMES[step.key];
     steps.append(li);
   });
@@ -109,55 +103,52 @@ export function updateExplainer(r) {
   const g = f.carbon(r.g.mid);
   const scale = f.energy(r.wh.mid * PROMPTS_PER_DAY);
 
+  const grid = CONFIG.carbon.venueGrid ? CONFIG.carbon.venueGrid.label : 'world-average';
   readings = {
     electricity: {
       ...e,
-      label: 'Electricity used by your conversation',
+      label: 'Electricity',
       range: `Range ${f.range(f.energy, r.wh.low, r.wh.high)}`,
-      analogy: `About <strong id="analogy-phone"></strong> ${c.phoneText}.`,
+      analogy: `<strong></strong> of a phone charge`,
       analogyValue: c.phone,
     },
     heat: {
       ...h,
-      label: 'Heat released by the chips',
+      label: 'Heat',
       range: `Range ${f.range(f.heat, r.j.low, r.j.high)}`,
-      analogy: `The same energy as <strong id="analogy-bulb"></strong> ${c.bulbText}.`,
+      analogy: `<strong></strong> of a ${CONFIG.comparisons.bulbWatts} W bulb`,
       analogyValue: c.bulb,
     },
     water: {
       ...w,
-      label: 'Water used for cooling and power',
-      range: `Range ${f.range(f.water, r.ml.low, r.ml.high)} (low counts on-site cooling only)`,
-      analogy: `About <strong id="analogy-water"></strong> ${c.water.text}.`,
+      label: 'Water',
+      range: `Range ${f.range(f.water, r.ml.low, r.ml.high)}`,
+      analogy: `<strong></strong> ${c.water.text}`,
       analogyValue: c.water.value,
     },
     carbon: {
       ...g,
       unit: `${g.unit} CO2e`,
-      label: CONFIG.carbon.venueGrid ? `Carbon on the ${CONFIG.carbon.venueGrid.label} grid` : 'Carbon on a world-average grid',
-      range: `Range ${f.range(f.carbon, r.g.low, r.g.high)} CO2e`,
-      analogy: `Like <strong id="analogy-car"></strong> ${c.carText}. ${cite('{{ref:epa-vehicle}}')}`,
+      label: `Carbon, ${grid} grid`,
+      range: `Range ${f.range(f.carbon, r.g.low, r.g.high)}`,
+      analogy: `<strong></strong> in a petrol car ${cite('{{ref:epa-vehicle}}')}`,
       analogyValue: c.car,
     },
     money: {
       value: r.money,
       unit: '',
       money: true,
-      label: r.allLive ? 'Actual API cost of your conversation' : 'Price of these tokens (includes sample answers)',
-      range: r.allLive
-        ? 'Not an estimate: the provider’s price for your exact tokens.'
-        : 'Sample answers were not charged; this is what the same tokens cost at the live price.',
-      analogy: c.perDollar
-        ? `One US dollar would pay for about <strong id="analogy-money"></strong> conversations like this.`
-        : '',
+      label: r.allLive ? 'Actual API cost' : 'Live price of these tokens',
+      range: r.allLive ? 'Not an estimate.' : 'Sample answers were not charged.',
+      analogy: c.perDollar ? `$1 pays for <strong></strong> of these` : '',
       analogyValue: c.perDollar ? f.int(c.perDollar) : '',
     },
     scale: {
       ...scale,
-      label: 'Electricity per day, at ChatGPT’s scale',
-      range: `${f.str(f.water(r.ml.mid * PROMPTS_PER_DAY), 2)} of water and ${f.str(f.carbon(r.g.mid * PROMPTS_PER_DAY), 2)} CO2e`,
-      analogy: `Each prompt is tiny; <strong id="analogy-scale"></strong> prompts a day are not.`,
-      analogyValue: '2.5 billion',
+      label: 'Per day, at ChatGPT’s scale',
+      range: `plus ${f.str(f.water(r.ml.mid * PROMPTS_PER_DAY), 2)} water, ${f.str(f.carbon(r.g.mid * PROMPTS_PER_DAY), 2)} CO2e`,
+      analogy: '',
+      analogyValue: '',
     },
   };
 
@@ -171,8 +162,10 @@ export function updateExplainer(r) {
     const analogyLine = $(`${VALUE_IDS[step.key].analogy}-line`);
     analogyLine.innerHTML = rd.analogy;
     const strong = analogyLine.querySelector('strong');
-    if (strong) strong.textContent = rd.analogyValue;
-    document.querySelector(`[data-compact="${step.key}"]`).textContent = `${display(rd)}${rd.unit ? ` ${rd.unit}` : ''}`;
+    if (strong) {
+      strong.id = VALUE_IDS[step.key].analogy;
+      strong.textContent = rd.analogyValue;
+    }
   }
   counted = new Set();
   setActive(activeKey, true);
@@ -185,7 +178,7 @@ function display(rd, value = rd.value) {
 export function clearExplainer() {
   readings = {};
   counted = new Set();
-  document.querySelectorAll('[data-reading], [data-compact]').forEach((el) => (el.textContent = '–'));
+  document.querySelectorAll('[data-reading]').forEach((el) => (el.textContent = '–'));
   document.querySelectorAll('[data-unit], [data-range]').forEach((el) => (el.textContent = ''));
   document.querySelectorAll('.analogy-badge').forEach((el) => (el.textContent = ''));
   setActive(STEPS[0].key, true);
@@ -234,7 +227,7 @@ function setActive(key, force = false) {
   const rd = readings[key];
   const number = $('callout-number');
   $('callout-unit').textContent = rd ? rd.unit : step.unitLabel;
-  $('callout-label').textContent = rd ? rd.label : 'Ask a question to take a reading';
+  $('callout-label').textContent = rd ? [rd.label, rd.range].filter(Boolean).join(' · ') : NAMES[key];
   if (rd) {
     if (changed && !counted.has(`panel-${key}`)) {
       counted.add(`panel-${key}`);

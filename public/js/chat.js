@@ -12,15 +12,15 @@ const $ = (id) => document.getElementById(id);
 
 // Plain, calm wording for every reason an answer is a sample.
 const SAMPLE_REASONS = {
-  demo: 'This exhibit is running on pre-written sample answers.',
-  nokey: 'This exhibit is running on pre-written sample answers.',
-  network: 'The live AI could not be reached, so this is a pre-written sample answer.',
-  offline: 'The exhibit could not reach its server, so this is a pre-written sample answer.',
-  rate: 'The live AI is busy right now, so this is a pre-written sample answer.',
-  credit: 'The live AI is not available right now, so this is a pre-written sample answer.',
-  auth: 'The live AI is not available right now, so this is a pre-written sample answer.',
-  cap: 'Today’s budget for live answers has been used up, so the exhibit is showing pre-written sample answers. Live answers return tomorrow.',
-  error: 'Something went wrong with the live AI, so this is a pre-written sample answer.',
+  demo: 'Sample answer.',
+  nokey: 'Sample answer.',
+  network: 'Sample answer: the live AI could not be reached.',
+  offline: 'Sample answer: the exhibit is offline.',
+  rate: 'Sample answer: the live AI is busy.',
+  credit: 'Sample answer: the live AI is unavailable.',
+  auth: 'Sample answer: the live AI is unavailable.',
+  cap: 'Sample answer: today’s live budget is used up.',
+  error: 'Sample answer: the live AI had a problem.',
 };
 
 export function createChat({ getVisitId, onTurnComplete, onActivity }) {
@@ -56,9 +56,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'preset-btn';
-    b.innerHTML = '<span class="preset-hint"></span><span class="preset-label"></span>';
-    b.querySelector('.preset-hint').textContent = p.hint;
-    b.querySelector('.preset-label').textContent = p.label;
+    b.textContent = p.label;
     b.addEventListener('click', () => send(p.prompt));
     presetBox.append(b);
   }
@@ -73,11 +71,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     const n = input.value.length;
     const near = n >= maxChars * 0.8;
     charCount.dataset.near = String(n >= maxChars * 0.95);
-    charCount.textContent = near
-      ? n >= maxChars
-        ? `${int(n)} / ${int(maxChars)}: that’s the limit`
-        : `${int(n)} / ${int(maxChars)} characters`
-      : '';
+    charCount.textContent = near ? `${int(n)} / ${int(maxChars)}` : '';
   }
 
   input.addEventListener('input', () => {
@@ -130,7 +124,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
   function updateQuestionsLeft() {
     questionsLeft.textContent =
-      remaining <= 0 ? 'No questions left' : `${remaining} question${remaining === 1 ? '' : 's'} left`;
+      remaining <= 0 ? 'no questions left' : `${remaining} question${remaining === 1 ? '' : 's'} left`;
   }
 
   /* ---------- Status from the server ---------- */
@@ -152,7 +146,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
   function setLive(live, reason) {
     statusDot.dataset.state = live ? 'live' : 'sample';
-    modelStatus.textContent = live ? 'Live answers' : reason === 'cap' ? 'Sample answers (today’s budget used)' : 'Sample answers';
+    modelStatus.textContent = live ? 'Live' : 'Sample answers';
   }
 
   /* ---------- Messages ---------- */
@@ -173,23 +167,14 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     el.className = 'message message--ai is-streaming';
     el.setAttribute('aria-label', `Answer ${turnNumber}`);
     el.innerHTML = `
-      <p class="message-meta"><span class="answer-from"></span></p>
       <p class="message-note" hidden></p>
-      <p class="thinking">Reading your question… <span class="thinking-time">0.0</span> s</p>
+      <p class="thinking">Thinking <span class="thinking-time">0.0</span> s</p>
       <div class="answer-body"></div>`;
-    el.querySelector('.answer-from').textContent = modelLabel;
     list.append(el);
     return el;
   }
 
   function markSample(el, reason) {
-    const meta = el.querySelector('.message-meta');
-    if (!meta.querySelector('.sample-tag')) {
-      const tag = document.createElement('span');
-      tag.className = 'sample-tag';
-      tag.textContent = 'Sample answer';
-      meta.prepend(tag);
-    }
     const note = el.querySelector('.message-note');
     note.textContent = SAMPLE_REASONS[reason] || SAMPLE_REASONS.error;
     note.hidden = false;
@@ -202,16 +187,16 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     const text = (raw || '').trim();
     if (!text) {
       input.setAttribute('aria-invalid', 'true');
-      showNotice('Type a question first, or tap one of the suggestions below.', 'empty');
+      showNotice('Type a question first.', 'empty');
       input.focus();
       return;
     }
     if (remaining <= 0) {
-      showNotice('That was your last question for this visit. Scroll down to see what the conversation cost.', 'warning');
+      showNotice(`That’s all ${CONFIG.limits.maxQuestionsPerVisit} questions. Scroll down to see the cost.`, 'warning');
       return;
     }
     if (text.length > maxChars) {
-      showNotice(`Please keep your question under ${int(maxChars)} characters.`, 'warning');
+      showNotice(`Keep it under ${int(maxChars)} characters.`, 'warning');
       return;
     }
 
@@ -261,7 +246,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
         current = null;
         updateQuestionsLeft();
         setBusy(false);
-        showNotice('That was your last question for this visit. Scroll down to see what the conversation cost.', 'warning');
+        showNotice(`That’s all ${CONFIG.limits.maxQuestionsPerVisit} questions. Scroll down to see the cost.`, 'warning');
         return;
       }
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -325,10 +310,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
         c.requestId = ev.requestId;
         c.live = ev.live;
         c.reason = ev.reason;
-        if (ev.modelLabel) {
-          modelLabel = ev.modelLabel;
-          c.el.querySelector('.answer-from').textContent = ev.modelLabel;
-        }
+        if (ev.modelLabel) modelLabel = ev.modelLabel;
         if (!ev.live) markSample(c.el, ev.reason);
         setLive(ev.live, ev.reason);
         break;
@@ -435,7 +417,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     if (c.stopped) {
       const note = document.createElement('p');
       note.className = 'stopped-note';
-      note.textContent = 'Stopped. The tokens written up to this point still count.';
+      note.textContent = 'Stopped. Tokens so far still count.';
       c.el.append(note);
     }
 
@@ -443,7 +425,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     const wh = usage.input * CONFIG.energy.inputWhPerToken + usage.output * CONFIG.energy.outputWhPerToken;
     const meter = document.createElement('p');
     meter.className = 'meter-line';
-    meter.innerHTML = `<span><strong></strong> tokens sent</span><span><strong></strong> tokens written</span><span>~<strong></strong> electricity</span>`;
+    meter.innerHTML = `<span><strong></strong> in · <strong></strong> out</span><span>~<strong></strong></span>`;
     const [a, b, d] = meter.querySelectorAll('strong');
     a.textContent = int(usage.input);
     b.textContent = int(usage.output);
@@ -457,9 +439,10 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
     updateQuestionsLeft();
     setBusy(false);
+    list.after(seeCostBtn);
     seeCostBtn.hidden = false;
     if (remaining <= 0) {
-      showNotice('That was your last question for this visit. Scroll down to see what the conversation cost.', 'info');
+      showNotice(`That’s all ${CONFIG.limits.maxQuestionsPerVisit} questions. Scroll down to see the cost.`, 'info');
     } else {
       input.focus({ preventScroll: true });
     }

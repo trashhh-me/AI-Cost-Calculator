@@ -13,7 +13,7 @@
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#Tokenization">Skip to the cost of this conversation</a>
+  <a class="skip-link" href="#Tokenization">Skip to the cost</a>
 
   <main id="main">
 
@@ -22,12 +22,13 @@
 
       <header id="Landing-Page-Prompting" class="start-screen">
         <h1 id="exhibit-title" class="wordmark">AI DEX</h1>
-        <p class="lede">Ask anything. Then see what it really cost.</p>
+        <p class="lede">Ask anything. Then see what it cost.</p>
       </header>
 
       <section id="Chat-Page" class="conversation" aria-labelledby="conversation-heading">
         <h2 id="conversation-heading" class="visually-hidden">Conversation</h2>
         <div id="conversation" class="message-list" role="log" aria-label="Messages"></div>
+        <button type="button" id="see-cost-btn" class="see-cost" hidden>See what this cost ↓</button>
         <!-- Announces finished answers to screen readers (not every word). -->
         <p id="answer-announcer" class="visually-hidden" aria-live="polite"></p>
       </section>
@@ -36,53 +37,54 @@
         <p id="chat-notice" class="chat-notice" role="status" hidden></p>
 
         <form id="prompt-box" class="composer" novalidate>
-          <label for="user-prompt" class="composer-label">Your question</label>
+          <label for="user-prompt" class="visually-hidden">Your question</label>
           <textarea id="user-prompt" class="prompt-input" name="message" rows="1"
-            maxlength="2000" placeholder="Ask anything…" autocomplete="off"
-            aria-describedby="composer-help char-count"></textarea>
-          <div class="composer-row">
-            <p id="composer-help" class="composer-help">Enter to send · Shift+Enter for a new line</p>
-            <p id="char-count" class="char-count" aria-live="polite"></p>
-            <button type="button" id="stop-btn" class="button-secondary" hidden>Stop</button>
-            <button type="submit" id="submit-prompt" class="button-primary send-button">Send</button>
-          </div>
+            maxlength="2000" placeholder="Ask anything" autocomplete="off"
+            aria-describedby="char-count"></textarea>
+          <p id="char-count" class="char-count" aria-live="polite"></p>
+          <button type="button" id="stop-btn" class="icon-button stop-button" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+            <span class="visually-hidden">Stop</span>
+          </button>
+          <button type="submit" id="submit-prompt" class="icon-button send-button">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+            <span class="visually-hidden">Send</span>
+          </button>
         </form>
 
-        <div id="presets" class="presets" role="group" aria-label="Suggestions to try"></div>
+        <div id="presets" class="presets" role="group" aria-label="Suggestions"></div>
 
         <p class="model-line">
           <span class="status-dot" aria-hidden="true"></span>
-          <span id="model-status">Connecting…</span>
+          <span id="model-status">Live</span>
           <span aria-hidden="true">·</span>
           <span id="model-name">AI model</span>
           <span aria-hidden="true">·</span>
           <span id="questions-left">3 questions left</span>
         </p>
-
-        <button type="button" id="see-cost-btn" class="button-primary see-cost" hidden>See what this conversation cost ↓</button>
       </div>
     </div>
 
     <!-- ================= PART 2: THE TOKENS ================= -->
     <section id="Tokenization" class="tokens-section" aria-labelledby="tokens-heading" hidden>
       <div class="section-inner">
-        <p class="section-kicker">Units metered</p>
-        <h2 id="tokens-heading">Your words, counted in tokens</h2>
+        <h2 id="tokens-heading">Your words, in tokens</h2>
         <p id="token-explainer" class="section-intro"></p>
 
         <div class="token-cards">
           <article class="token-card" aria-labelledby="input-tokens-heading">
             <header class="token-card-header">
-              <h3 id="input-tokens-heading">What you sent</h3>
-              <p class="tcount"><span class="tcount-label">Input</span> <span id="input-token-count" class="tcount-value">0</span> <span class="tcount-unit">tokens</span></p>
+              <h3 id="input-tokens-heading">Sent</h3>
+              <p class="tcount"><span id="input-token-count" class="tcount-value">0</span> <span class="tcount-unit">tokens</span></p>
+              <p id="input-breakdown" class="tcount-breakdown"></p>
             </header>
             <div id="input-tokens-visual" class="token-display-box" tabindex="0" aria-label="Your messages split into tokens"></div>
           </article>
 
           <article class="token-card" aria-labelledby="output-tokens-heading">
             <header class="token-card-header">
-              <h3 id="output-tokens-heading">What the AI wrote</h3>
-              <p class="tcount"><span class="tcount-label">Output</span> <span id="output-token-count" class="tcount-value">0</span> <span class="tcount-unit">tokens</span></p>
+              <h3 id="output-tokens-heading">Written</h3>
+              <p class="tcount"><span id="output-token-count" class="tcount-value">0</span> <span class="tcount-unit">tokens</span></p>
             </header>
             <div id="output-tokens-visual" class="token-display-box" tabindex="0" aria-label="The AI's answers split into tokens"></div>
           </article>
@@ -91,34 +93,31 @@
         <p id="split-note" class="split-note"></p>
 
         <div class="register">
-          <h3 class="register-title">Token register, turn by turn</h3>
-          <p id="resend-note" class="register-note"></p>
+          <h3 class="register-title">Turn by turn</h3>
           <div class="register-scroll">
             <table id="token-register" class="register-table">
               <thead>
                 <tr>
                   <th scope="col">Turn</th>
+                  <th scope="col" class="num">Typed</th>
                   <th scope="col" class="num">Sent</th>
                   <th scope="col" class="num">Written</th>
-                  <th scope="col" class="num">Running total</th>
                 </tr>
               </thead>
               <tbody></tbody>
             </table>
           </div>
+          <p id="resend-note" class="register-note"></p>
           <p id="register-footnote" class="register-footnote"></p>
         </div>
-
-        <a class="next-link" href="#exhibition-layout">What did these tokens use up? ↓</a>
       </div>
     </section>
 
     <!-- ================= PART 3: THE EXPLAINER ================= -->
     <section id="exhibition-layout" class="explainer" aria-labelledby="explainer-heading" hidden>
       <div class="section-inner explainer-intro">
-        <p class="section-kicker">Six meter readings</p>
-        <h2 id="explainer-heading">What did your conversation use?</h2>
-        <p class="section-intro">Scroll through six readings: what each cost is, what published research says about it, and your own number. Physical readings are estimates calculated from your exact token counts.</p>
+        <h2 id="explainer-heading">What it used</h2>
+        <p class="section-intro">Six readings, estimated from your exact token count.</p>
       </div>
 
       <div class="scrolly-split-container">
@@ -127,7 +126,7 @@
 
         <aside class="sticky-visual-panel" aria-label="Meter">
           <div class="sticky-wrapper">
-            <p class="display-header"><span class="display-header-tag">Meter</span> <span id="meter-resource">Electricity</span></p>
+            <p class="display-header"><span id="meter-resource">Electricity</span></p>
 
             <div class="image-frame">
               <img id="dynamic-display-img" src="images/electricity.jpg" alt="A long aisle of server racks in a data center, with status lights and bundled power cables." width="1600" height="1200">
@@ -140,7 +139,7 @@
 
             <div class="visual-stat-callout" aria-live="polite">
               <p class="callout-reading"><span id="callout-number" class="callout-value">0</span> <span id="callout-unit" class="callout-unit">Wh</span></p>
-              <p id="callout-label" class="callout-subtext">Electricity used by your conversation</p>
+              <p id="callout-label" class="callout-subtext">Electricity</p>
             </div>
 
             <ol id="meter-steps" class="meter-steps" aria-label="Readings"></ol>
@@ -152,15 +151,13 @@
     <!-- ================= PART 4: THE BILL ================= -->
     <section id="card-receipt" class="bill-section" aria-labelledby="bill-heading" hidden>
       <div class="section-inner bill-inner">
-        <p class="section-kicker">Final reading</p>
         <h2 id="bill-heading">Your bill</h2>
-        <p class="subtitle">An itemised receipt for the conversation you just had.</p>
 
         <div class="receipt-slot">
           <article id="thermal-receipt" class="thermal-receipt" aria-label="Itemised receipt"></article>
         </div>
 
-        <p class="bill-note">Electricity, heat, water and carbon are estimates. <a href="#sources-method">How they were calculated</a>.</p>
+        <p class="bill-note">Physical values are estimates. <a href="#sources-method">How we calculated them</a></p>
         <button type="button" id="reset-btn" class="button-primary">Start a new conversation</button>
       </div>
     </section>
@@ -176,7 +173,7 @@
     <section id="references" class="references-section" aria-labelledby="references-heading" hidden>
       <div class="section-inner reader">
         <h2 id="references-heading">References</h2>
-        <p class="references-intro">Every figure in this exhibit, with the source it comes from. Numbers in the text, like <span class="cite-sample">[1]</span>, point to these entries.</p>
+        <p class="references-intro">Numbers like <span class="cite-sample">[1]</span> in the text point here.</p>
         <div id="reference-list"></div>
       </div>
     </section>
@@ -187,7 +184,7 @@
   <div id="idle-overlay" class="idle-overlay" hidden>
     <div class="idle-dialog" role="alertdialog" aria-modal="true" aria-labelledby="idle-title" aria-describedby="idle-desc">
       <h2 id="idle-title">Still there?</h2>
-      <p id="idle-desc">To keep the next visitor’s conversation private, this will start over in <span id="idle-countdown" class="idle-countdown">15</span> seconds.</p>
+      <p id="idle-desc">Starting over in <span id="idle-countdown" class="idle-countdown">15</span> seconds.</p>
       <button type="button" id="idle-continue" class="button-primary">I’m still here</button>
     </div>
   </div>

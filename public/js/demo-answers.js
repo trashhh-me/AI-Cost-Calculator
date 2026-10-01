@@ -10,22 +10,18 @@
 export const PRESETS = [
   {
     label: 'Why is the sky blue?',
-    hint: 'One line',
     prompt: 'Why is the sky blue?',
   },
   {
-    label: 'A pancake recipe',
-    hint: 'Recipe',
+    label: 'Pancake recipe',
     prompt: 'Give me a simple recipe for pancakes.',
   },
   {
-    label: 'A short poem about the sea',
-    hint: 'Short poem',
+    label: 'Poem about the sea',
     prompt: 'Write a short poem about the sea.',
   },
   {
-    label: 'An essay on the history of electricity',
-    hint: 'Long essay',
+    label: 'Essay on electricity',
     prompt:
       'Write a detailed essay on the history of electricity, from the first experiments to the modern power grid.',
   },
@@ -106,11 +102,9 @@ In the twentieth century, separate local systems were joined into regional and n
 
 Today the grid is changing again. Wind and solar power are growing fast, batteries store energy for when the sun sets, and new demands such as electric cars and data centres are rising. From a rubbed piece of amber to a continent-wide machine, electricity has become the invisible thread that connects almost everything we do.`;
 
-const GENERIC = `I am answering in **sample mode** at the moment, so I cannot reply to your exact question live.
+const GENERIC = `Hi! I’m on **sample answers** right now, so I can’t reply to that live.
 
-Everything else in the exhibit still works. The token counts and the bill further down are calculated for this sample answer, which is about the length of a typical short reply from an AI assistant.
-
-To see how cost changes with length, try one of the suggestions: a one-line question, a recipe, a short poem, or a long essay.`;
+Try a suggestion to see how the cost grows with the length of the answer.`;
 
 export const SAMPLE_ANSWERS = {
   [PRESETS[0].prompt]: SKY,

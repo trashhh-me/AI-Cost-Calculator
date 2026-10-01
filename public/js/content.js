@@ -217,159 +217,131 @@ export const REFERENCES = [
 ];
 
 /* ---------------- Explainer steps ----------------
- * image: the photo path. "brief" describes what the photo should show, as a
- * brief for a photographer. If the file is missing, a designed fallback shows.
+ * Kept short: one plain paragraph per reading; the research sits behind
+ * "What research says". image.brief describes the photograph to take
+ * (see public/images/README.md). If the file is missing, a designed
+ * fallback shows.
  */
 
 export const STEPS = [
   {
     key: 'electricity',
-    tag: 'M-01',
+    tag: '01',
     unitLabel: 'Wh',
     headline: 'Where does the electricity go?',
     body: [
-      'Your question travelled to a data center: a building packed with computers that run on powerful chips called GPUs. First the model reads your whole prompt in one go. Engineers call this “prefill”. Then it writes the answer one token at a time, and every new token is a fresh pass through billions of numbers. That second step, “decode”, cannot be rushed, so each output token takes more work than an input token.',
-      'The building uses extra power for cooling and for converting electricity. That overhead is measured as PUE: Google reports 1.09, which means about 9% on top of the computers themselves. {{ref:google-2025}}',
+      'Data center chips read your prompt all at once, then write the answer one token at a time. Writing is slower, so output tokens cost more energy than input tokens.',
     ],
     research: [
-      'Median Gemini text prompt: <b>0.24 Wh</b>, counting the chips, the host computers, spare capacity kept ready and the building overhead. Counting only the AI chips gives 0.10 Wh. {{ref:google-2025}}',
-      'Typical ChatGPT (GPT-4o) query: about <b>0.3 Wh</b>. This is an estimate from public information, not a measurement. With a long ~10,000-token input it rises to about 2.5 Wh. {{ref:epoch-2025}}',
-      'Average ChatGPT query: about <b>0.34 Wh</b>, according to OpenAI’s chief executive. The method was not published. {{ref:altman-2025}}',
-      'A benchmark of 30 models: about <b>0.42 Wh</b> for a short GPT-4o query, but over 33 Wh for a long prompt to some “reasoning” models. {{ref:jegham-2025}}',
+      'Median Gemini prompt: <b>0.24 Wh</b>, including the building’s overhead (PUE 1.09). Chips alone: 0.10 Wh. {{ref:google-2025}}',
+      'Typical ChatGPT query: about <b>0.3 Wh</b> (an estimate); 2.5 Wh with a very long input. {{ref:epoch-2025}}',
+      'Average ChatGPT query: <b>0.34 Wh</b>, says OpenAI’s CEO. Method not published. {{ref:altman-2025}}',
+      'Short GPT-4o query: <b>0.42 Wh</b>. Some “reasoning” models: over 33 Wh for a long prompt. {{ref:jegham-2025}}',
     ],
-    disagree:
-      'Why the numbers differ: different models and chips, and different boundaries. Some studies count only the AI chips, others the whole building. Models that “think” before answering can use many times more.',
+    disagree: 'Studies differ in model, hardware, and whether they count just the chips or the whole building.',
     image: {
       src: 'images/electricity.jpg',
       alt: 'A long aisle of server racks in a data center, with status lights and bundled power cables.',
-      caption: 'A data center hall, where your prompt was answered',
-      // Photographer brief: a straight-down-the-aisle view of GPU server racks
-      // in a working data center; status LEDs and thick power cabling visible;
-      // cool, even light; no people; landscape 4:3, at least 1600 px wide.
+      caption: 'A data center hall',
     },
   },
   {
     key: 'heat',
-    tag: 'M-02',
+    tag: '02',
     unitLabel: 'J',
-    headline: 'Why does a computer get hot?',
+    headline: 'Why does it get hot?',
     body: [
-      'A chip does not use up electricity the way a car turns fuel into motion. Almost all the electrical energy that flows into a chip leaves it again as heat, which is why a laptop warms your knees.',
-      'A data center packs thousands of these chips into one room, so heat builds up fast. If it is not carried away, chips slow down and fail. That is why data centers need fans, chilled water and cooling towers, and why cooling is part of every prompt’s cost. Heat is measured in joules: one watt-hour is 3,600 joules.',
+      'Nearly all the electricity a chip uses turns into heat. Thousands of chips in one room must be cooled constantly, or they slow down and fail.',
     ],
     research: [
-      'Electrical energy used by a chip ends up as heat. This follows from the conservation of energy, basic physics rather than any single study.',
-      'Google reports a fleet PUE of <b>1.09</b> for the facilities serving Gemini: cooling, power conversion and other overhead add about 9% on top of the computing equipment. {{ref:google-2025}}',
+      'Electricity used by chips ends up as heat: basic physics (conservation of energy).',
+      'Cooling and other overhead add about <b>9%</b> at Google’s data centers (PUE 1.09). {{ref:google-2025}}',
     ],
-    disagree:
-      'Heat is the one reading the studies agree on: it equals the electricity used. The uncertainty comes only from the electricity estimate.',
+    disagree: '',
     image: {
       src: 'images/heat.jpg',
       alt: 'A thermal camera image of server racks, with the hottest parts glowing orange and white.',
-      caption: 'Servers seen through a thermal camera',
-      // Photographer brief: thermal (infrared) image of a server rack or the
-      // hot aisle behind it, with the colour scale legend visible; or, if no
-      // thermal camera is available, the back of a rack with large exhaust
-      // fans. Landscape 4:3, at least 1600 px wide.
+      caption: 'Servers through a thermal camera',
     },
   },
   {
     key: 'water',
-    tag: 'M-03',
+    tag: '03',
     unitLabel: 'mL',
     headline: 'Why does a chatbot need water?',
     body: [
-      'Many data centers cool themselves by evaporating water, the same way sweat cools your skin. That water is drawn on site and lost to the air.',
-      'There is a second, less visible share. Power plants that burn fuel or split atoms also evaporate water to make the electricity in the first place. How much water a prompt uses depends on where and when it runs: a hot, dry afternoon needs more evaporation than a cool night, and some buildings use air cooling that needs almost no water at all.',
+      'Data centers often cool by evaporating water, and power plants use water to make the electricity. How much depends on place, climate and season.',
     ],
     research: [
-      'Median Gemini prompt: <b>0.26 mL</b>, about five drops. This counts on-site cooling only, at 1.15 L per kWh. {{ref:google-2025}}',
-      'Average ChatGPT query: about <b>0.32 mL</b> (0.000085 US gallons). Method not published. {{ref:altman-2025}}',
-      'Counting the water power plants use too adds <b>3.142 L per kWh</b> on the average U.S. grid. On this basis, the older GPT-3 model consumes a 500 mL bottle for every 10–50 medium-length answers. {{ref:li-2023}}',
-      'Whole-lifecycle analysis, including making the hardware: <b>45 mL</b> for a 400-token reply from Mistral Large 2. {{ref:mistral-2025}}',
+      'Median Gemini prompt: <b>0.26 mL</b>, on-site cooling only. {{ref:google-2025}}',
+      'Average ChatGPT query: about <b>0.32 mL</b>. Method not published. {{ref:altman-2025}}',
+      'Power plants add <b>3.1 L per kWh</b> on the U.S. grid. On that basis GPT-3 used a 500 mL bottle per 10–50 answers. {{ref:li-2023}}',
+      'Including making the hardware: <b>45 mL</b> per 400-token reply (Mistral Large 2). {{ref:mistral-2025}}',
     ],
-    disagree:
-      'Why the numbers differ more than a hundredfold: what is counted (on-site cooling only, or also power plants, or also manufacturing), how efficient the model is, and where and when it runs.',
+    disagree: 'Estimates differ a hundredfold depending on what is counted, and where and when the model runs.',
     image: {
       src: 'images/water.jpg',
       alt: 'Cooling towers on the roof of a data center, with a plume of water vapour rising.',
-      caption: 'Cooling towers releasing evaporated water',
-      // Photographer brief: evaporative cooling towers or rooftop cooling units
-      // of a data center, ideally with visible vapour against the sky;
-      // landscape 4:3, at least 1600 px wide.
+      caption: 'Cooling towers',
     },
   },
   {
     key: 'carbon',
-    tag: 'M-04',
+    tag: '04',
     unitLabel: 'g CO2e',
-    headline: 'Why does the same prompt have a different footprint in different places?',
+    headline: 'Why does location matter?',
     body: [
-      'The carbon dioxide does not come out of the data center. It comes from the power plants that feed it. A kilowatt-hour from a coal plant releases far more CO2 than one from wind, sun, water or nuclear power.',
-      'The mix of sources on the grid at that moment, its “carbon intensity”, decides the footprint. It changes from country to country and from hour to hour. Companies sometimes report lower figures by counting clean electricity they buy under contract (“market-based”) instead of the grid’s actual mix (“location-based”).',
+      'The carbon comes from the power plants. The same prompt on a coal-heavy grid emits far more than on wind, solar or nuclear.',
     ],
     research: [
-      'Carbon intensity of electricity in 2025: world average <b>458 g</b> CO2e per kWh; European Union 210 g; United States 384 g; China 525 g. {{ref:ember-2026}}',
-      'Median Gemini prompt: <b>0.03 g</b> CO2e, market-based, counting Google’s clean-energy contracts. Google reports a 44-fold drop per prompt in one year. {{ref:google-2025}}',
-      'Whole-lifecycle analysis: <b>1.14 g</b> CO2e for a 400-token reply from Mistral Large 2, including the hardware’s manufacture. {{ref:mistral-2025}}',
+      'Grid average in 2025: world <b>458 g</b> CO2e per kWh; EU 210; U.S. 384; China 525. {{ref:ember-2026}}',
+      'Median Gemini prompt: <b>0.03 g</b>, counting Google’s clean-energy contracts. {{ref:google-2025}}',
+      'Including making the hardware: <b>1.14 g</b> per 400-token reply (Mistral Large 2). {{ref:mistral-2025}}',
     ],
-    disagree:
-      'Why the numbers differ: market-based versus location-based accounting, which grid supplies the data center, and whether making the hardware is included.',
+    disagree: 'Figures differ on accounting method, which grid is used, and whether hardware is included.',
     image: {
       src: 'images/carbon.jpg',
       alt: 'High-voltage power lines crossing a landscape towards a power station.',
-      caption: 'The grid that powers the data center',
-      // Photographer brief: transmission pylons and lines leading towards a
-      // power station (ideally one with both a fossil plant and wind turbines
-      // or solar panels in view, to suggest the mix). Landscape 4:3, 1600 px+.
+      caption: 'The grid behind the data center',
     },
   },
   {
     key: 'money',
-    tag: 'M-05',
+    tag: '05',
     unitLabel: 'USD',
-    headline: 'Why do output tokens cost more?',
+    headline: 'What did it cost?',
     body: [
-      'AI companies charge per token, with one price for the tokens you send and a higher price for the tokens the model writes, because writing is the slow, one-at-a-time step.',
-      'Every follow-up question re-sends the whole conversation, so the input grows with each turn. When a model “thinks” before answering, those hidden tokens are billed as output too. Unlike the physical readings, this one is not an estimate: it is what the provider charged for exactly the tokens your conversation used.',
+      'Providers charge per token, and writing costs more than reading. Each follow-up re-sends the whole conversation. This number is real, not an estimate.',
     ],
     research: [], // filled in from the configured model's prices (see explainer.js)
     disagree: '',
     image: {
       src: 'images/money.jpg',
       alt: 'A printed itemised bill on a desk next to a calculator.',
-      caption: 'Every token is metered and billed',
-      // Photographer brief: close-up of a printed utility bill or till receipt
-      // with itemised lines, next to an electricity meter or calculator;
-      // warm, natural light; landscape 4:3, at least 1600 px wide.
+      caption: 'Every token is billed',
     },
   },
   {
     key: 'scale',
-    tag: 'M-06',
+    tag: '06',
     unitLabel: 'MWh',
-    headline: 'What happens when billions of people do this?',
+    headline: 'What about billions of prompts?',
     body: [
-      'One conversation is tiny. But ChatGPT alone receives about 2.5 billion prompts a day, and it is one service among many. Data centers, which also run search, video and cloud storage, used about 1.5% of the world’s electricity in 2024, and AI is the main reason that is expected to more than double by 2030.',
-      'Per-prompt figures also leave things out. Training a model takes weeks on thousands of chips, and building the chips and the buildings has its own footprint.',
+      'One prompt is tiny. ChatGPT alone gets about 2.5 billion a day, and data centers’ electricity use is set to more than double by 2030.',
     ],
     research: [
-      'ChatGPT receives about <b>2.5 billion</b> prompts a day. {{ref:openai-usage-2025}}',
-      'Data centers worldwide used about <b>415 TWh</b> in 2024, around 1.5% of all electricity, heading for about 945 TWh by 2030. {{ref:iea-2025}}',
-      'U.S. data centers used <b>176 TWh</b> in 2023 (4.4% of U.S. electricity), projected at 6.7–12% by 2028. {{ref:lbnl-2024}}',
-      'Training and 18 months of use of Mistral Large 2: <b>20.4 kt</b> CO2e and 281,000 m³ of water. Training GPT-3 is estimated to have evaporated about 700,000 L on site. {{ref:mistral-2025}} {{ref:li-2023}}',
-      'Making an image used on average about <b>60 times</b> the energy of generating text in one study (2.907 vs 0.047 kWh per 1,000). {{ref:luccioni-2024}}',
+      'ChatGPT: about <b>2.5 billion</b> prompts a day. {{ref:openai-usage-2025}}',
+      'Data centers used <b>415 TWh</b> in 2024 (1.5% of world electricity), heading for 945 TWh by 2030. {{ref:iea-2025}}',
+      'U.S. data centers: <b>4.4%</b> of U.S. electricity in 2023, up to 12% by 2028. {{ref:lbnl-2024}}',
+      'Not counted per prompt: training. Mistral Large 2, trained and used for 18 months: <b>20.4 kt</b> CO2e. {{ref:mistral-2025}}',
+      'An image uses about <b>60×</b> the energy of text (2.907 vs 0.047 kWh per 1,000). {{ref:luccioni-2024}}',
     ],
     disagree: '',
-    closing:
-      'None of this means you should not use AI. It means it is worth using on purpose: ask for what you need, choose a smaller model when it will do, and remember that how data centers are powered and cooled matters most of all.',
+    closing: 'Use it on purpose: ask for what you need, and pick a smaller model when it will do.',
     image: {
       src: 'images/scale.jpg',
       alt: 'An aerial view of a large data center campus beside a highway, with rows of cooling units on the roofs.',
-      caption: 'A data center campus, seen from above',
-      // Photographer brief: aerial or drone photo of a large data center campus
-      // showing several warehouse-sized buildings, rooftop cooling and the
-      // substation; daylight; landscape 4:3, at least 1600 px wide.
+      caption: 'A data center campus from above',
     },
   },
 ];
@@ -377,18 +349,14 @@ export const STEPS = [
 /* ---------------- Short texts used around the page ---------------- */
 
 export const TEXT = {
-  tokenExplainer:
-    'AI models do not read letters or whole words. They read <b>tokens</b>: common words, parts of longer words, spaces and punctuation. In English, one token is about three-quarters of a word, so 100 tokens is roughly 75 words. Every token costs computing work to read or to write, so AI services measure use, and charge for it, by the token.',
-  resendNote:
-    'Each follow-up re-sends the whole conversation, so the tokens sent grow with every turn.',
-  splitExact: 'Split by OpenAI’s o200k tokenizer, the one this model uses. Counts are exact.',
+  tokenExplainer: 'AI reads and writes in <b>tokens</b>, about ¾ of a word each. Every token is counted and billed.',
+  resendNote: '“Sent” includes the exhibit’s short instructions to the AI and, for follow-ups, the whole conversation so far.',
+  splitExact: 'Split by OpenAI’s tokenizer. Counts are exact.',
   splitApprox: 'Approximate split. Counts are exact.',
-  splitSample: 'Sample answers: the split and the counts are made on this computer, not reported by an AI provider.',
+  splitSample: 'Sample answer: counted on this computer.',
   method: [
-    'Your token counts are exact: they are the numbers the AI provider reported for your conversation. They include the exhibit’s short hidden instructions to the AI and, from the second question on, the earlier conversation that is sent again.',
-    'Electricity is estimated from those counts. Each input token is given 0.00022 Wh and each output token 0.0006 Wh, derived from Epoch AI’s estimate of about 0.3 Wh for a typical answer of about 500 tokens and about 2.5 Wh for a 10,000-token input {{ref:epoch-2025}}. Output tokens weigh about 2.7 times more because the model writes them one at a time. The low end is 0.8 times this (scaled to Google’s measured 0.24 Wh {{ref:google-2025}}) and the high end 1.4 times (scaled to 0.42 Wh for GPT-4o {{ref:jegham-2025}}).',
-    'Heat equals the electricity used: 1 Wh is 3,600 joules. Water multiplies electricity by water per kWh. The low estimate counts on-site cooling only (1.15 L/kWh {{ref:google-2025}}). The central and high estimates also count power-plant water (3.142 L/kWh, U.S. average {{ref:li-2023}}). Carbon multiplies electricity by the grid’s carbon intensity: EU 210, world 458, China 525 g CO2e per kWh for low, central and high {{ref:ember-2026}}.',
-    'Money is not an estimate: it is your exact token counts times the provider’s published price for this model.',
-    'What is uncertain: no AI company publishes energy per token for its models, the model you used may be more or less efficient than the ones studied, and we do not know which data center or grid answered you. Per-prompt figures leave out training the model and manufacturing the hardware. Treat the physical numbers as a well-sourced order of magnitude, not a meter reading.',
+    'Token counts come from the AI provider. Electricity: 0.00022 Wh per input token and 0.0006 Wh per output token, from Epoch AI’s estimates {{ref:epoch-2025}}. Range: ×0.8 (Google {{ref:google-2025}}) to ×1.4 (Jegham et al. {{ref:jegham-2025}}).',
+    'Heat = electricity (1 Wh = 3,600 J). Water: 1.15 L/kWh for cooling {{ref:google-2025}}, plus 3.142 L/kWh at power plants {{ref:li-2023}}. Carbon: 210 / 458 / 525 g per kWh (EU / world / China) {{ref:ember-2026}}. Money: your tokens × the published price.',
+    'Uncertain: no company publishes energy per token, and we don’t know which data center answered you. Training and hardware are not included. Treat physical numbers as an order of magnitude.',
   ],
 };

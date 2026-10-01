@@ -63,7 +63,7 @@ Everything is in **`public/js/config.js`**:
 | Daily spending cap | `limits.dailySpendCapUSD` (default $5) |
 | Questions per visitor | `limits.maxQuestionsPerVisit` (default 3) |
 | Idle reset | `kiosk.idleSeconds` (90), `kiosk.countdownSeconds` (15) |
-| System prompt | `systemPrompt` |
+| System prompt (kept short: it is re-sent with every question) | `systemPrompt` |
 | Local grid for carbon | `carbon.venueGrid`, e.g. `{ label: 'United States', gPerWh: 0.384 }` |
 
 Then put the matching key in `.env` (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or

@@ -102,12 +102,12 @@ export async function renderTokens(turns) {
   for (const t of turns) {
     const q = await group('', t.question);
     typed.push(q.count);
-    q.el.firstChild.textContent = `Question ${t.number} · ${int(q.count)} pieces typed`;
+    q.el.firstChild.textContent = `Q${t.number} · ${int(q.count)} typed`;
     inFrag.append(q.el);
 
     const a = await group('', t.answer || ' ');
-    const hidden = t.thinking ? ` · includes ${int(t.thinking)} hidden thinking tokens` : '';
-    a.el.firstChild.textContent = `Answer ${t.number} · ${int(t.output)} tokens${hidden}`;
+    const hidden = t.thinking ? ` (${int(t.thinking)} hidden thinking)` : '';
+    a.el.firstChild.textContent = `A${t.number} · ${int(t.output)} tokens${hidden}`;
     outFrag.append(a.el);
   }
   if (version !== renderVersion) return; // a newer render (or a reset) started
@@ -120,6 +120,9 @@ export async function renderTokens(turns) {
   const totalIn = turns.reduce((s, t) => s + t.input, 0);
   const totalOut = turns.reduce((s, t) => s + t.output, 0);
   $('input-token-count').textContent = int(totalIn);
+  // Why "sent" is more than what was typed: instructions + earlier messages.
+  const totalTyped = typed.reduce((a, b) => a + b, 0);
+  $('input-breakdown').textContent = `${int(totalTyped)} typed + ${int(Math.max(0, totalIn - totalTyped))} instructions & history`;
   $('output-token-count').textContent = int(totalOut);
 
   // How honest is the split?
@@ -127,7 +130,7 @@ export async function renderTokens(turns) {
   const allSample = turns.every((t) => !t.live);
   let note = CONFIG.provider === 'openai' ? TEXT.splitExact : TEXT.splitApprox;
   if (allSample) note = TEXT.splitSample;
-  else if (anySample) note += ' Sample answers (marked †) are counted on this computer, not by an AI provider.';
+  else if (anySample) note += ' † Sample: counted on this computer.';
   $('split-note').textContent = note;
 
   renderRegister(turns, typed);
@@ -137,14 +140,12 @@ function renderRegister(turns, typed) {
   const table = $('token-register');
   const body = table.tBodies[0];
   body.replaceChildren();
-  let running = 0;
   let flagged = false;
-  for (const t of turns) {
-    running += t.input + t.output;
+  for (const [i, t] of turns.entries()) {
     const mark = !t.live ? ' †' : t.stopped || !t.exact?.output ? ' *' : '';
     if (mark) flagged = true;
     const tr = document.createElement('tr');
-    const cells = [`Question ${t.number}${mark}`, int(t.input), int(t.output), int(running)];
+    const cells = [`Q${t.number}${mark}`, int(typed[i]), int(t.input), int(t.output)];
     cells.forEach((v, c) => {
       const td = document.createElement('td');
       td.textContent = v;
@@ -159,28 +160,19 @@ function renderRegister(turns, typed) {
   const tr = foot.insertRow();
   const totalIn = turns.reduce((s, t) => s + t.input, 0);
   const totalOut = turns.reduce((s, t) => s + t.output, 0);
-  ['Total', int(totalIn), int(totalOut), int(totalIn + totalOut)].forEach((v, c) => {
+  const totalTyped = typed.reduce((a, b) => a + b, 0);
+  ['Total', int(totalTyped), int(totalIn), int(totalOut)].forEach((v, c) => {
     const td = tr.insertCell();
     td.textContent = v;
     if (c > 0) td.className = 'num';
   });
 
-  // The surprising cost driver: follow-ups re-send everything.
-  let note = TEXT.resendNote;
-  if (turns.length > 1) {
-    const last = turns[turns.length - 1];
-    const lastTyped = typed[typed.length - 1];
-    note += ` Your question ${last.number} was about ${int(lastTyped)} tokens long, but ${int(last.input)} tokens were sent.`;
-  } else if (turns.length === 1) {
-    note += ` “Sent” also includes the exhibit’s short hidden instructions to the AI.`;
-  }
-  $('resend-note').textContent = note;
+  $('resend-note').textContent = TEXT.resendNote;
 
   const notes = [];
-  if (turns.some((t) => !t.live)) notes.push('† Sample answer: tokens counted on this computer.');
-  if (turns.some((t) => t.live && (t.stopped || !t.exact?.output)))
-    notes.push('* Stopped early: tokens written were counted on this computer.');
-  $('register-footnote').textContent = flagged ? notes.join(' ') : 'All counts reported by the AI provider.';
+  if (turns.some((t) => !t.live)) notes.push('† Sample: counted on this computer.');
+  if (turns.some((t) => t.live && (t.stopped || !t.exact?.output))) notes.push('* Stopped early: output counted on this computer.');
+  $('register-footnote').textContent = flagged ? notes.join(' ') : '';
 }
 
 export function clearTokens() {
@@ -188,6 +180,7 @@ export function clearTokens() {
   $('input-tokens-visual').replaceChildren();
   $('output-tokens-visual').replaceChildren();
   $('input-token-count').textContent = '0';
+  $('input-breakdown').textContent = '';
   $('output-token-count').textContent = '0';
   $('token-register').tBodies[0].replaceChildren();
   $('token-register').tFoot?.remove();
