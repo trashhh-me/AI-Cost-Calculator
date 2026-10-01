@@ -51,7 +51,6 @@ export function moneyResearch() {
 
 export function buildExplainer() {
   const story = $('scrolling-story');
-  const steps = $('meter-steps');
   STEPS.forEach((step) => {
     const ids = VALUE_IDS[step.key];
     const research = step.key === 'money' ? moneyResearch() : step.research;
@@ -62,7 +61,7 @@ export function buildExplainer() {
     card.dataset.resource = step.key;
     card.setAttribute('aria-labelledby', `${card.id}-title`);
     card.innerHTML = `
-      <p class="meter-tag"><span>${step.tag}</span><span>${NAMES[step.key]}</span></p>
+      <p class="step-kicker">${NAMES[step.key]}</p>
       <h3 id="${card.id}-title">${step.headline}</h3>
       <div class="metric-feature">
         ${step.key === 'scale' ? '<p class="metric-caption">Your conversation × 2.5 billion, every day</p>' : ''}
@@ -82,11 +81,6 @@ export function buildExplainer() {
           : ''
       }`;
     story.append(card);
-
-    const li = document.createElement('li');
-    li.textContent = step.tag;
-    li.title = NAMES[step.key];
-    steps.append(li);
   });
 
   observeSteps();
@@ -222,7 +216,6 @@ function setActive(key, force = false) {
   const step = STEPS.find((s) => s.key === key);
   const panel = document.querySelector('.sticky-visual-panel');
   panel.dataset.resource = key;
-  $('meter-resource').textContent = NAMES[key];
 
   const rd = readings[key];
   const number = $('callout-number');
@@ -234,11 +227,6 @@ function setActive(key, force = false) {
       countUp(number, rd);
     } else number.textContent = display(rd);
   } else number.textContent = '–';
-
-  [...$('meter-steps').children].forEach((li, i) => {
-    if (STEPS[i].key === key) li.setAttribute('aria-current', 'step');
-    else li.removeAttribute('aria-current');
-  });
 
   if (changed) swapImage(step);
 }

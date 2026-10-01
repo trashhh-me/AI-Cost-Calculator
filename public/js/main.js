@@ -1,15 +1,13 @@
 // AI DEX: wires the four parts together.
-//   chat → tokens → explainer → bill, plus sources, references and the
-//   kiosk idle reset.
+//   chat → tokens → explainer → bill, and the kiosk idle reset.
 import { createChat } from './chat.js';
 import { renderTokens, clearTokens } from './tokens.js';
-import { buildExplainer, updateExplainer, clearExplainer, runtimeCitations } from './explainer.js';
+import { buildExplainer, updateExplainer, clearExplainer } from './explainer.js';
 import { renderReceipt, initPrinting, clearReceipt } from './bill.js';
-import { buildReferences, buildMethod } from './references.js';
 import { calculate } from './calculate.js';
 import { initKiosk } from './kiosk.js';
 
-const SECTIONS = ['Tokenization', 'exhibition-layout', 'card-receipt', 'sources-method', 'references'];
+const SECTIONS = ['Tokenization', 'exhibition-layout', 'card-receipt'];
 
 const newVisitId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
 
@@ -17,8 +15,6 @@ let visitId = newVisitId();
 let turns = [];
 
 buildExplainer();
-buildMethod();
-buildReferences(runtimeCitations());
 initPrinting();
 
 const chat = createChat({

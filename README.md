@@ -165,15 +165,16 @@ server.js                 local server: static files, /api/chat, /api/stop, /api
 server/providers/         anthropic.js · openai.js · gemini.js · demo.js (same output)
 server/limits.js          daily spend ledger, per-visit question limit
 server/tokenizer.js       local token counts (samples and stopped answers only)
-public/index.html         the single page
+public/index.html         the exhibit: chat → tokens → readings → bill
+public/references.html    method and every source (opened from the bill and from citations)
 public/style.css          all styles, organised by section
-public/fonts/             Archivo + IBM Plex Mono (SIL Open Font License)
+public/fonts/             Newsreader, Source Sans 3, IBM Plex Mono (SIL Open Font License)
 public/images/            photographs (see README there)
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
 public/js/content.js      explainer text, research figures, references
 public/js/demo-answers.js suggestion buttons and sample answers
 public/js/chat.js · tokens.js · explainer.js · bill.js · references.js
-public/js/calculate.js · format.js · markdown.js · kiosk.js · main.js
+public/js/calculate.js · format.js · markdown.js · kiosk.js · main.js · references-page.js
 public/js/vendor/         js-tiktoken with o200k_base (bundled, offline)
 scripts/build-vendor.mjs  rebuilds the vendor bundle (npm install && npm run build:vendor)
 ```

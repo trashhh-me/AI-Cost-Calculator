@@ -9,12 +9,14 @@ const BY_ID = new Map(REFERENCES.map((r) => [r.id, r]));
 const CITE = /\{\{ref:([a-z0-9-]+)\}\}/g;
 
 /** Replace {{ref:id}} marks with numbered links to the References section. */
-export function cite(html) {
+export function cite(html, { local = false } = {}) {
   return html.replace(CITE, (_, id) => {
     const n = NUMBER.get(id);
     const ref = BY_ID.get(id);
     if (!n) return '';
-    return `<sup class="cite"><a href="#ref-${id}" aria-label="Reference ${n}: ${escapeHTML(ref.short)}">[${n}]</a></sup>`;
+    // References live on their own page; a new tab keeps the conversation open.
+    const link = local ? `href="#ref-${id}"` : `href="references.html#ref-${id}" target="_blank" rel="noopener"`;
+    return `<sup class="cite"><a ${link} aria-label="Reference ${n}: ${escapeHTML(ref.short)}">[${n}]</a></sup>`;
   });
 }
 
@@ -33,7 +35,7 @@ function citedIn() {
     const text = [...step.body, ...step.research, step.disagree || ''].join(' ');
     for (const [, id] of text.matchAll(CITE)) add(id, stepLabel(step), `#${cardId(step.key)}`);
   }
-  for (const [, id] of TEXT.method.join(' ').matchAll(CITE)) add(id, 'Sources and method', '#sources-method');
+  for (const [, id] of TEXT.method.join(' ').matchAll(CITE)) add(id, 'Method', '#method');
   return map;
 }
 
@@ -73,8 +75,8 @@ export function buildReferences(extraCitations = []) {
       li.className = 'reference';
       li.id = `ref-${r.id}`;
       const back = (where.get(r.id) || [])
-        .map((w) => `<a href="${w.href}">${escapeHTML(w.label)}</a>`)
-        .join('');
+        .map((w) => escapeHTML(w.label))
+        .join(', ');
       li.innerHTML = `
         <span class="reference-number">[${NUMBER.get(r.id)}]</span>
         <div>
@@ -93,5 +95,5 @@ export function buildReferences(extraCitations = []) {
 /** The "Sources and method" text, with citations. */
 export function buildMethod() {
   const root = document.getElementById('method-text');
-  root.innerHTML = TEXT.method.map((p) => `<p>${cite(p)}</p>`).join('');
+  root.innerHTML = TEXT.method.map((p) => `<p>${cite(p, { local: true })}</p>`).join('');
 }

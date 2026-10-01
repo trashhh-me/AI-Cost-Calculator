@@ -1,25 +1,38 @@
 /* =====================================================================
-   AI DEX: "the meter reading"
-   AI as a utility you are billed for: paper, ink, meters and receipts.
-   Sections: fonts · tokens · base · buttons · chat · tokens section ·
-   explainer · meter panel · bill · method & references · kiosk overlay ·
-   small screens · reduced motion
+   AI DEX
+   Quiet paper and ink: a humanist serif for headings and readings,
+   a humanist sans for text, and monospace only where things are
+   printed or counted (tokens, the receipt).
+   Sections: fonts · tokens · base · chat · tokens section · explainer ·
+   bill · references page · kiosk overlay · small screens · reduced motion
    ===================================================================== */
 
 /* ---------- Fonts (self-hosted, SIL Open Font License) ---------- */
 @font-face {
-  font-family: 'Archivo';
-  src: url(fonts/archivo-latin-wdth-normal.woff2) format('woff2-variations');
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
+  font-family: 'Newsreader';
+  src: url(fonts/newsreader-latin-opsz-normal.woff2) format('woff2-variations');
+  font-weight: 200 800;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: 'Archivo';
-  src: url(fonts/archivo-latin-wdth-italic.woff2) format('woff2-variations');
-  font-weight: 100 900;
-  font-stretch: 62% 125%;
+  font-family: 'Newsreader';
+  src: url(fonts/newsreader-latin-opsz-italic.woff2) format('woff2-variations');
+  font-weight: 200 800;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url(fonts/source-sans-3-latin-wght-normal.woff2) format('woff2-variations');
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Source Sans 3';
+  src: url(fonts/source-sans-3-latin-wght-italic.woff2) format('woff2-variations');
+  font-weight: 200 900;
   font-style: italic;
   font-display: swap;
 }
@@ -45,57 +58,51 @@
 /* ---------- Design tokens ---------- */
 :root {
   /* Paper and ink */
-  --paper: #f2ede3;
-  --paper-deep: #e8e1d2;
+  --paper: #f3efe7;
+  --paper-deep: #e9e3d7;
   --paper-receipt: #fbf8f1;
   --field: #fbf8f1;
-  --ink: #201e1b;
-  --ink-soft: #57524a;
-  --ink-faint: #8c8577; /* decoration only, never body text */
-  --rule: #cbc2b0;
-  --bubble: #e2dacb;
+  --ink: #221f1b;
+  --ink-soft: #5a554c;
+  --ink-faint: #8c8577; /* lines and decoration only */
+  --rule: #d6cebf;
+  --bubble: #e5ddcf;
 
-  /* One strong signal colour: primary action and key numbers */
+  /* One signal colour: the main action and the key number */
   --signal: #b23718;
   --signal-ink: #fbf8f1;
-  --signal-lit: #f2906f; /* signal on dark backgrounds */
+  --signal-hover: #952c11;
 
-  /* Resources: muted, used everywhere the resource appears */
+  /* One muted colour per resource, used wherever it appears */
   --electricity: #75611a;
   --heat: #8e4826;
   --water: #29636e;
   --carbon: #4a4f55;
   --money: #386140;
   --electricity-lit: #e3c766;
-  --heat-lit: #f0a57e;
-  --water-lit: #8fcbd3;
-  --carbon-lit: #c4c9cf;
-  --money-lit: #9fd0a3;
 
-  /* The meter panel and the counter the receipt is printed on */
-  --meter-face: #26292b;
-  --meter-ink: #ede8dc;
-  --meter-dim: #aaa597;
+  /* The counter the receipt is printed on */
   --desk: #2b2724;
   --desk-ink: #efe9dd;
   --desk-dim: #b9b1a2;
 
-  /* Pills of the token "units" */
+  /* Token pieces */
   --pill-a: #ebe3d1;
-  --pill-b: #dbe2dd;
+  --pill-b: #dde3de;
   --pill-edge: #b7ad98;
 
   /* Type */
-  --font-text: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
   --step--1: 0.875rem;
-  --step-0: 1rem; /* body; root is at least 18px */
-  --step-1: 1.25rem;
-  --step-2: 1.6rem;
-  --step-3: 2.2rem;
-  --step-4: 3rem;
-  --step-5: 4.5rem;
-  --reading: 68ch;
+  --step-0: 1rem; /* body; the root is at least 18px */
+  --step-1: 1.2rem;
+  --step-2: 1.5rem;
+  --step-3: 2.1rem;
+  --step-4: 2.8rem;
+  --step-5: 4.2rem;
+  --reading: 66ch;
 
   /* Space and motion */
   --gutter: clamp(1rem, 4vw, 3rem);
@@ -104,17 +111,15 @@
   --ease: cubic-bezier(0.2, 0, 0, 1);
   --focus: var(--signal);
 
-  /* Current resource (set per step / panel) */
   --resource: var(--electricity);
-  --resource-lit: var(--electricity-lit);
 }
 
-[data-resource='electricity'] { --resource: var(--electricity); --resource-lit: var(--electricity-lit); }
-[data-resource='heat'] { --resource: var(--heat); --resource-lit: var(--heat-lit); }
-[data-resource='water'] { --resource: var(--water); --resource-lit: var(--water-lit); }
-[data-resource='carbon'] { --resource: var(--carbon); --resource-lit: var(--carbon-lit); }
-[data-resource='money'] { --resource: var(--money); --resource-lit: var(--money-lit); }
-[data-resource='scale'] { --resource: var(--ink); --resource-lit: var(--meter-ink); }
+[data-resource='electricity'] { --resource: var(--electricity); }
+[data-resource='heat'] { --resource: var(--heat); }
+[data-resource='water'] { --resource: var(--water); }
+[data-resource='carbon'] { --resource: var(--carbon); }
+[data-resource='money'] { --resource: var(--money); }
+[data-resource='scale'] { --resource: var(--ink); }
 
 /* ---------- Base ---------- */
 *,
@@ -129,17 +134,16 @@ html {
   scroll-behavior: smooth;
 }
 @media (min-width: 1600px) {
-  html { font-size: 125%; } /* 20px on large kiosk screens */
+  html { font-size: 125%; }
 }
 
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: var(--font-text);
+  font-family: var(--font-sans);
   font-size: var(--step-0);
   line-height: 1.55;
-  font-stretch: 100%;
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
@@ -148,10 +152,11 @@ h1, h2, h3, h4, p, ol, ul, figure, blockquote {
   margin: 0;
 }
 
-h2, h3 {
-  font-stretch: 87%;
-  font-weight: 700;
+h1, h2, h3 {
+  font-family: var(--font-serif);
+  font-weight: 500;
   line-height: 1.12;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
@@ -193,77 +198,61 @@ a {
 }
 
 .section-inner {
-  max-width: 76rem;
+  max-width: 72rem;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
 
+/* Section openings are centred */
+.tokens-section h2,
+.explainer h2,
+.bill-section h2 {
+  font-size: var(--step-4);
+  text-align: center;
+}
 .section-intro {
-  max-width: var(--reading);
-  margin-top: 1rem;
+  max-width: 34rem;
+  margin: 0.75rem auto 0;
   font-size: var(--step-1);
   color: var(--ink-soft);
+  text-align: center;
 }
 
-/* ---------- Buttons ---------- */
 button {
   font: inherit;
   cursor: pointer;
 }
 
-.button-primary,
-.button-secondary {
-  min-height: 3.25rem; /* well above 48px */
-  padding: 0.7rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 650;
-  font-stretch: 95%;
-  font-size: var(--step-0);
-  transition: background-color var(--t-fast) var(--ease), color var(--t-fast) var(--ease);
-}
-
 .button-primary {
+  min-height: 3.25rem;
+  padding: 0.7rem 1.75rem;
   background: var(--signal);
   color: var(--signal-ink);
-  border: 2px solid var(--signal);
+  border: 0;
+  border-radius: 999px;
+  font-weight: 600;
+  transition: background-color var(--t-fast) var(--ease);
 }
 .button-primary:hover {
-  background: #952c11;
-  border-color: #952c11;
-}
-.button-primary:disabled {
-  background: var(--paper-deep);
-  border-color: var(--ink-faint);
-  color: var(--ink-soft);
-  cursor: not-allowed;
-}
-
-.button-secondary {
-  background: transparent;
-  color: var(--ink);
-  border: 2px solid var(--ink);
-}
-.button-secondary:hover {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--signal-hover);
 }
 
 /* =====================================================================
-   PART 1: THE CHAT — familiar and quiet: a greeting, one box, a few chips
+   PART 1: THE CHAT, familiar and quiet
    ===================================================================== */
 .chat-app {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
-  max-width: 48rem;
+  max-width: 52rem;
   margin: 0 auto;
   padding: 0 var(--gutter);
 }
 
 .chat-app[data-state='start'] {
   justify-content: center;
-  padding-bottom: 12vh; /* sit slightly above centre, like a chat start screen */
+  padding-bottom: 12vh;
 }
 
 .start-screen {
@@ -272,14 +261,14 @@ button {
 }
 
 .wordmark {
-  font-size: var(--step-4);
-  font-weight: 750;
-  font-stretch: 78%;
+  font-size: var(--step-5);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
 .lede {
-  margin-top: 0.6rem;
+  margin-top: 0.75rem;
   font-size: var(--step-1);
   color: var(--ink-soft);
 }
@@ -290,11 +279,10 @@ button {
   height: 100dvh;
 }
 .chat-app[data-state='chat'] .start-screen {
-  padding: 1.1rem 0 0.9rem;
-  text-align: left;
+  padding: 1rem 0 0.75rem;
 }
 .chat-app[data-state='chat'] .wordmark {
-  font-size: var(--step-1);
+  font-size: var(--step-2);
 }
 .chat-app[data-state='chat'] .lede {
   display: none;
@@ -321,7 +309,7 @@ button {
 .message--visitor {
   align-self: flex-end;
   max-width: min(80%, 34rem);
-  padding: 0.7rem 1.1rem;
+  padding: 0.65rem 1.1rem;
   background: var(--bubble);
   border-radius: 20px;
   white-space: pre-wrap;
@@ -334,17 +322,18 @@ button {
   max-width: var(--reading);
 }
 
-.message-note {
-  margin-bottom: 0.5rem;
-  font-family: var(--font-mono);
+.message-note,
+.thinking,
+.stopped-note {
   font-size: var(--step--1);
-  color: var(--electricity);
-}
-
-.thinking {
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
+  font-style: italic;
   color: var(--ink-soft);
+}
+.message-note {
+  margin-bottom: 0.4rem;
+}
+.stopped-note {
+  margin-top: 0.5rem;
 }
 
 /* Rendered Markdown in answers */
@@ -354,7 +343,8 @@ button {
 .answer-body h3,
 .answer-body h4,
 .answer-body h5 {
-  font-stretch: 90%;
+  font-family: var(--font-serif);
+  font-weight: 600;
   line-height: 1.2;
   margin-top: 1.2em;
 }
@@ -370,7 +360,7 @@ button {
 }
 .answer-body code {
   font-family: var(--font-mono);
-  font-size: 0.9em;
+  font-size: 0.88em;
   background: var(--paper-deep);
   padding: 0.05em 0.3em;
 }
@@ -396,32 +386,24 @@ button {
 .is-streaming .answer-body > :last-child::after {
   content: '';
   display: inline-block;
-  width: 0.5em;
+  width: 0.45em;
   height: 1em;
   margin-left: 0.15em;
   vertical-align: -0.12em;
   background: var(--ink);
 }
 
-/* One quiet meter reading under each answer */
+/* One quiet reading under each answer */
 .meter-line {
   display: flex;
-  gap: 1rem;
+  gap: 0.75rem;
   margin-top: 0.75rem;
-  font-family: var(--font-mono);
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
 .meter-line strong {
   color: var(--ink);
-  font-weight: 500;
-}
-
-.stopped-note {
-  margin-top: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  color: var(--ink-soft);
+  font-weight: 600;
 }
 
 .see-cost {
@@ -438,7 +420,7 @@ button {
   transition: background-color var(--t-fast) var(--ease);
 }
 .see-cost:hover {
-  background: #952c11;
+  background: var(--signal-hover);
 }
 
 /* Composer */
@@ -474,7 +456,7 @@ button {
 .prompt-input {
   flex: 1;
   align-self: center;
-  min-height: 3.2rem; /* roomier on the start screen */
+  min-height: 3.2rem;
   max-height: 12rem;
   padding: 0.45rem 0;
   border: 0;
@@ -487,7 +469,7 @@ button {
   outline: none;
 }
 .chat-app[data-state='chat'] .prompt-input {
-  min-height: 0; /* one line once the conversation has started */
+  min-height: 0;
   font-size: var(--step-0);
 }
 .prompt-input::placeholder {
@@ -497,8 +479,7 @@ button {
 
 .char-count {
   align-self: center;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: var(--step--1);
   color: var(--ink-soft);
 }
 .char-count:empty {
@@ -534,7 +515,7 @@ button {
   stroke-linejoin: round;
 }
 .send-button:hover {
-  background: #952c11;
+  background: var(--signal-hover);
 }
 .send-button:disabled {
   background: var(--rule);
@@ -549,7 +530,7 @@ button {
   fill: currentColor;
 }
 
-/* Suggestions: plain chips under the box, only on the start screen */
+/* Suggestions: plain chips, only on the start screen */
 .presets {
   display: flex;
   flex-wrap: wrap;
@@ -568,7 +549,6 @@ button {
   color: var(--ink-soft);
   border: 1px solid var(--ink-faint);
   border-radius: 999px;
-  font-size: var(--step--1);
   transition: color var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease);
 }
 .preset-btn:hover {
@@ -583,7 +563,7 @@ button {
   align-items: center;
   gap: 0.2rem 0.5rem;
   margin-top: 1.25rem;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--ink-soft);
 }
 .chat-app[data-state='chat'] .model-line {
@@ -601,30 +581,25 @@ button {
 .status-dot[data-state='sample'] { background: var(--electricity-lit); box-shadow: inset 0 0 0 1px var(--electricity); }
 
 /* =====================================================================
-   PART 2: TOKENS, the units being metered
+   PART 2: TOKENS
    ===================================================================== */
 .tokens-section {
   padding: 6rem 0 5rem;
   background: var(--paper-deep);
-  border-top: 1px solid var(--rule);
-}
-.tokens-section h2 {
-  font-size: var(--step-4);
 }
 
 .token-cards {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.5rem;
-  margin-top: 2.5rem;
+  margin-top: 3rem;
 }
 
 .token-card {
   display: flex;
   flex-direction: column;
   background: var(--paper-receipt);
-  border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: 4px;
 }
 
 .token-card-header {
@@ -632,65 +607,60 @@ button {
   flex-wrap: wrap;
   justify-content: space-between;
   align-items: baseline;
-  gap: 0.5rem 1rem;
-  padding: 1rem 1.25rem;
-  border-bottom: 1px dashed var(--rule);
+  gap: 0.25rem 1rem;
+  padding: 1.1rem 1.4rem;
+  border-bottom: 1px solid var(--rule);
 }
 .token-card-header h3 {
-  font-size: var(--step-1);
+  font-size: var(--step-2);
 }
 
-/* Register readout: "182 tokens" */
 .tcount {
-  font-family: var(--font-mono);
   color: var(--ink-soft);
+}
+.tcount-value {
+  font-family: var(--font-serif);
+  font-size: var(--step-3);
+  color: var(--ink);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .tcount-breakdown {
   flex-basis: 100%;
   text-align: right;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--ink-soft);
-}
-.tcount-value {
-  font-size: var(--step-2);
-  font-weight: 600;
-  color: var(--ink);
-}
-.tcount-unit {
   font-size: var(--step--1);
+  color: var(--ink-soft);
 }
 
 .token-display-box {
   min-height: 6rem;
   max-height: 20rem;
   overflow-y: auto;
-  padding: 1rem 1.25rem 1.25rem;
+  padding: 1rem 1.4rem 1.25rem;
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.95rem;
   line-height: 1.6;
 }
 
 .token-group + .token-group {
   margin-top: 1.25rem;
   padding-top: 1rem;
-  border-top: 1px dashed var(--rule);
+  border-top: 1px solid var(--rule);
 }
 .token-group-label {
   display: block;
-  font-size: 0.8rem;
-  line-height: 1.4;
+  font-family: var(--font-sans);
+  font-size: var(--step--1);
+  font-style: italic;
   color: var(--ink-soft);
   margin-bottom: 0.4rem;
 }
 
-/* Each token is a stamped unit: square, mono, a printed edge */
+/* Each token is a small printed unit */
 .token-pill {
   display: inline-block;
   max-width: 100%;
   padding: 0 0.08em;
   margin: 0 1px 4px 0;
-  line-height: 1.6;
   background: var(--pill-a);
   box-shadow: inset 0 -2px 0 var(--pill-edge);
   white-space: pre;
@@ -705,21 +675,18 @@ button {
 
 .split-note {
   margin-top: 1rem;
-  font-family: var(--font-mono);
   font-size: var(--step--1);
   color: var(--ink-soft);
+  text-align: center;
 }
 
 .register {
-  margin-top: 3rem;
-  max-width: 48rem;
+  max-width: 36rem;
+  margin: 3.5rem auto 0;
 }
 .register-title {
-  font-size: var(--step-1);
-}
-.register-note {
-  margin-top: 0.4rem;
-  color: var(--ink-soft);
+  font-size: var(--step-2);
+  text-align: center;
 }
 .register-scroll {
   overflow-x: auto;
@@ -728,19 +695,17 @@ button {
 .register-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--font-mono);
 }
 .register-table th {
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
   color: var(--ink-soft);
   padding: 0.5rem 0.75rem 0.5rem 0;
-  border-bottom: 1.5px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
 }
 .register-table td {
-  padding: 0.55rem 0.75rem 0.55rem 0;
-  border-bottom: 1px dashed var(--rule);
+  padding: 0.5rem 0.75rem 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
 }
 .register-table .num {
   text-align: right;
@@ -748,29 +713,27 @@ button {
 .register-table tfoot td {
   font-weight: 600;
   border-bottom: 0;
-  border-top: 1.5px solid var(--ink);
 }
+.register-note,
 .register-footnote {
-  margin-top: 0.6rem;
+  margin-top: 0.75rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
+  text-align: center;
 }
 
 /* =====================================================================
-   PART 3: THE EXPLAINER, six meter readings
+   PART 3: THE EXPLAINER, six readings told like a magazine spread
    ===================================================================== */
 .explainer {
-  padding: 7rem 0 4rem;
-}
-.explainer h2 {
-  font-size: var(--step-4);
+  padding: 7rem 0 3rem;
 }
 
 .scrolly-split-container {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
-  gap: 3rem;
-  max-width: 82rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 4rem;
+  max-width: 72rem;
   margin: 3rem auto 0;
   padding: 0 var(--gutter);
 }
@@ -786,42 +749,73 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 1.25rem;
-}
-.story-card:first-child {
-  border-top: 0;
-  padding-top: 1rem;
+  gap: 1rem;
 }
 
-/* Step marker: a small printed label in the resource colour */
-.meter-tag {
-  align-self: flex-start;
-  display: inline-flex;
-  gap: 0.6rem;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  font-weight: 500;
+/* The resource's name, set like a magazine section line */
+.step-kicker {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--step-1);
   color: var(--resource);
-}
-.meter-tag span:first-child {
-  color: var(--ink-soft);
 }
 
 .story-card h3 {
   font-size: var(--step-3);
-  max-width: 22ch;
+  max-width: 18ch;
 }
 
 .story-body {
-  display: grid;
-  gap: 1rem;
-  max-width: 34rem;
+  max-width: 32rem;
+  font-size: var(--step-1);
+  line-height: 1.5;
   color: var(--ink-soft);
 }
 
-.research {
-  max-width: 34rem;
+/* Your reading */
+.metric-caption {
   font-size: var(--step--1);
+  font-style: italic;
+  color: var(--ink-soft);
+}
+.metric-value {
+  font-family: var(--font-serif);
+  font-size: var(--step-5);
+  font-weight: 500;
+  line-height: 1;
+  color: var(--resource);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.metric-value small {
+  font-size: var(--step-2);
+  margin-left: 0.3rem;
+}
+.metric-range {
+  margin-top: 0.3rem;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+.analogy-badge {
+  font-size: var(--step-1);
+}
+.analogy-badge:empty {
+  display: none;
+}
+.analogy-badge strong {
+  font-weight: 600;
+  color: var(--resource);
+}
+.closing-thought {
+  max-width: 32rem;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--step-2);
+  line-height: 1.3;
+}
+
+/* "What research says": folded away until wanted */
+.research {
+  max-width: 32rem;
 }
 .research summary {
   display: inline-flex;
@@ -829,56 +823,52 @@ button {
   gap: 0.5rem;
   min-height: 3rem;
   cursor: pointer;
-  font-family: var(--font-mono);
   color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--ink-faint);
+  text-underline-offset: 0.25em;
   list-style: none;
 }
 .research summary::-webkit-details-marker {
   display: none;
 }
-.research summary::before {
+.research summary::after {
   content: '+';
-  display: grid;
-  place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 1px solid var(--ink-faint);
-  border-radius: 50%;
-  font-size: 0.9rem;
+  color: var(--ink-soft);
 }
-.research[open] summary::before {
+.research[open] summary::after {
   content: '\2212';
 }
 .research ul {
-  list-style: none;
-  padding: 0 0 0 1rem;
+  padding: 0 0 0 1.1rem;
   margin-top: 0.25rem;
-  border-left: 2px solid var(--resource);
   display: grid;
   gap: 0.6rem;
+  font-size: var(--step--1);
+}
+.research li::marker {
+  color: var(--resource);
 }
 .research b {
-  font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 650;
 }
 .disagree {
   margin-top: 0.75rem;
-  padding-left: 1rem;
+  font-size: var(--step--1);
+  font-style: italic;
   color: var(--ink-soft);
 }
 
-/* Citation marks link to the References section */
+/* Citation marks open the References page */
 .cite {
-  font-family: var(--font-mono);
-  font-size: 0.75em;
-  font-weight: 500;
-  vertical-align: 0.35em;
+  font-size: 0.72em;
+  vertical-align: 0.4em;
   line-height: 0;
   white-space: nowrap;
 }
 .cite a {
   display: inline-block;
-  padding: 0.35em 0.2em; /* larger touch area than the glyphs */
+  padding: 0.35em 0.15em;
   color: var(--signal);
   text-decoration: none;
 }
@@ -886,192 +876,90 @@ button {
   text-decoration: underline;
 }
 
-/* Your conversation: the personal reading. On large screens the meter
-   panel shows the number, so the card keeps only the comparison. */
-@media (min-width: 901px) {
-  .story-card .metric-value,
-  .story-card .metric-range {
-    display: none;
-  }
-}
-.metric-caption {
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-}
-.metric-value {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: var(--step-5);
-  line-height: 1.05;
-  color: var(--resource);
-  letter-spacing: -0.02em;
-}
-.metric-value small {
-  font-size: var(--step-2);
-  font-weight: 500;
-  margin-left: 0.3rem;
-  letter-spacing: 0;
-}
-.metric-range {
-  margin-top: 0.35rem;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-}
-.analogy-badge {
-  margin-top: 0.5rem;
-  font-size: var(--step-1);
-}
-.analogy-badge:empty {
-  display: none;
-}
-.analogy-badge strong {
-  font-family: var(--font-mono);
-  font-weight: 600;
-}
-.closing-thought {
-  max-width: 34rem;
-  font-weight: 550;
-}
-
-/* ---------- The meter: sticky visual panel ---------- */
+/* The sticky side: photograph, caption, your number */
 .sticky-visual-panel {
   position: relative;
 }
 .sticky-wrapper {
   position: sticky;
-  top: 1.5rem;
+  top: 10vh;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: var(--meter-face);
-  color: var(--meter-ink);
-  border-radius: 6px;
-}
-
-.display-header {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-#meter-resource {
-  color: var(--resource-lit);
-  font-weight: 600;
+  gap: 1.5rem;
 }
 
 .image-frame {
   position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: #1c1e20;
-  border: 1px solid #44484b;
+  margin: 0;
 }
 .image-frame img {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
   object-fit: cover;
+  border-radius: 4px;
   transition: opacity var(--t-mid) var(--ease);
 }
 .image-frame img.is-swapping {
   opacity: 0;
 }
 .image-caption {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 0.5rem 0.75rem;
-  background: rgba(28, 30, 32, 0.88);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--meter-ink);
+  margin-top: 0.5rem;
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--ink-soft);
 }
 
-/* Designed fallback when a photograph is missing */
+/* Shown until a photograph is supplied */
 .image-fallback {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 1.5rem 1.5rem 3rem;
-  background: #1f2123;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--resource) 12%, var(--paper));
 }
 .image-fallback-word {
+  font-family: var(--font-serif);
+  font-style: italic;
   font-size: var(--step-4);
-  font-weight: 800;
-  font-stretch: 70%;
-  line-height: 1;
-  color: var(--resource-lit);
-}
-.image-fallback-note {
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--meter-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  color: var(--resource);
 }
 
-.visual-stat-callout {
-  padding: 0.75rem 0 0.25rem;
-  border-top: 1px solid #44484b;
-}
 .callout-reading {
-  font-family: var(--font-mono);
-  line-height: 1.05;
+  font-family: var(--font-serif);
+  line-height: 1;
+  color: var(--resource);
+  font-variant-numeric: lining-nums tabular-nums;
 }
 .callout-value {
   font-size: var(--step-5);
-  font-weight: 600;
-  color: var(--resource-lit);
-  letter-spacing: -0.02em;
+  font-weight: 500;
 }
 .callout-unit {
   font-size: var(--step-2);
-  color: var(--meter-ink);
 }
 .callout-subtext {
   margin-top: 0.4rem;
-  color: var(--meter-dim);
+  color: var(--ink-soft);
 }
 
-/* Six dial positions; the current one is lit */
-.meter-steps {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 0.35rem;
-  padding: 0;
-  list-style: none;
-}
-.meter-steps li {
-  padding-top: 0.4rem;
-  border-top: 3px solid #44484b;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--meter-dim);
-  transition: border-color var(--t-mid) var(--ease), color var(--t-mid) var(--ease);
-}
-.meter-steps li[aria-current='step'] {
-  border-top-color: var(--resource-lit);
-  color: var(--meter-ink);
+/* On large screens the side shows the number, so cards keep the comparison */
+@media (min-width: 901px) {
+  .story-card .metric-value,
+  .story-card .metric-range {
+    display: none;
+  }
 }
 
 /* =====================================================================
    PART 4: THE BILL, printed on the counter
    ===================================================================== */
 .bill-section {
-  padding: 7rem 0 7rem;
+  padding: 7rem 0;
   background: var(--desk);
   color: var(--desk-ink);
-  --focus: var(--signal-lit);
+  --focus: #f2906f;
 }
 .bill-inner {
   display: flex;
@@ -1079,21 +967,15 @@ button {
   align-items: center;
   text-align: center;
 }
-.bill-section h2 {
-  font-size: var(--step-5);
-  font-stretch: 75%;
-  font-weight: 800;
-}
 
-/* The slot the receipt prints out of. drop-shadow follows the torn edge. */
+/* drop-shadow follows the torn edge */
 .receipt-slot {
   width: 100%;
-  max-width: 34rem;
-  margin: 3rem 0 2rem;
+  max-width: 32rem;
+  margin: 3rem 0 2.5rem;
   filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }
 .receipt-slot::before {
-  /* the printer's mouth */
   content: '';
   display: block;
   height: 10px;
@@ -1112,7 +994,6 @@ button {
   font-size: 0.95rem;
   line-height: 1.5;
   text-align: left;
-  /* torn, zigzag bottom edge */
   -webkit-mask:
     linear-gradient(#000 0 0) top / 100% calc(100% - var(--zigzag)) no-repeat,
     conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--zigzag) var(--zigzag) repeat-x;
@@ -1138,7 +1019,6 @@ button {
   font-size: 1.15rem;
   font-weight: 600;
   letter-spacing: 0.2em;
-  font-stretch: normal;
 }
 .receipt-header p {
   font-size: 0.85rem;
@@ -1190,7 +1070,6 @@ button {
   height: 0.6rem;
   background: var(--resource);
 }
-
 .receipt-line.total-line {
   font-size: 1.15rem;
   padding: 0.3rem 0;
@@ -1211,80 +1090,81 @@ button {
   font-size: 0.85rem;
   color: var(--ink-soft);
 }
-
-.receipt-scale p + p {
-  margin-top: 0.25rem;
-}
 .receipt-scale {
   font-size: 0.9rem;
 }
-
 .receipt-footer {
   text-align: center;
   font-size: 0.8rem;
   color: var(--ink-soft);
 }
-.receipt-footer p + p {
-  margin-top: 0.3rem;
-}
 
-.bill-note {
-  color: var(--desk-dim);
-  margin-bottom: 1.5rem;
-}
-.bill-note a {
-  color: var(--desk-ink);
-}
 #reset-btn {
   min-height: 3.75rem;
   padding: 0.8rem 2.25rem;
   font-size: var(--step-1);
 }
+.bill-note {
+  margin-top: 1.25rem;
+  font-size: var(--step--1);
+  color: var(--desk-dim);
+}
+.bill-section .references-link {
+  margin-top: 3rem;
+  font-size: var(--step-2);
+}
+.references-link a {
+  display: inline-block;
+  padding: 0.5rem 0.25rem;
+  text-decoration-color: var(--desk-dim);
+}
 
 /* =====================================================================
-   SOURCES, METHOD AND REFERENCES: a reader's appendix
+   REFERENCES PAGE: a reader's appendix
    ===================================================================== */
-.method-section {
-  padding: 6rem 0 2rem;
+.references-page .reader {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 3rem var(--gutter) 6rem;
 }
-.references-section {
-  padding: 2rem 0 8rem;
+.back-link {
+  font-family: var(--font-serif);
+  font-size: var(--step-1);
 }
-.reader {
-  max-width: 48rem;
+.back-link a {
+  display: inline-block;
+  padding: 0.5rem 0;
 }
-.reader h2 {
-  font-size: var(--step-3);
-  padding-bottom: 0.75rem;
-  border-bottom: 1.5px solid var(--ink);
+.references-page h1 {
+  margin-top: 2.5rem;
+  font-size: var(--step-4);
+  text-align: center;
+}
+.references-intro {
+  margin-top: 0.5rem;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.references-page h2 {
+  margin-top: 3.5rem;
+  font-size: var(--step-2);
+  text-align: center;
 }
 .method-text {
   display: grid;
   gap: 1rem;
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
   line-height: 1.65;
 }
-.references-intro {
-  margin-top: 1.25rem;
-  color: var(--ink-soft);
-}
-.cite-sample {
-  font-family: var(--font-mono);
-  color: var(--signal);
-}
-
 .reference-group {
-  margin-top: 2.25rem;
+  margin-top: 2rem;
 }
 .reference-group h3 {
-  font-family: var(--font-mono);
-  font-size: var(--step--1);
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  font-size: var(--step-1);
+  font-style: italic;
   color: var(--ink-soft);
   padding-bottom: 0.4rem;
-  border-bottom: 1px dashed var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 .reference-list {
   list-style: none;
@@ -1293,10 +1173,10 @@ button {
 }
 .reference {
   display: grid;
-  grid-template-columns: 3rem 1fr;
+  grid-template-columns: 2.5rem 1fr;
   gap: 0 0.5rem;
   padding: 1rem 0;
-  border-bottom: 1px dashed var(--rule);
+  border-bottom: 1px solid var(--rule);
   scroll-margin-top: 2rem;
   line-height: 1.5;
 }
@@ -1305,14 +1185,12 @@ button {
   box-shadow: -0.75rem 0 0 var(--paper-deep), 0.75rem 0 0 var(--paper-deep);
 }
 .reference-number {
-  font-family: var(--font-mono);
-  font-weight: 600;
+  font-family: var(--font-serif);
   color: var(--signal);
 }
 .reference-title {
   font-style: italic;
 }
-.reference-kind,
 .reference-used,
 .reference-backlinks {
   margin-top: 0.35rem;
@@ -1322,14 +1200,8 @@ button {
 .reference-url {
   display: inline-block;
   margin-top: 0.35rem;
-  font-family: var(--font-mono);
   font-size: var(--step--1);
   overflow-wrap: anywhere;
-}
-.reference-backlinks a {
-  display: inline-block;
-  padding: 0.2rem 0;
-  margin-right: 0.6rem;
 }
 
 /* =====================================================================
@@ -1342,27 +1214,25 @@ button {
   display: grid;
   place-items: center;
   padding: var(--gutter);
-  background: rgba(32, 30, 27, 0.78);
+  background: rgba(34, 31, 27, 0.7);
 }
 .idle-dialog {
-  max-width: 34rem;
+  max-width: 30rem;
   padding: 2.5rem;
   background: var(--paper-receipt);
-  border-top: 8px solid var(--signal);
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
   text-align: center;
 }
 .idle-dialog h2 {
   font-size: var(--step-4);
-  font-stretch: 75%;
-  font-weight: 800;
 }
 .idle-dialog p {
-  margin: 1rem 0 1.75rem;
+  margin: 0.75rem 0 1.75rem;
   font-size: var(--step-1);
+  color: var(--ink-soft);
 }
 .idle-countdown {
-  font-family: var(--font-mono);
   font-weight: 600;
   color: var(--signal);
 }
@@ -1373,16 +1243,15 @@ button {
 }
 
 /* =====================================================================
-   SMALL SCREENS (under 900px): no side panel; each card shows its reading
+   SMALL SCREENS (under 900px): no side column; each card has its number
    ===================================================================== */
 @media (max-width: 900px) {
   :root {
     --step-3: 1.8rem;
-    --step-4: 2.3rem;
+    --step-4: 2.2rem;
     --step-5: 3.2rem;
   }
 
-  /* Let the conversation flow with the page instead of a fixed panel */
   .chat-app[data-state='chat'] {
     height: auto;
     min-height: 100dvh;
@@ -1390,7 +1259,7 @@ button {
   .chat-app[data-state='chat'] .conversation {
     overflow: visible;
   }
-  /* The box stays pinned to the bottom of the screen while chatting */
+  /* The box stays pinned to the bottom while chatting */
   .chat-app[data-state='chat'] .composer-dock {
     position: sticky;
     bottom: 0;
@@ -1423,7 +1292,7 @@ button {
     font-size: 0.85rem;
   }
   .reference {
-    grid-template-columns: 2.25rem 1fr;
+    grid-template-columns: 2rem 1fr;
   }
 }
 

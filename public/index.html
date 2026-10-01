@@ -7,8 +7,8 @@
   <meta name="description" content="AI DEX: ask an AI anything, then see what it really cost in electricity, heat, water, carbon and money.">
   <title>AI DEX</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="fonts/archivo-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="js/main.js"></script>
 </head>
@@ -124,25 +124,20 @@
         <!-- Story cards are built from js/content.js -->
         <div id="scrolling-story" class="scrolling-story"></div>
 
-        <aside class="sticky-visual-panel" aria-label="Meter">
+        <aside class="sticky-visual-panel" aria-label="Your reading">
           <div class="sticky-wrapper">
-            <p class="display-header"><span id="meter-resource">Electricity</span></p>
-
-            <div class="image-frame">
+            <figure class="image-frame">
               <img id="dynamic-display-img" src="images/electricity.jpg" alt="A long aisle of server racks in a data center, with status lights and bundled power cables." width="1600" height="1200">
               <div id="image-fallback" class="image-fallback" hidden>
                 <span id="image-fallback-word" class="image-fallback-word">Electricity</span>
-                <span class="image-fallback-note">Photograph to come</span>
               </div>
-              <span id="img-caption-tag" class="image-caption"></span>
-            </div>
+              <figcaption id="img-caption-tag" class="image-caption"></figcaption>
+            </figure>
 
             <div class="visual-stat-callout" aria-live="polite">
               <p class="callout-reading"><span id="callout-number" class="callout-value">0</span> <span id="callout-unit" class="callout-unit">Wh</span></p>
               <p id="callout-label" class="callout-subtext">Electricity</p>
             </div>
-
-            <ol id="meter-steps" class="meter-steps" aria-label="Readings"></ol>
           </div>
         </aside>
       </div>
@@ -157,24 +152,9 @@
           <article id="thermal-receipt" class="thermal-receipt" aria-label="Itemised receipt"></article>
         </div>
 
-        <p class="bill-note">Physical values are estimates. <a href="#sources-method">How we calculated them</a></p>
         <button type="button" id="reset-btn" class="button-primary">Start a new conversation</button>
-      </div>
-    </section>
-
-    <!-- ================= SOURCES, METHOD AND REFERENCES ================= -->
-    <section id="sources-method" class="method-section" aria-labelledby="method-heading" hidden>
-      <div class="section-inner reader">
-        <h2 id="method-heading">Sources and method</h2>
-        <div id="method-text" class="method-text"></div>
-      </div>
-    </section>
-
-    <section id="references" class="references-section" aria-labelledby="references-heading" hidden>
-      <div class="section-inner reader">
-        <h2 id="references-heading">References</h2>
-        <p class="references-intro">Numbers like <span class="cite-sample">[1]</span> in the text point here.</p>
-        <div id="reference-list"></div>
+        <p class="bill-note">Electricity, heat, water and carbon are estimates.</p>
+        <h2 class="references-link"><a href="references.html" target="_blank" rel="noopener">References</a></h2>
       </div>
     </section>
 
