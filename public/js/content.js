@@ -218,9 +218,8 @@ export const REFERENCES = [
 
 /* ---------------- Explainer steps ----------------
  * Kept short: one plain paragraph per reading; the research sits behind
- * "What research says". image.brief describes the photograph to take
- * (see public/images/README.md). If the file is missing, a designed
- * fallback shows.
+ * "What research says". The photographs are set in index.html
+ * (search for "PHOTOGRAPHS").
  */
 
 export const STEPS = [
@@ -239,17 +238,12 @@ export const STEPS = [
       'Short GPT-4o query: <b>0.42 Wh</b>. Some “reasoning” models: over 33 Wh for a long prompt. {{ref:jegham-2025}}',
     ],
     disagree: 'Studies differ in model, hardware, and whether they count just the chips or the whole building.',
-    image: {
-      src: 'images/electricity.jpg',
-      alt: 'A long aisle of server racks in a data center, with status lights and bundled power cables.',
-      caption: 'A data center hall',
-    },
   },
   {
     key: 'heat',
     tag: '02',
     unitLabel: 'J',
-    headline: 'Why does it get hot?',
+    headline: 'Chips turn power into heat.',
     body: [
       'Nearly all the electricity a chip uses turns into heat. Thousands of chips in one room must be cooled constantly, or they slow down and fail.',
     ],
@@ -258,11 +252,6 @@ export const STEPS = [
       'Cooling and other overhead add about <b>9%</b> at Google’s data centers (PUE 1.09). {{ref:google-2025}}',
     ],
     disagree: '',
-    image: {
-      src: 'images/heat.jpg',
-      alt: 'A thermal camera image of server racks, with the hottest parts glowing orange and white.',
-      caption: 'Servers through a thermal camera',
-    },
   },
   {
     key: 'water',
@@ -279,17 +268,12 @@ export const STEPS = [
       'Including making the hardware: <b>45 mL</b> per 400-token reply (Mistral Large 2). {{ref:mistral-2025}}',
     ],
     disagree: 'Estimates differ a hundredfold depending on what is counted, and where and when the model runs.',
-    image: {
-      src: 'images/water.jpg',
-      alt: 'Cooling towers on the roof of a data center, with a plume of water vapour rising.',
-      caption: 'Cooling towers',
-    },
   },
   {
     key: 'carbon',
     tag: '04',
     unitLabel: 'g CO2e',
-    headline: 'Why does location matter?',
+    headline: 'Same question, different footprint.',
     body: [
       'The carbon comes from the power plants. The same prompt on a coal-heavy grid emits far more than on wind, solar or nuclear.',
     ],
@@ -299,35 +283,25 @@ export const STEPS = [
       'Including making the hardware: <b>1.14 g</b> per 400-token reply (Mistral Large 2). {{ref:mistral-2025}}',
     ],
     disagree: 'Figures differ on accounting method, which grid is used, and whether hardware is included.',
-    image: {
-      src: 'images/carbon.jpg',
-      alt: 'High-voltage power lines crossing a landscape towards a power station.',
-      caption: 'The grid behind the data center',
-    },
   },
   {
     key: 'money',
     tag: '05',
     unitLabel: 'USD',
-    headline: 'What did it cost?',
+    headline: 'Writing costs more than reading.',
     body: [
       'Providers charge per token, and writing costs more than reading. Each follow-up re-sends the whole conversation. This number is real, not an estimate.',
     ],
     research: [], // filled in from the configured model's prices (see explainer.js)
     disagree: '',
-    image: {
-      src: 'images/money.jpg',
-      alt: 'A printed itemised bill on a desk next to a calculator.',
-      caption: 'Every token is billed',
-    },
   },
   {
     key: 'scale',
     tag: '06',
     unitLabel: 'MWh',
-    headline: 'What about billions of prompts?',
+    headline: 'One prompt is tiny. Billions are not.',
     body: [
-      'One prompt is tiny. ChatGPT alone gets about 2.5 billion a day, and data centers’ electricity use is set to more than double by 2030.',
+      'ChatGPT alone gets about 2.5 billion prompts a day, and data centers’ electricity use is set to more than double by 2030.',
     ],
     research: [
       'ChatGPT: about <b>2.5 billion</b> prompts a day. {{ref:openai-usage-2025}}',
@@ -338,11 +312,6 @@ export const STEPS = [
     ],
     disagree: '',
     closing: 'Use it on purpose: ask for what you need, and pick a smaller model when it will do.',
-    image: {
-      src: 'images/scale.jpg',
-      alt: 'An aerial view of a large data center campus beside a highway, with rows of cooling units on the roofs.',
-      caption: 'A data center campus from above',
-    },
   },
 ];
 

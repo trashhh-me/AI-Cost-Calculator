@@ -70,7 +70,6 @@ export function buildExplainer() {
         <p class="analogy-badge" id="${ids.analogy}-line"></p>
       </div>
       <div class="story-body">${step.body.map((p) => `<p>${cite(p)}</p>`).join('')}</div>
-      ${step.closing ? `<p class="closing-thought">${cite(step.closing)}</p>` : ''}
       ${
         research.length
           ? `<details class="research">
@@ -83,6 +82,11 @@ export function buildExplainer() {
     story.append(card);
   });
 
+  // The last step's closing thought gets a quiet section of its own.
+  const closing = STEPS.find((s) => s.closing)?.closing;
+  if (closing) $('closing-thought').innerHTML = cite(closing);
+
+  watchPhotos();
   observeSteps();
   setActive(STEPS[0].key);
 }
@@ -231,35 +235,32 @@ function setActive(key, force = false) {
   if (changed) swapImage(step);
 }
 
+// Photographs live in index.html, one <img class="step-photo"> per reading.
+// The current one fades in; a missing file shows the plain placeholder.
 function swapImage(step) {
-  const img = $('dynamic-display-img');
-  const fallback = $('image-fallback');
-  const caption = $('img-caption-tag');
-  const show = () => {
-    const probe = new Image();
-    probe.onload = () => {
-      img.src = step.image.src;
-      img.alt = step.image.alt;
-      img.hidden = false;
-      fallback.hidden = true;
-      img.classList.remove('is-swapping');
+  const photos = document.querySelectorAll('.step-photo');
+  let current = null;
+  photos.forEach((img) => {
+    const on = img.dataset.step === step.key;
+    img.classList.toggle('is-active', on);
+    if (on) current = img;
+  });
+  const missing = !current || current.dataset.missing === 'true';
+  $('image-fallback').hidden = !missing;
+  $('image-fallback-word').textContent = NAMES[step.key];
+  $('img-caption-tag').textContent = missing ? '' : current.dataset.caption || '';
+}
+
+function watchPhotos() {
+  document.querySelectorAll('.step-photo').forEach((img) => {
+    const mark = (missing) => {
+      img.dataset.missing = String(missing);
+      if (img.dataset.step === activeKey) swapImage(STEPS.find((s) => s.key === activeKey));
     };
-    probe.onerror = () => {
-      // No photograph yet: show the designed fallback, never a broken image.
-      img.hidden = true;
-      img.alt = '';
-      fallback.hidden = false;
-      $('image-fallback-word').textContent = NAMES[step.key];
-      img.classList.remove('is-swapping');
-    };
-    probe.src = step.image.src;
-    caption.textContent = step.image.caption;
-  };
-  if (reducedMotion() || img.hidden) show();
-  else {
-    img.classList.add('is-swapping');
-    setTimeout(show, 150);
-  }
+    img.addEventListener('load', () => mark(false));
+    img.addEventListener('error', () => mark(true));
+    if (img.complete) img.dataset.missing = String(img.naturalWidth === 0);
+  });
 }
 
 /* ---------- Count-up: numbers rise once, like a meter ---------- */

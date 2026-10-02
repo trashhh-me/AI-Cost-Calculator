@@ -67,10 +67,13 @@
 
     <!-- ================= PART 2: THE TOKENS ================= -->
     <section id="Tokenization" class="tokens-section" aria-labelledby="tokens-heading" hidden>
-      <div class="section-inner">
-        <h2 id="tokens-heading">Your words, in tokens</h2>
-        <p id="token-explainer" class="section-intro"></p>
+      <div class="section-inner tokens-layout">
+        <header class="tokens-intro">
+          <h2 id="tokens-heading">How the AI read your words</h2>
+          <p id="token-explainer"></p>
+        </header>
 
+        <div class="tokens-body">
         <div class="token-cards">
           <article class="token-card" aria-labelledby="input-tokens-heading">
             <header class="token-card-header">
@@ -110,6 +113,7 @@
           <p id="resend-note" class="register-note"></p>
           <p id="register-footnote" class="register-footnote"></p>
         </div>
+        </div>
       </div>
     </section>
 
@@ -126,10 +130,23 @@
 
         <aside class="sticky-visual-panel" aria-label="Your reading">
           <div class="sticky-wrapper">
+            <!--
+              PHOTOGRAPHS: one per reading. Replace src, alt and data-caption
+              with your own. Until the file exists, a plain placeholder
+              with the reading's name is shown instead. Briefs for each
+              photo are in images/README.md.
+            -->
             <figure class="image-frame">
-              <img id="dynamic-display-img" src="images/electricity.jpg" alt="A long aisle of server racks in a data center, with status lights and bundled power cables." width="1600" height="1200">
-              <div id="image-fallback" class="image-fallback" hidden>
-                <span id="image-fallback-word" class="image-fallback-word">Electricity</span>
+              <div class="photo-stack">
+                <img class="step-photo" data-step="electricity" src="images/electricity.jpg" data-caption="A data center hall" alt="A long aisle of server racks in a data center, with status lights and bundled power cables." width="1600" height="1200">
+                <img class="step-photo" data-step="heat" src="images/heat.jpg" data-caption="Servers through a thermal camera" alt="A thermal camera image of server racks, with the hottest parts glowing orange and white." width="1600" height="1200">
+                <img class="step-photo" data-step="water" src="images/water.jpg" data-caption="Cooling towers" alt="Cooling towers on the roof of a data center, with a plume of water vapour rising." width="1600" height="1200">
+                <img class="step-photo" data-step="carbon" src="images/carbon.jpg" data-caption="The grid behind the data center" alt="High-voltage power lines crossing a landscape towards a power station." width="1600" height="1200">
+                <img class="step-photo" data-step="money" src="images/money.jpg" data-caption="Every token is billed" alt="A printed itemised bill on a desk next to a calculator." width="1600" height="1200">
+                <img class="step-photo" data-step="scale" src="images/scale.jpg" data-caption="A data center campus from above" alt="An aerial view of a large data center campus beside a highway, with rows of cooling units on the roofs." width="1600" height="1200">
+                <div id="image-fallback" class="image-fallback" hidden>
+                  <span id="image-fallback-word" class="image-fallback-word">Electricity</span>
+                </div>
               </div>
               <figcaption id="img-caption-tag" class="image-caption"></figcaption>
             </figure>
@@ -141,6 +158,10 @@
           </div>
         </aside>
       </div>
+
+      <blockquote class="closing">
+        <p id="closing-thought" class="closing-quote"></p>
+      </blockquote>
     </section>
 
     <!-- ================= PART 4: THE BILL ================= -->

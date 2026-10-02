@@ -14,5 +14,15 @@ at least 1600 × 1200 px, JPEG, under about 500 KB each.
 | `money.jpg` | Close-up of a printed utility bill or till receipt with itemised lines, beside an electricity meter or calculator; warm natural light. |
 | `scale.jpg` | Aerial or drone photo of a large data center campus: several warehouse-sized buildings, rooftop cooling and the substation; daylight. |
 
-Captions and alt text live in `public/js/content.js` (each step's `image`).
-Update the alt text there if a photograph differs from the brief.
+The photos are listed in `public/index.html`: search for **PHOTOGRAPHS**.
+Each reading has one line like this:
+
+```html
+<img class="step-photo" data-step="water" src="images/water.jpg"
+     data-caption="Cooling towers" alt="Cooling towers on the roof of a data center…">
+```
+
+Change `src` to your file, and update `alt` (what the photo shows, for
+screen readers) and `data-caption` (the line shown under the photo). Keep
+`class` and `data-step` as they are. Until a file exists, a plain placeholder
+with the reading's name is shown, never a broken image.
