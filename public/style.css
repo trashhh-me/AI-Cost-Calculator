@@ -204,13 +204,11 @@ a {
   text-align: center;
 }
 
+.explainer-intro {
+  text-align: center;
+}
 .explainer h2 {
   font-size: calc(var(--step-4) * 1.15);
-  max-width: 12ch;
-}
-.explainer .section-intro {
-  margin: 0.75rem 0 0;
-  text-align: left;
 }
 .section-intro {
   max-width: 34rem;
@@ -815,21 +813,46 @@ button {
   padding: 0 var(--gutter);
 }
 
-/* One section per reading: the explanation on the left, the icon and your
-   reading on the right. A line separates one reading from the next. */
+/* One section per reading, laid out like a printed spread rather than a
+   template: the photograph swaps sides, changes shape and sits a little
+   higher or lower each time. No dividing lines. */
 .story-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: 4rem;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: 2rem;
   align-items: start;
-  padding: 4rem 0;
-  border-top: 1px solid var(--rule);
+  padding: 5rem 0;
+}
+.story-card > * {
+  grid-row: 1;
 }
 .story-text {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
+
+/* 1 Electricity: text left, a landscape photo dropped a little lower */
+.story-card:nth-child(1) .story-text { grid-column: 1 / 6; }
+.story-card:nth-child(1) .metric-feature { grid-column: 7 / 13; margin-top: 4rem; --ratio: 4 / 3; }
+/* 2 Heat: a tall photo on the left, text set further down */
+.story-card:nth-child(2) { padding-top: 7rem; }
+.story-card:nth-child(2) .metric-feature { grid-column: 1 / 6; --ratio: 4 / 5; }
+.story-card:nth-child(2) .story-text { grid-column: 7 / 12; margin-top: 6rem; }
+/* 3 Water: indented text, a small square photo riding higher */
+.story-card:nth-child(3) .story-text { grid-column: 2 / 7; margin-top: 2rem; }
+.story-card:nth-child(3) .metric-feature { grid-column: 8 / 12; --ratio: 1 / 1; }
+/* 4 Carbon: a wide photo first, narrow text tucked to the right */
+.story-card:nth-child(4) { padding-top: 6rem; }
+.story-card:nth-child(4) .metric-feature { grid-column: 1 / 8; --ratio: 16 / 9; }
+.story-card:nth-child(4) .story-text { grid-column: 9 / 13; margin-top: 3rem; }
+/* 5 Money: text left, a portrait photo pushed well down */
+.story-card:nth-child(5) .story-text { grid-column: 1 / 6; }
+.story-card:nth-child(5) .metric-feature { grid-column: 7 / 11; margin-top: 5.5rem; --ratio: 3 / 4; }
+/* 6 Scale: the widest photo, text beside it from the left edge */
+.story-card:nth-child(6) { padding-top: 7rem; }
+.story-card:nth-child(6) .story-text { grid-column: 1 / 5; margin-top: 1.5rem; }
+.story-card:nth-child(6) .metric-feature { grid-column: 6 / 13; --ratio: 16 / 9; }
 
 /* The resource's name, set like a magazine section line */
 .step-kicker {
@@ -850,22 +873,38 @@ button {
   color: var(--ink-soft);
 }
 
-/* Your reading, beside the text */
-.metric-feature {
-  padding-left: 2.5rem;
-  border-left: 1px solid var(--rule);
+/* The photograph, with your reading underneath it */
+.reading-photo {
+  position: relative;
+  margin: 0 0 1.25rem;
+  aspect-ratio: var(--ratio, 4 / 3);
+  overflow: hidden;
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--resource) 12%, var(--paper));
 }
-.reading-icon {
-  width: 2.75rem;
-  height: 2.75rem;
-  fill: none;
-  stroke: var(--resource);
-  stroke-width: 1.4;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.reading-photo img {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
+.reading-photo.has-photo img {
+  display: block;
+}
+.reading-photo.has-photo .photo-placeholder {
+  display: none;
+}
+/* until a photograph is supplied: just the reading's name, small, in a corner */
+.photo-placeholder {
+  position: absolute;
+  left: 1rem;
+  bottom: 0.8rem;
+  font-family: var(--font-serif);
+  font-size: var(--step-1);
+  color: var(--resource);
+}
+
 .metric-label {
-  margin-top: 1rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
@@ -1323,17 +1362,22 @@ button {
     border-top: 1px solid var(--rule);
   }
 
-  .story-card {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+  .story-card,
+  .story-card:nth-child(n) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     padding: 2.5rem 0;
   }
-  .metric-feature {
-    padding: 1.5rem 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--rule);
+  .story-card:nth-child(n) > * {
+    margin-top: 0;
   }
-  .explainer-intro,
+  .story-card .metric-feature {
+    align-self: stretch;
+  }
+  .explainer-intro {
+    padding-inline: var(--gutter);
+  }
   .closing {
     padding-left: var(--gutter);
   }

@@ -55,7 +55,7 @@ Everything is in **`public/js/config.js`**:
 | What | Setting |
 |---|---|
 | Provider | `provider: 'anthropic'` · `'openai'` · `'gemini'` |
-| Model | `models: { anthropic: 'claude-opus-5-5', openai: 'gpt-5.4-mini', gemini: 'gemini-2.5-flash' }` |
+| Model | `models: { anthropic: 'claude-opus-5-5', openai: 'gpt-5.4-mini', gemini: 'gemini-3.8-flash' }` |
 | Model name shown to visitors | `modelLabels` |
 | Price (for the bill) | `prices` — **add a price for any new model**, in USD per million tokens |
 | Sample answers only | `demoMode: true` (or `npm run demo`, or `AI_DEX_DEMO=1` in `.env`) |
@@ -77,8 +77,8 @@ Notes per provider:
   model and priced at that model's rate.
 - **OpenAI**: uses the Responses API. For reasoning models, set
   `providerOptions.openai.reasoningEffort` to the lowest value the model accepts.
-- **Gemini**: for Gemini 2.5, `thinkingBudget: 0` turns thinking off. For
-  Gemini 3.5 and later use `thinkingConfig: { thinkingLevel: 'MINIMAL' }`.
+- **Gemini**: for Gemini 3.x use `thinkingConfig: { thinkingLevel: 'LOW' }`
+  (the lowest level the Flash models accept).
 
 ### How the credit is protected
 - The key lives only in `.env` on the server; the browser never sees it.
@@ -107,7 +107,9 @@ Notes per provider:
    worth reading in the original: Epoch AI's 2.5 Wh / 10,000-token figure
    (it sets the input-token weighting), Li et al.'s 3.142 L/kWh, and
    Jegham et al.'s 0.42 Wh (it sets the high end of the range).
-4. **Stated assumptions** you may want to change in `config.js`: phone
+4. **Photographs** for the six readings: see `public/images/README.md`.
+   Until they are added, each reading shows a plain tinted placeholder.
+5. **Stated assumptions** you may want to change in `config.js`: phone
    battery 15 Wh, one drop = 0.05 mL, one glass = 250 mL. The car comparison
    uses the US EPA figure; for another country, replace `carGPerKm`.
 
@@ -166,6 +168,7 @@ server/tokenizer.js       local token counts (samples and stopped answers only)
 public/index.html         the exhibit: chat → tokens → readings → bill
 public/references.html    method and every source (opened from the bill and from citations)
 public/style.css          all styles, organised by section
+public/images/            photographs for the six readings (see its README)
 public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya (SIL Open Font License)
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
 public/js/content.js      explainer text, research figures, references

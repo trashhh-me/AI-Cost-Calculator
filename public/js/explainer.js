@@ -1,6 +1,6 @@
 // Part 3: the explainer. Six readings, each its own static section: the
-// explanation on the left, and on the right an icon with the visitor's own
-// reading. A line separates one reading from the next. No scroll effects.
+// explanation, and beside it a photograph with the visitor's own reading.
+// The photographs are set in index.html (search for PHOTOGRAPHS).
 import { CONFIG } from './config.js';
 import { STEPS } from './content.js';
 import { cite, cardId } from './references.js';
@@ -29,17 +29,6 @@ const NAMES = {
   carbon: 'Carbon',
   money: 'Money',
   scale: 'At scale',
-};
-
-// Simple line icons, drawn for this exhibit (24 × 24, stroked in the
-// resource colour). Decorative: the reading's name is always written beside.
-const ICONS = {
-  electricity: '<path d="M13.5 2.5 5 13.2h6l-1.3 8.3 8.8-11.1h-6.1z"/>',
-  heat: '<path d="M12 21.5c-3.9 0-6.5-2.6-6.5-6.2 0-3.2 2.4-5.2 3.6-7.5.5 1.4 1.3 2.4 2.4 2.9C11.2 7.6 12.4 4.6 15 2.6c-.1 3 1.4 4.6 2.6 6.4 1 1.5 1.4 3 1.4 4.6 0 4.6-3 7.9-7 7.9z"/><path d="M12 21.5c-1.6 0-2.7-1.1-2.7-2.7 0-1.6 1.4-2.5 2-3.8.9 1.2 3.4 2 3.4 4 0 1.5-1.1 2.5-2.7 2.5z"/>',
-  water: '<path d="M12 2.8c3.1 4.2 6.3 7.8 6.3 11.4a6.3 6.3 0 0 1-12.6 0c0-3.6 3.2-7.2 6.3-11.4z"/><path d="M9 15.4a3.1 3.1 0 0 0 2.6 2.8"/>',
-  carbon: '<path d="M6.5 19.5h11.2a3.8 3.8 0 0 0 .6-7.6 5.6 5.6 0 0 0-10.8-1.4A4.6 4.6 0 0 0 6.5 19.5z"/><path d="M9.5 15.5h1.2M13.2 15.5h1.3"/>',
-  money: '<circle cx="12" cy="12" r="8.8"/><path d="M14.8 9.1c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.4 0 1.3-1.3 2.2-3 2.2-1.3 0-2.5-.6-3-1.6M12 6.2v1.5M12 16.4v1.4"/>',
-  scale: '<circle cx="12" cy="12" r="8.8"/><path d="M3.4 12h17.2M12 3.2c2.4 2.4 3.6 5.4 3.6 8.8s-1.2 6.4-3.6 8.8c-2.4-2.4-3.6-5.4-3.6-8.8s1.2-6.4 3.6-8.8z"/>',
 };
 
 /** Money research lines come from the configured model's real prices. */
@@ -82,7 +71,9 @@ export function buildExplainer() {
         }
       </div>
       <div class="metric-feature">
-        <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[step.key]}</svg>
+        <figure class="reading-photo" data-photo="${step.key}">
+          <span class="photo-placeholder" aria-hidden="true">${NAMES[step.key]}</span>
+        </figure>
         <p class="metric-label" data-label="${step.key}">${NAMES[step.key]}</p>
         <p class="metric-value"><span id="${ids.value}" data-reading="${step.key}">–</span><small data-unit="${step.key}"></small></p>
         <p class="metric-range" data-range="${step.key}"></p>
@@ -91,9 +82,26 @@ export function buildExplainer() {
     story.append(section);
   });
 
+  placePhotos();
+
   // The last step's closing thought gets a quiet section of its own.
   const closing = STEPS.find((s) => s.closing)?.closing;
   if (closing) $('closing-thought').innerHTML = cite(closing);
+}
+
+// Move each photograph from index.html into its reading. A missing file
+// keeps the plain placeholder, never a broken image.
+function placePhotos() {
+  document.querySelectorAll('#reading-photos img[data-step]').forEach((img) => {
+    const figure = document.querySelector(`[data-photo="${img.dataset.step}"]`);
+    if (!figure) return;
+    const show = () => figure.classList.add('has-photo');
+    const hide = () => figure.classList.remove('has-photo');
+    img.addEventListener('load', show);
+    img.addEventListener('error', hide);
+    figure.prepend(img);
+    if (img.complete && img.naturalWidth > 0) show();
+  });
 }
 
 /* ---------- Visitor's readings ---------- */

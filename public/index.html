@@ -131,7 +131,20 @@
       <div class="scrolly-split-container">
         <!-- One section per reading, built from js/content.js -->
         <div id="scrolling-story" class="scrolling-story"></div>
+      </div>
 
+      <!--
+        PHOTOGRAPHS: one per reading. Replace src and alt with your own
+        (keep data-step). Each is moved into its reading when the page loads;
+        until the file exists, a plain placeholder is shown instead.
+      -->
+      <div id="reading-photos" hidden>
+        <img data-step="electricity" src="images/electricity.jpg" alt="A long aisle of server racks in a data center, with status lights and power cables." width="1600" height="1200">
+        <img data-step="heat" src="images/heat.jpg" alt="A thermal camera image of server racks, the hottest parts glowing orange and white." width="1200" height="1500">
+        <img data-step="water" src="images/water.jpg" alt="Cooling towers on a data center roof, with water vapour rising." width="1400" height="1400">
+        <img data-step="carbon" src="images/carbon.jpg" alt="High-voltage power lines crossing a landscape towards a power station." width="1600" height="900">
+        <img data-step="money" src="images/money.jpg" alt="A printed itemised bill on a desk next to a calculator." width="1200" height="1600">
+        <img data-step="scale" src="images/scale.jpg" alt="An aerial view of a large data center campus with cooling units on the roofs." width="1600" height="900">
       </div>
 
       <blockquote class="closing">
