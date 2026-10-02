@@ -80,7 +80,7 @@ export function buildReferences(extraCitations = []) {
       li.innerHTML = `
         <span class="reference-number">[${NUMBER.get(r.id)}]</span>
         <div>
-          <p>${escapeHTML(r.authors)} (${escapeHTML(r.date)}). <span class="reference-title">${escapeHTML(r.title)}</span>. ${escapeHTML(r.publisher)}.</p>
+          <p>${escapeHTML(r.authors)} (${escapeHTML(r.date)}). <span class="reference-title">${escapeHTML(r.title)}</span>${/[?!.]$/.test(r.title) ? '' : '.'} ${escapeHTML(r.publisher)}.</p>
           <a class="reference-url" href="${escapeHTML(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHTML(r.url)}</a>
           <p class="reference-used"><strong>Used for:</strong> ${escapeHTML(r.usedFor)}</p>
           ${back ? `<p class="reference-backlinks">Cited in: ${back}</p>` : ''}

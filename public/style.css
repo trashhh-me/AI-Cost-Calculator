@@ -16,24 +16,10 @@
   font-display: swap;
 }
 @font-face {
-  font-family: 'Newsreader';
-  src: url(fonts/newsreader-latin-opsz-italic.woff2) format('woff2-variations');
-  font-weight: 200 800;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
   font-family: 'Source Sans 3';
   src: url(fonts/source-sans-3-latin-wght-normal.woff2) format('woff2-variations');
   font-weight: 200 900;
   font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Source Sans 3';
-  src: url(fonts/source-sans-3-latin-wght-italic.woff2) format('woff2-variations');
-  font-weight: 200 900;
-  font-style: italic;
   font-display: swap;
 }
 @font-face {
@@ -57,39 +43,41 @@
 
 /* ---------- Design tokens ---------- */
 :root {
-  /* Cool grey paper and near-black ink */
-  --paper: #eceeea;
-  --paper-deep: #e0e3dd;
-  --paper-receipt: #fbfaf6; /* thermal paper stays warm */
-  --field: #f8f9f6;
-  --ink: #1b1f1d;
-  --ink-soft: #525a55;
-  --ink-faint: #7d847f; /* lines and decoration only */
-  --rule: #cfd3cd;
-  --bubble: #dde1da;
+  /* A near-black room with white text. Names kept from the paper version:
+     --paper is the page, --paper-deep a raised surface. */
+  --paper: #0f1110;
+  --paper-deep: #181b19;
+  --surface: #1e2220;
+  --paper-receipt: #fbfaf6; /* the receipt stays real thermal paper */
+  --field: #1a1d1b;
+  --ink: #f1f3ef;
+  --ink-soft: #b3bab4;
+  --ink-faint: #6e7670; /* lines and decoration only */
+  --rule: #2e3430;
+  --bubble: #262b28;
 
-  /* One signal colour, deep green: the main action and the key number */
-  --signal: #1d5843;
-  --signal-ink: #fbfaf6;
-  --signal-hover: #14402f;
+  /* One signal colour, a clear green on dark: the main action and key number */
+  --signal: #7fcfa6;
+  --signal-ink: #0f1110;
+  --signal-hover: #a3dfbf;
 
-  /* One muted colour per resource, used wherever it appears */
-  --electricity: #76600f;
-  --heat: #9a4021;
-  --water: #1d5d70;
-  --carbon: #4a4f55;
-  --money: #7a2f48;
-  --electricity-lit: #e3c766;
+  /* One colour per resource, lightened to read on near-black */
+  --electricity: #e2c562;
+  --heat: #f0a57e;
+  --water: #8fcbd8;
+  --carbon: #c6cbd0;
+  --money: #e8a3bb;
+  --electricity-lit: #e2c562;
 
   /* The counter the receipt is printed on */
-  --desk: #202523;
-  --desk-ink: #eceee8;
+  --desk: #161917;
+  --desk-ink: #f1f3ef;
   --desk-dim: #a9b0aa;
 
   /* Token pieces */
-  --pill-a: #e9e4d6;
-  --pill-b: #d9e2dc;
-  --pill-edge: #aab2ab;
+  --pill-a: #2b2a22;
+  --pill-b: #1f2c26;
+  --pill-edge: #4f5751;
 
   /* Type */
   --font-serif: 'Newsreader', Georgia, 'Times New Roman', serif;
@@ -203,11 +191,23 @@ a {
   padding: 0 var(--gutter);
 }
 
-/* Section openings are centred, except the tokens section (see below) */
-.explainer h2,
+/* Section openings are set differently on purpose: the tokens heading
+   sits in its own column, the readings heading is set left and indented,
+   the bill is centred on its counter. */
 .bill-section h2 {
   font-size: var(--step-4);
   text-align: center;
+}
+.explainer-intro {
+  padding-left: calc(var(--gutter) + 6vw);
+}
+.explainer h2 {
+  font-size: calc(var(--step-4) * 1.15);
+  max-width: 12ch;
+}
+.explainer .section-intro {
+  margin: 0.75rem 0 0;
+  text-align: left;
 }
 .section-intro {
   max-width: 34rem;
@@ -325,7 +325,6 @@ button {
 .thinking,
 .stopped-note {
   font-size: var(--step--1);
-  font-style: italic;
   color: var(--ink-soft);
 }
 .message-note {
@@ -356,6 +355,10 @@ button {
 }
 .answer-body li + li {
   margin-top: 0.25em;
+}
+.answer-body em {
+  font-style: normal;
+  font-weight: 600;
 }
 .answer-body code {
   font-family: var(--font-mono);
@@ -576,7 +579,7 @@ button {
   border-radius: 50%;
   background: var(--ink-faint);
 }
-.status-dot[data-state='live'] { background: var(--money); }
+.status-dot[data-state='live'] { background: var(--signal); }
 .status-dot[data-state='sample'] { background: var(--electricity-lit); box-shadow: inset 0 0 0 1px var(--electricity); }
 
 /* =====================================================================
@@ -610,13 +613,15 @@ button {
 
 .token-cards {
   display: grid;
-  gap: 1.25rem;
+  gap: 1.5rem;
 }
+.token-card:nth-child(1) { margin-right: 3rem; }
+.token-card:nth-child(2) { margin-left: 2rem; background: #252a27; }
 
 .token-card {
   display: flex;
   flex-direction: column;
-  background: var(--paper-receipt);
+  background: var(--surface);
   border-radius: 4px;
 }
 
@@ -668,7 +673,6 @@ button {
   display: block;
   font-family: var(--font-sans);
   font-size: var(--step--1);
-  font-style: italic;
   color: var(--ink-soft);
   margin-bottom: 0.4rem;
 }
@@ -745,31 +749,45 @@ button {
 
 .scrolly-split-container {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 4rem;
-  max-width: 72rem;
-  margin: 3rem auto 0;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 5rem;
+  max-width: 76rem;
+  margin: 4rem auto 0;
   padding: 0 var(--gutter);
 }
 
 .scrolling-story {
   display: flex;
   flex-direction: column;
+  gap: 18vh;
+  padding: 6vh 0 20vh;
 }
 
+/* Each reading is its own panel, tinted from its resource colour.
+   The tint, offset, width and corner change from card to card, the way
+   pinned-up sheets never line up exactly. */
 .story-card {
-  min-height: 85vh;
-  padding: 3rem 0;
+  --tint: 9%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   gap: 1rem;
+  padding: 2.5rem 2.25rem 2.25rem;
+  background: color-mix(in srgb, var(--resource) var(--tint), var(--paper));
+  border-top: 3px solid var(--resource);
 }
+.story-card:nth-child(1) { --tint: 8%;  margin-right: 3rem; border-radius: 2px; }
+.story-card:nth-child(2) { --tint: 13%; margin-left: 2.5rem; border-radius: 0; }
+.story-card:nth-child(3) { --tint: 6%;  margin-right: 1rem; border-radius: 6px; }
+.story-card:nth-child(4) { --tint: 11%; margin-left: 4rem;  border-radius: 0; padding-top: 3rem; }
+.story-card:nth-child(5) { --tint: 15%; margin-right: 2rem; border-radius: 3px; }
+.story-card:nth-child(6) { --tint: 5%;  margin-left: 1rem;  border-radius: 0; padding-bottom: 3rem; }
+.story-card:nth-child(2) h3 { font-size: calc(var(--step-3) * 1.12); }
+.story-card:nth-child(4) h3 { font-size: calc(var(--step-3) * 0.92); }
+.story-card:nth-child(6) h3 { font-size: calc(var(--step-3) * 1.2); max-width: 14ch; }
 
 /* The resource's name, set like a magazine section line */
 .step-kicker {
   font-family: var(--font-serif);
-  font-style: italic;
   font-size: var(--step-1);
   color: var(--resource);
 }
@@ -789,7 +807,6 @@ button {
 /* Your reading */
 .metric-caption {
   font-size: var(--step--1);
-  font-style: italic;
   color: var(--ink-soft);
 }
 .metric-value {
@@ -825,10 +842,13 @@ button {
   margin: 6rem auto 3rem;
   padding: 0 var(--gutter);
 }
+.closing {
+  padding-left: calc(var(--gutter) + 14vw);
+}
 .closing-quote {
-  max-width: 22ch;
+  max-width: 20ch;
+  font-weight: 400;
   font-family: var(--font-serif);
-  font-style: italic;
   font-size: clamp(2.2rem, 4.5vw, 4rem);
   line-height: 1.12;
   letter-spacing: -0.01em;
@@ -879,7 +899,6 @@ button {
 .disagree {
   margin-top: 0.75rem;
   font-size: var(--step--1);
-  font-style: italic;
   color: var(--ink-soft);
 }
 
@@ -904,12 +923,19 @@ button {
 .sticky-visual-panel {
   position: relative;
 }
+.sticky-visual-panel {
+  border-left: 1px solid var(--rule);
+  padding-left: 3rem;
+}
 .sticky-wrapper {
   position: sticky;
-  top: 12vh;
+  top: 10vh;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  padding: 1.5rem;
+  background: var(--paper-deep);
+  border-radius: 4px;
 }
 
 .image-frame {
@@ -939,7 +965,6 @@ button {
   margin-top: 0.5rem;
   min-height: 1.4em;
   font-size: var(--step--1);
-  font-style: italic;
   color: var(--ink-soft);
 }
 
@@ -949,11 +974,10 @@ button {
   inset: 0;
   display: grid;
   place-items: center;
-  background: color-mix(in srgb, var(--resource) 10%, var(--paper));
+  background: color-mix(in srgb, var(--resource) 14%, var(--paper));
 }
 .image-fallback-word {
   font-family: var(--font-serif);
-  font-style: italic;
   font-size: var(--step-4);
   color: var(--resource);
 }
@@ -989,9 +1013,10 @@ button {
    ===================================================================== */
 .bill-section {
   padding: 7rem 0;
+  border-top: 1px solid var(--rule);
   background: var(--desk);
   color: var(--desk-ink);
-  --focus: #8fd1b5;
+  --focus: var(--signal);
 }
 .bill-inner {
   display: flex;
@@ -1005,6 +1030,7 @@ button {
   width: 100%;
   max-width: 32rem;
   margin: 3rem 0 2.5rem;
+  transform: rotate(-0.5deg) translateX(0.75rem);
   filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.45)) drop-shadow(0 2px 3px rgba(0, 0, 0, 0.35));
 }
 .receipt-slot::before {
@@ -1012,12 +1038,21 @@ button {
   display: block;
   height: 10px;
   margin: 0 -1rem;
-  background: #151311;
+  background: #050605;
   border-radius: 3px;
 }
 
 .thermal-receipt {
   --zigzag: 14px;
+  /* printed ink on thermal paper */
+  --ink: #1b1f1d;
+  --ink-soft: #525a55;
+  --signal: #1d5843;
+  --electricity: #76600f;
+  --heat: #9a4021;
+  --water: #1d5d70;
+  --carbon: #4a4f55;
+  --money: #7a2f48;
   position: relative;
   padding: 2rem 1.75rem calc(2.5rem + var(--zigzag));
   background: var(--paper-receipt);
@@ -1193,7 +1228,6 @@ button {
 }
 .reference-group h3 {
   font-size: var(--step-1);
-  font-style: italic;
   color: var(--ink-soft);
   padding-bottom: 0.4rem;
   border-bottom: 1px solid var(--rule);
@@ -1221,7 +1255,6 @@ button {
   color: var(--signal);
 }
 .reference-title {
-  font-style: italic;
 }
 .reference-used,
 .reference-backlinks {
@@ -1246,12 +1279,12 @@ button {
   display: grid;
   place-items: center;
   padding: var(--gutter);
-  background: rgba(27, 31, 29, 0.7);
+  background: rgba(0, 0, 0, 0.75);
 }
 .idle-dialog {
   max-width: 30rem;
   padding: 2.5rem;
-  background: var(--paper-receipt);
+  background: var(--surface);
   border-radius: 6px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
   text-align: center;
@@ -1291,6 +1324,10 @@ button {
   .chat-app[data-state='chat'] .conversation {
     overflow: visible;
   }
+  /* Keep the cost button clear of the pinned box when scrolled to */
+  .see-cost {
+    scroll-margin-bottom: 11rem;
+  }
   /* The box stays pinned to the bottom while chatting */
   .chat-app[data-state='chat'] .composer-dock {
     position: sticky;
@@ -1314,9 +1351,21 @@ button {
   .sticky-visual-panel {
     display: none;
   }
-  .story-card {
-    min-height: auto;
-    padding: 3rem 0;
+  .scrolling-story {
+    gap: 2.5rem;
+    padding: 2rem 0;
+  }
+  .story-card,
+  .story-card:nth-child(n) {
+    margin: 0;
+    padding: 2rem 1.25rem;
+  }
+  .token-card:nth-child(n) {
+    margin: 0;
+  }
+  .explainer-intro,
+  .closing {
+    padding-left: var(--gutter);
   }
 
   .thermal-receipt {

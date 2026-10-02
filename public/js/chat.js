@@ -151,6 +151,13 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
   /* ---------- Messages ---------- */
   function scrollToEnd(force = false) {
+    // Large screens scroll the conversation box; small screens scroll the page.
+    if (getComputedStyle(scroller).overflowY === 'visible') {
+      const doc = document.scrollingElement;
+      const nearBottom = doc.scrollHeight - doc.scrollTop - window.innerHeight < 200;
+      if (force || nearBottom) window.scrollTo({ top: doc.scrollHeight });
+      return;
+    }
     const nearBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 120;
     if (force || nearBottom) scroller.scrollTop = scroller.scrollHeight;
   }
