@@ -96,20 +96,18 @@ Notes per provider:
 ## What you still need to provide
 
 1. **API key** in `.env` (see above).
-2. **Photographs**: six images in `public/images/`. Briefs are in
-   `public/images/README.md`. Until then a designed fallback is shown.
-3. **Prices to confirm**: Anthropic prices come from Anthropic's official
+2. **Prices to confirm**: Anthropic prices come from Anthropic's official
    model table (September 2026). The **OpenAI and Gemini prices came from
    secondary listings**, because the official pricing pages could not be
    reached from the build machine. Check them on the official pages before
    switching provider.
-4. **Research figures to spot-check** (see the table below). Each figure was
+3. **Research figures to spot-check** (see the table below). Each figure was
    checked against published reporting that quotes the primary source; the
    original PDFs could not be opened from the build machine. The ones most
    worth reading in the original: Epoch AI's 2.5 Wh / 10,000-token figure
    (it sets the input-token weighting), Li et al.'s 3.142 L/kWh, and
    Jegham et al.'s 0.42 Wh (it sets the high end of the range).
-5. **Stated assumptions** you may want to change in `config.js`: phone
+4. **Stated assumptions** you may want to change in `config.js`: phone
    battery 15 Wh, one drop = 0.05 mL, one glass = 250 mL. The car comparison
    uses the US EPA figure; for another country, replace `carGPerKm`.
 
@@ -169,7 +167,6 @@ public/index.html         the exhibit: chat → tokens → readings → bill
 public/references.html    method and every source (opened from the bill and from citations)
 public/style.css          all styles, organised by section
 public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya (SIL Open Font License)
-public/images/            photographs (see README there)
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
 public/js/content.js      explainer text, research figures, references
 public/js/demo-answers.js suggestion buttons and sample answers

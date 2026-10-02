@@ -203,9 +203,7 @@ a {
   font-size: var(--step-4);
   text-align: center;
 }
-.explainer-intro {
-  padding-left: calc(var(--gutter) + 6vw);
-}
+
 .explainer h2 {
   font-size: calc(var(--step-4) * 1.15);
   max-width: 12ch;
@@ -648,6 +646,10 @@ button {
   gap: 4rem;
   align-items: start;
 }
+.tokens-body {
+  padding-left: 4rem;
+  border-left: 1px solid var(--rule);
+}
 .tokens-intro {
   position: sticky;
   top: 4rem;
@@ -808,32 +810,25 @@ button {
 }
 
 .scrolly-split-container {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-  gap: 5rem;
-  max-width: 76rem;
+  max-width: 72rem;
   margin: 4rem auto 0;
   padding: 0 var(--gutter);
 }
 
-.scrolling-story {
-  display: flex;
-  flex-direction: column;
-  padding-bottom: 10vh;
-}
-
-/* Readings are plain text; one hairline separates each from the next */
+/* One section per reading: the explanation on the left, the icon and your
+   reading on the right. A line separates one reading from the next. */
 .story-card {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-height: 70vh;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 4rem;
+  align-items: start;
   padding: 4rem 0;
   border-top: 1px solid var(--rule);
 }
-.story-card:first-child {
-  border-top: 0;
+.story-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 /* The resource's name, set like a magazine section line */
@@ -855,12 +850,27 @@ button {
   color: var(--ink-soft);
 }
 
-/* Your reading */
-.metric-caption {
+/* Your reading, beside the text */
+.metric-feature {
+  padding-left: 2.5rem;
+  border-left: 1px solid var(--rule);
+}
+.reading-icon {
+  width: 2.75rem;
+  height: 2.75rem;
+  fill: none;
+  stroke: var(--resource);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.metric-label {
+  margin-top: 1rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
 .metric-value {
+  margin-top: 0.25rem;
   font-family: var(--font-serif);
   font-size: var(--step-5);
   font-weight: 500;
@@ -873,11 +883,12 @@ button {
   margin-left: 0.3rem;
 }
 .metric-range {
-  margin-top: 0.3rem;
+  margin-top: 0.4rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
 .analogy-badge {
+  margin-top: 0.75rem;
   font-size: var(--step-1);
 }
 .analogy-badge:empty {
@@ -968,95 +979,6 @@ button {
 }
 .cite a:hover {
   text-decoration: underline;
-}
-
-/* The sticky side: photograph, caption, your number */
-.sticky-visual-panel {
-  position: relative;
-}
-.sticky-visual-panel {
-  border-left: 1px solid var(--rule);
-  padding-left: 3rem;
-}
-.sticky-wrapper {
-  position: sticky;
-  top: 10vh;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  background: var(--paper-deep);
-  border-radius: 4px;
-}
-
-.image-frame {
-  margin: 0;
-}
-/* All six photographs sit in one box; the current one fades in */
-.photo-stack {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  border-radius: 4px;
-  background: var(--paper-deep);
-}
-.step-photo {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0;
-  transition: opacity var(--t-mid) var(--ease);
-}
-.step-photo.is-active:not([data-missing='true']) {
-  opacity: 1;
-}
-.image-caption {
-  margin-top: 0.5rem;
-  min-height: 1.4em;
-  font-size: var(--step--1);
-  color: var(--ink-soft);
-}
-
-/* Placeholder until a photograph is supplied */
-.image-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--resource) 14%, var(--paper));
-}
-.image-fallback-word {
-  font-family: var(--font-serif);
-  font-size: var(--step-4);
-  color: var(--resource);
-}
-
-.callout-reading {
-  font-family: var(--font-serif);
-  line-height: 1;
-  color: var(--resource);
-  font-variant-numeric: lining-nums tabular-nums;
-}
-.callout-value {
-  font-size: var(--step-5);
-  font-weight: 500;
-}
-.callout-unit {
-  font-size: var(--step-2);
-}
-.callout-subtext {
-  margin-top: 0.4rem;
-  color: var(--ink-soft);
-}
-
-/* On large screens the side shows the number, so cards keep the comparison */
-@media (min-width: 901px) {
-  .story-card .metric-value,
-  .story-card .metric-range {
-    display: none;
-  }
 }
 
 /* =====================================================================
@@ -1394,20 +1316,22 @@ button {
   .tokens-intro {
     position: static;
   }
+  /* stacked: the dividing line runs across instead of down */
+  .tokens-body {
+    padding: 2rem 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
+  }
 
-  .scrolly-split-container {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .sticky-visual-panel {
-    display: none;
-  }
-  .scrolling-story {
-    padding-bottom: 2rem;
-  }
   .story-card {
-    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 2rem;
     padding: 2.5rem 0;
+  }
+  .metric-feature {
+    padding: 1.5rem 0 0;
+    border-left: 0;
+    border-top: 1px solid var(--rule);
   }
   .explainer-intro,
   .closing {

@@ -218,8 +218,8 @@ export const REFERENCES = [
 
 /* ---------------- Explainer steps ----------------
  * Kept short: one plain paragraph per reading; the research sits behind
- * "What research says". The photographs are set in index.html
- * (search for "PHOTOGRAPHS").
+ * "What research says". Each reading shows an icon (explainer.js) and
+ * the visitor's own number beside the text.
  */
 
 export const STEPS = [

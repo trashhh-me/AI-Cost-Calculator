@@ -1,7 +1,6 @@
-// Part 3: the explainer. Six "meter readings", each with plain-language
-// text, what research says, and the visitor's own number. The sticky meter
-// panel follows along; under 900px the panel is hidden and each card's own
-// reading is enough.
+// Part 3: the explainer. Six readings, each its own static section: the
+// explanation on the left, and on the right an icon with the visitor's own
+// reading. A line separates one reading from the next. No scroll effects.
 import { CONFIG } from './config.js';
 import { STEPS } from './content.js';
 import { cite, cardId } from './references.js';
@@ -9,7 +8,6 @@ import { comparisons } from './calculate.js';
 import * as f from './format.js';
 
 const $ = (id) => document.getElementById(id);
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const PRICING_REF = { anthropic: 'anthropic-pricing', openai: 'openai-pricing', gemini: 'google-pricing' };
 const PROMPTS_PER_DAY = 2.5e9; // OpenAI via Axios, July 2025 (see content.js)
@@ -33,8 +31,16 @@ const NAMES = {
   scale: 'At scale',
 };
 
-let readings = {}; // key -> { value, unit, label, decimals }
-let counted = new Set(); // steps whose number has counted up for this conversation
+// Simple line icons, drawn for this exhibit (24 × 24, stroked in the
+// resource colour). Decorative: the reading's name is always written beside.
+const ICONS = {
+  electricity: '<path d="M13.5 2.5 5 13.2h6l-1.3 8.3 8.8-11.1h-6.1z"/>',
+  heat: '<path d="M12 21.5c-3.9 0-6.5-2.6-6.5-6.2 0-3.2 2.4-5.2 3.6-7.5.5 1.4 1.3 2.4 2.4 2.9C11.2 7.6 12.4 4.6 15 2.6c-.1 3 1.4 4.6 2.6 6.4 1 1.5 1.4 3 1.4 4.6 0 4.6-3 7.9-7 7.9z"/><path d="M12 21.5c-1.6 0-2.7-1.1-2.7-2.7 0-1.6 1.4-2.5 2-3.8.9 1.2 3.4 2 3.4 4 0 1.5-1.1 2.5-2.7 2.5z"/>',
+  water: '<path d="M12 2.8c3.1 4.2 6.3 7.8 6.3 11.4a6.3 6.3 0 0 1-12.6 0c0-3.6 3.2-7.2 6.3-11.4z"/><path d="M9 15.4a3.1 3.1 0 0 0 2.6 2.8"/>',
+  carbon: '<path d="M6.5 19.5h11.2a3.8 3.8 0 0 0 .6-7.6 5.6 5.6 0 0 0-10.8-1.4A4.6 4.6 0 0 0 6.5 19.5z"/><path d="M9.5 15.5h1.2M13.2 15.5h1.3"/>',
+  money: '<circle cx="12" cy="12" r="8.8"/><path d="M14.8 9.1c-.5-.9-1.6-1.4-2.8-1.4-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.4 0 1.3-1.3 2.2-3 2.2-1.3 0-2.5-.6-3-1.6M12 6.2v1.5M12 16.4v1.4"/>',
+  scale: '<circle cx="12" cy="12" r="8.8"/><path d="M3.4 12h17.2M12 3.2c2.4 2.4 3.6 5.4 3.6 8.8s-1.2 6.4-3.6 8.8c-2.4-2.4-3.6-5.4-3.6-8.8s1.2-6.4 3.6-8.8z"/>',
+};
 
 /** Money research lines come from the configured model's real prices. */
 export function moneyResearch() {
@@ -54,41 +60,40 @@ export function buildExplainer() {
   STEPS.forEach((step) => {
     const ids = VALUE_IDS[step.key];
     const research = step.key === 'money' ? moneyResearch() : step.research;
-    const card = document.createElement('article');
-    card.className = 'story-card';
-    card.id = cardId(step.key);
-    card.dataset.step = step.key;
-    card.dataset.resource = step.key;
-    card.setAttribute('aria-labelledby', `${card.id}-title`);
-    card.innerHTML = `
-      <p class="step-kicker">${NAMES[step.key]}</p>
-      <h3 id="${card.id}-title">${step.headline}</h3>
+    const section = document.createElement('article');
+    section.className = 'story-card';
+    section.id = cardId(step.key);
+    section.dataset.step = step.key;
+    section.dataset.resource = step.key;
+    section.setAttribute('aria-labelledby', `${section.id}-title`);
+    section.innerHTML = `
+      <div class="story-text">
+        <p class="step-kicker">${NAMES[step.key]}</p>
+        <h3 id="${section.id}-title">${step.headline}</h3>
+        <div class="story-body">${step.body.map((p) => `<p>${cite(p)}</p>`).join('')}</div>
+        ${
+          research.length
+            ? `<details class="research">
+                <summary>What research says</summary>
+                <ul>${research.map((r) => `<li>${cite(r)}</li>`).join('')}</ul>
+                ${step.disagree ? `<p class="disagree">${cite(step.disagree)}</p>` : ''}
+              </details>`
+            : ''
+        }
+      </div>
       <div class="metric-feature">
-        ${step.key === 'scale' ? '<p class="metric-caption">Your conversation × 2.5 billion, every day</p>' : ''}
+        <svg class="reading-icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[step.key]}</svg>
+        <p class="metric-label" data-label="${step.key}">${NAMES[step.key]}</p>
         <p class="metric-value"><span id="${ids.value}" data-reading="${step.key}">–</span><small data-unit="${step.key}"></small></p>
         <p class="metric-range" data-range="${step.key}"></p>
         <p class="analogy-badge" id="${ids.analogy}-line"></p>
-      </div>
-      <div class="story-body">${step.body.map((p) => `<p>${cite(p)}</p>`).join('')}</div>
-      ${
-        research.length
-          ? `<details class="research">
-              <summary>What research says</summary>
-              <ul>${research.map((r) => `<li>${cite(r)}</li>`).join('')}</ul>
-              ${step.disagree ? `<p class="disagree">${cite(step.disagree)}</p>` : ''}
-            </details>`
-          : ''
-      }`;
-    story.append(card);
+      </div>`;
+    story.append(section);
   });
 
   // The last step's closing thought gets a quiet section of its own.
   const closing = STEPS.find((s) => s.closing)?.closing;
   if (closing) $('closing-thought').innerHTML = cite(closing);
-
-  watchPhotos();
-  observeSteps();
-  setActive(STEPS[0].key);
 }
 
 /* ---------- Visitor's readings ---------- */
@@ -100,26 +105,26 @@ export function updateExplainer(r) {
   const w = f.water(r.ml.mid);
   const g = f.carbon(r.g.mid);
   const scale = f.energy(r.wh.mid * PROMPTS_PER_DAY);
-
   const grid = CONFIG.carbon.venueGrid ? CONFIG.carbon.venueGrid.label : 'world-average';
-  readings = {
+
+  const readings = {
     electricity: {
       ...e,
-      label: 'Electricity',
+      label: 'Your electricity',
       range: `Range ${f.range(f.energy, r.wh.low, r.wh.high)}`,
       analogy: `<strong></strong> of a phone charge`,
       analogyValue: c.phone,
     },
     heat: {
       ...h,
-      label: 'Heat',
+      label: 'Your heat',
       range: `Range ${f.range(f.heat, r.j.low, r.j.high)}`,
       analogy: `<strong></strong> of a ${CONFIG.comparisons.bulbWatts} W bulb`,
       analogyValue: c.bulb,
     },
     water: {
       ...w,
-      label: 'Water',
+      label: 'Your water',
       range: `Range ${f.range(f.water, r.ml.low, r.ml.high)}`,
       analogy: `<strong></strong> ${c.water.text}`,
       analogyValue: c.water.value,
@@ -127,7 +132,7 @@ export function updateExplainer(r) {
     carbon: {
       ...g,
       unit: `${g.unit} CO2e`,
-      label: `Carbon, ${grid} grid`,
+      label: `Your carbon, ${grid} grid`,
       range: `Range ${f.range(f.carbon, r.g.low, r.g.high)}`,
       analogy: `<strong></strong> in a petrol car ${cite('{{ref:epa-vehicle}}')}`,
       analogyValue: c.car,
@@ -143,7 +148,7 @@ export function updateExplainer(r) {
     },
     scale: {
       ...scale,
-      label: 'Per day, at ChatGPT’s scale',
+      label: 'Your conversation × 2.5 billion, per day',
       range: `plus ${f.str(f.water(r.ml.mid * PROMPTS_PER_DAY), 2)} water, ${f.str(f.carbon(r.g.mid * PROMPTS_PER_DAY), 2)} CO2e`,
       analogy: '',
       analogyValue: '',
@@ -152,10 +157,9 @@ export function updateExplainer(r) {
 
   for (const step of STEPS) {
     const rd = readings[step.key];
-    const valueEl = document.querySelector(`[data-reading="${step.key}"]`);
-    const unitEl = document.querySelector(`[data-unit="${step.key}"]`);
-    valueEl.textContent = display(rd);
-    unitEl.textContent = rd.unit ? ` ${rd.unit}` : '';
+    document.querySelector(`[data-label="${step.key}"]`).textContent = rd.label;
+    document.querySelector(`[data-reading="${step.key}"]`).textContent = rd.money ? f.usd(rd.value) : f.sig(rd.value, 3);
+    document.querySelector(`[data-unit="${step.key}"]`).textContent = rd.unit ? ` ${rd.unit}` : '';
     document.querySelector(`[data-range="${step.key}"]`).textContent = rd.range;
     const analogyLine = $(`${VALUE_IDS[step.key].analogy}-line`);
     analogyLine.innerHTML = rd.analogy;
@@ -165,121 +169,13 @@ export function updateExplainer(r) {
       strong.textContent = rd.analogyValue;
     }
   }
-  counted = new Set();
-  setActive(activeKey, true);
-}
-
-function display(rd, value = rd.value) {
-  return rd.money ? f.usd(value) : f.sig(value, 3);
 }
 
 export function clearExplainer() {
-  readings = {};
-  counted = new Set();
   document.querySelectorAll('[data-reading]').forEach((el) => (el.textContent = '–'));
   document.querySelectorAll('[data-unit], [data-range]').forEach((el) => (el.textContent = ''));
+  document.querySelectorAll('[data-label]').forEach((el) => (el.textContent = NAMES[el.dataset.label]));
   document.querySelectorAll('.analogy-badge').forEach((el) => (el.textContent = ''));
-  setActive(STEPS[0].key, true);
-}
-
-/* ---------- Sticky meter panel ---------- */
-
-let activeKey = null;
-
-function observeSteps() {
-  // A step is "active" when it crosses the middle band of the screen.
-  const io = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) if (e.isIntersecting) setActive(e.target.dataset.step);
-    },
-    { rootMargin: '-45% 0px -50% 0px' },
-  );
-  document.querySelectorAll('.story-card').forEach((card) => io.observe(card));
-
-  // Count each number up once when its card comes into view.
-  const countIO = new IntersectionObserver(
-    (entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        const key = e.target.dataset.step;
-        if (readings[key] && !counted.has(key)) {
-          counted.add(key);
-          countUp(document.querySelector(`[data-reading="${key}"]`), readings[key]);
-        }
-      }
-    },
-    { threshold: 0.35 },
-  );
-  document.querySelectorAll('.story-card').forEach((card) => countIO.observe(card));
-}
-
-function setActive(key, force = false) {
-  if (!key || (key === activeKey && !force)) return;
-  const changed = key !== activeKey;
-  activeKey = key;
-  const step = STEPS.find((s) => s.key === key);
-  const panel = document.querySelector('.sticky-visual-panel');
-  panel.dataset.resource = key;
-
-  const rd = readings[key];
-  const number = $('callout-number');
-  $('callout-unit').textContent = rd ? rd.unit : step.unitLabel;
-  $('callout-label').textContent = rd ? [rd.label, rd.range].filter(Boolean).join(' · ') : NAMES[key];
-  if (rd) {
-    if (changed && !counted.has(`panel-${key}`)) {
-      counted.add(`panel-${key}`);
-      countUp(number, rd);
-    } else number.textContent = display(rd);
-  } else number.textContent = '–';
-
-  if (changed) swapImage(step);
-}
-
-// Photographs live in index.html, one <img class="step-photo"> per reading.
-// The current one fades in; a missing file shows the plain placeholder.
-function swapImage(step) {
-  const photos = document.querySelectorAll('.step-photo');
-  let current = null;
-  photos.forEach((img) => {
-    const on = img.dataset.step === step.key;
-    img.classList.toggle('is-active', on);
-    if (on) current = img;
-  });
-  const missing = !current || current.dataset.missing === 'true';
-  $('image-fallback').hidden = !missing;
-  $('image-fallback-word').textContent = NAMES[step.key];
-  $('img-caption-tag').textContent = missing ? '' : current.dataset.caption || '';
-}
-
-function watchPhotos() {
-  document.querySelectorAll('.step-photo').forEach((img) => {
-    const mark = (missing) => {
-      img.dataset.missing = String(missing);
-      if (img.dataset.step === activeKey) swapImage(STEPS.find((s) => s.key === activeKey));
-    };
-    img.addEventListener('load', () => mark(false));
-    img.addEventListener('error', () => mark(true));
-    if (img.complete) img.dataset.missing = String(img.naturalWidth === 0);
-  });
-}
-
-/* ---------- Count-up: numbers rise once, like a meter ---------- */
-
-function countUp(el, rd) {
-  if (!el) return;
-  if (reducedMotion()) {
-    el.textContent = display(rd);
-    return;
-  }
-  const start = performance.now();
-  const duration = 900;
-  const tick = (now) => {
-    const t = Math.min(1, (now - start) / duration);
-    const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = t < 1 ? display(rd, rd.value * eased) : display(rd);
-    if (t < 1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
 }
 
 /** References cited at runtime (for the References back-links). */
