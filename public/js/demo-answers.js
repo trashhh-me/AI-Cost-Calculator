@@ -10,18 +10,22 @@
 export const PRESETS = [
   {
     label: 'Why is the sky blue?',
+    kind: 'One line',
     prompt: 'Why is the sky blue?',
   },
   {
     label: 'Pancake recipe',
+    kind: 'Recipe',
     prompt: 'Give me a simple recipe for pancakes.',
   },
   {
     label: 'Poem about the sea',
+    kind: 'Short poem',
     prompt: 'Write a short poem about the sea.',
   },
   {
     label: 'Essay on electricity',
+    kind: 'Long essay',
     prompt:
       'Write a detailed essay on the history of electricity, from the first experiments to the modern power grid.',
   },

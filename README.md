@@ -168,7 +168,7 @@ server/tokenizer.js       local token counts (samples and stopped answers only)
 public/index.html         the exhibit: chat → tokens → readings → bill
 public/references.html    method and every source (opened from the bill and from citations)
 public/style.css          all styles, organised by section
-public/fonts/             Newsreader, Source Sans 3, IBM Plex Mono (SIL Open Font License)
+public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya (SIL Open Font License)
 public/images/            photographs (see README there)
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
 public/js/content.js      explainer text, research figures, references

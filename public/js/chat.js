@@ -52,14 +52,40 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
   /* ---------- Suggestions ---------- */
   const presetBox = $('presets');
+  // Template prompts: choosing one fills the box (the visitor can still
+  // edit it) and closes the list; it is not sent until they press Send.
+  const templates = $('templates');
   for (const p of PRESETS) {
+    const li = document.createElement('li');
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'preset-btn';
-    b.textContent = p.label;
-    b.addEventListener('click', () => send(p.prompt));
-    presetBox.append(b);
+    b.innerHTML = '<span class="preset-text"></span><span class="preset-kind"></span>';
+    b.querySelector('.preset-text').textContent = p.prompt;
+    b.querySelector('.preset-kind').textContent = p.kind;
+    b.addEventListener('click', () => {
+      input.value = p.prompt;
+      templates.open = false;
+      autoGrow();
+      updateCharCount();
+      hideNotice();
+      input.removeAttribute('aria-invalid');
+      input.focus();
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
+    li.append(b);
+    presetBox.append(li);
   }
+  // Close the list when tapping elsewhere or pressing Escape.
+  document.addEventListener('click', (e) => {
+    if (templates.open && !templates.contains(e.target)) templates.open = false;
+  });
+  templates.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && templates.open) {
+      templates.open = false;
+      templates.querySelector('summary').focus();
+    }
+  });
 
   /* ---------- Composer ---------- */
   function autoGrow() {
@@ -496,6 +522,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     announcer.textContent = '';
     input.value = '';
     input.removeAttribute('aria-invalid');
+    templates.open = false;
     autoGrow();
     updateCharCount();
     hideNotice();

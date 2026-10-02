@@ -7,8 +7,8 @@
   <meta name="description" content="AI DEX: ask an AI anything, then see what it really cost in electricity, heat, water, carbon and money.">
   <title>AI DEX</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/newsreader-latin-opsz-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/alegreya-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="js/main.js"></script>
 </head>
@@ -52,7 +52,10 @@
           </button>
         </form>
 
-        <div id="presets" class="presets" role="group" aria-label="Suggestions"></div>
+        <details id="templates" class="templates">
+          <summary>Template prompts</summary>
+          <ul id="presets" class="template-list" aria-label="Template prompts"></ul>
+        </details>
 
         <p class="model-line">
           <span class="status-dot" aria-hidden="true"></span>
@@ -71,6 +74,7 @@
         <header class="tokens-intro">
           <h2 id="tokens-heading">How the AI read your words</h2>
           <p id="token-explainer"></p>
+          <p>A token can be a whole word, part of a word, a space or a punctuation mark. “dishwasher” is two tokens: <span class="token-example">dish</span> + <span class="token-example">washer</span>. “I love pancakes!” is four. Each model splits text its own way.</p>
         </header>
 
         <div class="tokens-body">

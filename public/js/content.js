@@ -318,7 +318,7 @@ export const STEPS = [
 /* ---------------- Short texts used around the page ---------------- */
 
 export const TEXT = {
-  tokenExplainer: 'AI reads and writes in <b>tokens</b>, about ¾ of a word each. Every token is counted and billed.',
+  tokenExplainer: 'An AI doesn’t read letters or whole words. It reads <b>tokens</b>: small pieces of text, about ¾ of a word on average. Every token is counted, and every token is billed.',
   resendNote: '“Sent” includes the exhibit’s short instructions to the AI and, for follow-ups, the whole conversation so far.',
   splitExact: 'Split by OpenAI’s tokenizer. Counts are exact.',
   splitApprox: 'Approximate split. Counts are exact.',
