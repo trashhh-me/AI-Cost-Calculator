@@ -3,9 +3,9 @@
    Quiet paper and ink: a humanist serif for headings and readings,
    a humanist sans for text, and monospace only where things are
    printed or counted (tokens, the receipt).
-   Sections: fonts · tokens · base · top bar · chat · cost page: bill ·
-   tokens · readings · disclaimer · references · kiosk overlay · small
-   screens · more contrast · reduced motion
+   Sections: fonts · tokens · base · page controls · chat · bill · how
+   the AI reads your text · how we estimate · disclaimer · references ·
+   kiosk overlay · small screens · more contrast · reduced motion
    Low vision: 20px text at the smallest, every text colour at least 7:1
    on its background, a larger-text switch, and a thick focus ring.
    ===================================================================== */
@@ -37,6 +37,13 @@
   font-family: 'Alegreya';
   src: url(fonts/alegreya-latin-wght-normal.woff2) format('woff2-variations');
   font-weight: 400 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Alegreya';
+  src: url(fonts/alegreya-latin-wght-italic.woff2) format('woff2-variations');
+  font-weight: 400 900;
+  font-style: italic;
   font-display: swap;
 }
 @font-face {
@@ -105,8 +112,8 @@
   --desk-dim: #a9b0aa;
 
   /* Token pieces */
-  --pill-a: #2b2a22;
-  --pill-b: #1f2c26;
+  --pill-a: #3b3626;
+  --pill-b: #1d3a2f;
   --pill-edge: #4f5751;
 
   /* Type */
@@ -211,24 +218,20 @@ body:lang(ne) {
   letter-spacing: 0;
 }
 
-/* ---------- Top bar: language and text size, top right ---------- */
-.topbar {
+/* ---------- Page controls: language and text size, top right ----------
+   Fixed, so they are within reach anywhere on the page. */
+.page-controls {
+  position: fixed;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 20;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.75rem var(--gutter);
-}
-/* On the chat page it floats over the centred start screen */
-body:not(.cost-page) .topbar {
-  position: absolute;
-  inset: 0 0 auto 0;
-  z-index: 10;
-}
-.topbar-controls {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  gap: 0.25rem;
+  padding: 0 0.35rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 999px;
 }
 .lang-switch {
   display: flex;
@@ -266,14 +269,6 @@ body:not(.cost-page) .topbar {
   font-size: var(--step-1);
   line-height: 1;
 }
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem;
-  color: var(--ink);
-  font-size: var(--step-0);
-}
-
 [hidden] {
   display: none !important;
 }
@@ -309,7 +304,7 @@ body:not(.cost-page) .topbar {
 /* Section openings are set differently on purpose: the tokens heading
    sits in its own column, the readings heading is set left and indented,
    the bill is centred on its counter. */
-.bill-section h1 {
+.bill-section h2 {
   font-size: var(--step-4);
   text-align: center;
 }
@@ -374,7 +369,7 @@ a.button-primary {
   min-height: 100dvh;
   max-width: 52rem;
   margin: 0 auto;
-  padding: 3.5rem var(--gutter) 0;
+  padding: 3.5rem var(--gutter) 0; /* room for the language pill */
 }
 
 .chat-app[data-state='start'] {
@@ -758,61 +753,88 @@ a.button-primary {
 .status-dot[data-state='sample'] { background: var(--electricity-lit); box-shadow: inset 0 0 0 1px var(--electricity); }
 
 /* =====================================================================
-   COST PAGE 2: HOW WE ESTIMATE, first the tokens
+   HOW THE AI READS YOUR TEXT: what a token is, then the visitor's own
    ===================================================================== */
 .tokens-section {
-  margin-top: 4rem;
-  padding: 5rem 0;
+  padding: 6rem 0;
   background: var(--paper-deep);
 }
 
-/* Off-centre on purpose: a narrow column of words beside the evidence */
-.tokens-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2.1fr);
-  gap: 4rem;
-  align-items: start;
+/* The lesson: the word, what it means, one sentence in two languages */
+.token-lesson {
+  max-width: 46rem;
+  margin: 0 auto;
+  text-align: center;
 }
-.tokens-body {
-  padding-left: 4rem;
-  border-left: 1px solid var(--rule);
+.token-lesson h2 {
+  font-size: calc(var(--step-4) * 1.15);
 }
-.tokens-intro {
-  position: sticky;
-  top: 4rem;
+.token-define {
+  margin: 3rem auto 0;
+  padding: 2.25rem 2rem 2.5rem;
+  background: var(--surface);
+  border-radius: 6px;
 }
-.tokens-intro h3 {
-  font-size: var(--step-4);
-  line-height: 1.05;
+.token-word {
+  font-family: var(--font-serif);
+  font-size: var(--step-5);
+  line-height: 1;
+  color: var(--signal);
 }
-.tokens-intro p {
-  margin-top: 1.25rem;
+.token-def {
+  max-width: 34rem;
+  margin: 1rem auto 0;
   font-size: var(--step-1);
+  line-height: 1.55;
+}
+.token-examples-label {
+  margin-top: 2.5rem;
   color: var(--ink-soft);
 }
-.tokens-intro p + p {
-  margin-top: 0.9rem;
-  font-size: var(--step-0);
+.token-examples {
+  display: grid;
+  gap: 1.25rem;
+  margin-top: 1rem;
 }
-.token-example {
+.token-example-row {
+  display: grid;
+  justify-items: center;
+  gap: 0.4rem;
+}
+.token-sample {
   font-family: var(--font-mono);
-  color: var(--ink);
-  white-space: nowrap;
+  font-size: var(--step-2);
+  line-height: 1.5;
+}
+.token-example-row figcaption {
+  color: var(--ink-soft);
+}
+.token-after {
+  max-width: 36rem;
+  margin: 2rem auto 0;
+  color: var(--ink-soft);
 }
 
+/* The visitor's own: sent and written side by side, a line between */
+.tokens-yours {
+  margin-top: 6rem;
+  font-size: var(--step-3);
+  text-align: center;
+}
 .token-cards {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: 2.5rem;
 }
-
 .token-card {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--rule);
-  padding: 1.25rem 0 1.5rem;
+  min-width: 0;
+  padding: 0 3rem 0 0;
 }
-.token-card:first-child {
-  border-top: 0;
-  padding-top: 0;
+.token-card + .token-card {
+  padding: 0 0 0 3rem;
+  border-left: 1px solid var(--rule);
 }
 
 .token-card-header {
@@ -821,7 +843,6 @@ a.button-primary {
   justify-content: space-between;
   align-items: baseline;
   gap: 0.25rem 1rem;
-  padding-bottom: 0.75rem;
 }
 .token-card-header h4 {
   font-size: var(--step-2);
@@ -837,14 +858,14 @@ a.button-primary {
   font-variant-numeric: lining-nums tabular-nums;
 }
 .tcount-breakdown {
-  flex-basis: 100%;
-  text-align: right;
+  margin: 0.5rem 0 1rem;
+  min-height: 3em;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
 
 .token-display-box {
-  max-height: 15rem;
+  max-height: 22rem;
   overflow-y: auto;
   padding: 0.25rem 0;
   font-family: var(--font-mono);
@@ -857,6 +878,10 @@ a.button-primary {
   padding-top: 1rem;
   border-top: 1px solid var(--rule);
 }
+/* The exhibit's hidden note: shown, but quieter than the visitor's words */
+.token-group--note .token-pill {
+  color: var(--ink-soft);
+}
 .token-group-label {
   display: block;
   font-family: var(--font-sans);
@@ -865,16 +890,14 @@ a.button-primary {
   margin-bottom: 0.4rem;
 }
 
-/* Each token is a small printed unit */
+/* Each token is a small printed unit. Inline, with no padding, so letters
+   split across two tokens (Nepali vowel signs) still join up on screen. */
 .token-pill {
-  display: inline-block;
-  max-width: 100%;
-  padding: 0 0.08em;
-  margin: 0 1px 4px 0;
   background: var(--pill-a);
-  box-shadow: inset 0 -2px 0 var(--pill-edge);
-  white-space: pre;
-  overflow-wrap: anywhere;
+  box-shadow: inset 0 -2px 0 var(--pill-edge), inset -2px 0 0 var(--paper-deep);
+  white-space: pre-wrap;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
 }
 .token-pill:nth-of-type(even) {
   background: var(--pill-b);
@@ -884,104 +907,44 @@ a.button-primary {
 }
 
 .split-note {
-  margin-top: 0.75rem;
+  margin-top: 1.5rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
-}
-
-.register {
-  margin-top: 3rem;
-}
-.register-title {
-  font-size: var(--step-2);
-}
-.register-scroll {
-  overflow-x: auto;
-  margin-top: 1rem;
-}
-.register-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums; /* figures line up in columns */
-}
-.register-table th {
-  font-weight: 600;
-  text-align: left;
-  color: var(--ink-soft);
-  padding: 0.5rem 0.75rem 0.5rem 0;
-  border-bottom: 1px solid var(--ink);
-}
-.register-table td {
-  padding: 0.5rem 0.75rem 0.5rem 0;
-  border-bottom: 1px solid var(--rule);
-}
-.register-table .num {
-  text-align: right;
-}
-.register-table tfoot td {
-  font-weight: 600;
-  border-bottom: 0;
-}
-.register-note,
-.register-footnote {
-  margin-top: 0.75rem;
-  font-size: var(--step--1);
-  color: var(--ink-soft);
+  text-align: center;
 }
 
 /* =====================================================================
-   COST PAGE 2 (continued): six readings told like a magazine spread
+   HOW WE ESTIMATE: one section per reading, text and photo side by side
    ===================================================================== */
 .estimate {
-  padding: 6rem 0 3rem;
+  padding: 7rem 0 3rem;
 }
 
 .readings {
-  max-width: 72rem;
-  margin: 2rem auto 0;
+  max-width: 68rem;
+  margin: 3rem auto 0;
   padding: 0 var(--gutter);
 }
 
-/* One section per reading, laid out like a printed spread rather than a
-   template: the photograph swaps sides, changes shape and sits a little
-   higher or lower each time. No dividing lines. */
+/* Two even columns, tops aligned; the photo swaps sides each time */
 .story-card {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: 2rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 5rem;
   align-items: start;
-  padding: 5rem 0;
+  padding: 4.5rem 0;
 }
-.story-card > * {
-  grid-row: 1;
+.story-card:nth-child(even) .story-text {
+  order: 2;
 }
 .story-text {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.1rem;
 }
-
-/* 1 Electricity: text left, a landscape photo dropped a little lower */
-.story-card:nth-child(1) .story-text { grid-column: 1 / 6; }
-.story-card:nth-child(1) .metric-feature { grid-column: 7 / 13; margin-top: 4rem; --ratio: 4 / 3; }
-/* 2 Heat: a tall photo on the left, text set further down */
-.story-card:nth-child(2) { padding-top: 7rem; }
-.story-card:nth-child(2) .metric-feature { grid-column: 1 / 6; --ratio: 4 / 5; }
-.story-card:nth-child(2) .story-text { grid-column: 7 / 12; margin-top: 6rem; }
-/* 3 Water: indented text, a small square photo riding higher */
-.story-card:nth-child(3) .story-text { grid-column: 2 / 7; margin-top: 2rem; }
-.story-card:nth-child(3) .metric-feature { grid-column: 8 / 12; --ratio: 1 / 1; }
-/* 4 Carbon: a wide photo first, narrow text tucked to the right */
-.story-card:nth-child(4) { padding-top: 6rem; }
-.story-card:nth-child(4) .metric-feature { grid-column: 1 / 8; --ratio: 16 / 9; }
-.story-card:nth-child(4) .story-text { grid-column: 9 / 13; margin-top: 3rem; }
-/* 5 Money: text left, a portrait photo pushed well down */
-.story-card:nth-child(5) .story-text { grid-column: 1 / 6; }
-.story-card:nth-child(5) .metric-feature { grid-column: 7 / 11; margin-top: 5.5rem; --ratio: 3 / 4; }
-/* 6 Scale: the widest photo, text beside it from the left edge */
-.story-card:nth-child(6) { padding-top: 7rem; }
-.story-card:nth-child(6) .story-text { grid-column: 1 / 5; margin-top: 1.5rem; }
-.story-card:nth-child(6) .metric-feature { grid-column: 6 / 13; --ratio: 16 / 9; }
+.metric-feature {
+  --ratio: 4 / 3;
+}
 
 /* The resource's name, set like a magazine section line */
 .step-kicker {
@@ -992,7 +955,6 @@ a.button-primary {
 
 .story-card h3 {
   font-size: var(--step-3);
-  max-width: 18ch;
 }
 
 .story-body {
@@ -1002,11 +964,20 @@ a.button-primary {
   color: var(--ink-soft);
 }
 
-/* The working, set like sums in a notebook: the visitor's own numbers */
+/* The working: the visitor's own numbers, set like sums on a slip */
+.working {
+  padding: 1rem 1.25rem 1.1rem;
+  background: var(--surface);
+  border-radius: 6px;
+}
+.working-label {
+  margin-bottom: 0.4rem;
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
 .calc {
-  max-width: 32rem;
   font-family: var(--font-mono);
-  font-size: var(--step-0);
+  font-size: var(--step--1);
   font-variant-numeric: tabular-nums;
 }
 .calc-line {
@@ -1023,17 +994,23 @@ a.button-primary {
   display: none;
 }
 .calc-total {
-  margin-top: 0.2rem;
+  margin-top: 0.3rem;
   font-weight: 700;
   font-size: var(--step-1);
   color: var(--resource);
-  justify-content: flex-start;
 }
-.calc-key {
-  margin-top: 0.35rem;
-  font-family: var(--font-sans);
+
+/* Where the numbers come from: one plain paragraph with its sources */
+.source {
   font-size: var(--step--1);
+  line-height: 1.6;
   color: var(--ink-soft);
+}
+.source strong {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--ink);
+  font-weight: 600;
 }
 
 /* The photograph, with your reading underneath it */
@@ -1100,25 +1077,30 @@ a.button-primary {
   font-weight: 600;
   color: var(--resource);
 }
-/* The closing thought: one large, left-set line before the bill */
+/* The closing thought: a centred quotation */
 .closing {
-  max-width: 72rem;
-  margin: 6rem auto 3rem;
+  max-width: 52rem;
+  margin: 5rem auto 4rem;
   padding: 0 var(--gutter);
+  text-align: center;
 }
-.closing {
-  padding-left: calc(var(--gutter) + 14vw);
+.closing::before {
+  content: '\201C';
+  display: block;
+  height: 0.55em;
+  font-family: var(--font-serif);
+  font-size: 7rem;
+  line-height: 1;
+  color: var(--signal);
 }
 .closing-quote {
-  max-width: 20ch;
-  font-weight: 400;
+  margin: 0 auto;
+  max-width: 24ch;
   font-family: var(--font-serif);
-  font-size: clamp(2.2rem, 4.5vw, 4rem);
-  line-height: 1.12;
-  letter-spacing: -0.01em;
-}
-.closing-quote .cite {
-  font-style: normal;
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.2;
+  text-wrap: balance;
 }
 
 /* "What research says": folded away until wanted */
@@ -1184,7 +1166,7 @@ a.button-primary {
 }
 
 /* =====================================================================
-   COST PAGE 1: THE BILL, printed on the counter
+   THE BILL, printed on the counter
    ===================================================================== */
 .bill-section {
   padding: 2rem 0 5rem;
@@ -1256,7 +1238,7 @@ a.button-primary {
 .receipt-header {
   text-align: center;
 }
-.receipt-header h2 {
+.receipt-header h3 {
   font-family: var(--font-mono);
   font-size: 1.15rem;
   font-weight: 600;
@@ -1353,7 +1335,7 @@ a.button-primary {
 }
 
 /* =====================================================================
-   COST PAGE 3: THE DISCLAIMER, plainly said
+   THE DISCLAIMER, in italics: the one place the voice changes
    ===================================================================== */
 .disclaimer {
   padding: 5rem 0;
@@ -1364,12 +1346,20 @@ a.button-primary {
 }
 .disclaimer h2 {
   font-size: var(--step-3);
+  font-style: italic;
   text-align: center;
   margin-bottom: 1.5rem;
 }
 .disclaimer p {
-  font-size: var(--step-1);
-  line-height: 1.55;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: var(--step-2);
+  line-height: 1.45;
+}
+/* Devanagari has no true italic: keep Nepali upright */
+:lang(ne) .disclaimer h2,
+:lang(ne) .disclaimer p {
+  font-style: normal;
 }
 .disclaimer p + p {
   margin-top: 1rem;
@@ -1380,7 +1370,7 @@ a.button-primary {
 }
 
 /* =====================================================================
-   COST PAGE 4: REFERENCES, a reader's appendix
+   REFERENCES, a reader's appendix
    ===================================================================== */
 .references .reader {
   max-width: 44rem;
@@ -1410,16 +1400,6 @@ a.button-primary {
   font-size: var(--step-1);
 }
 
-.no-visit {
-  display: grid;
-  justify-items: center;
-  gap: 1.5rem;
-  max-width: 34rem;
-  margin: 20vh auto;
-  padding: 0 var(--gutter);
-  font-size: var(--step-1);
-  text-align: center;
-}
 .reference-group {
   margin-top: 2rem;
 }
@@ -1534,52 +1514,46 @@ a.button-primary {
     background: var(--paper);
   }
 
-  .tokens-layout {
+  .token-cards {
     grid-template-columns: 1fr;
-    gap: 2rem;
   }
-  .tokens-intro {
-    position: static;
+  .token-card,
+  .token-card + .token-card {
+    padding: 0;
   }
   /* stacked: the dividing line runs across instead of down */
-  .tokens-body {
-    padding: 2rem 0 0;
+  .token-card + .token-card {
+    margin-top: 2rem;
+    padding-top: 2rem;
     border-left: 0;
     border-top: 1px solid var(--rule);
   }
+  .token-sample {
+    font-size: var(--step-1);
+  }
+  /* On a phone the controls stay at the top instead of covering the text */
+  .page-controls {
+    position: absolute;
+  }
 
-  .story-card,
-  .story-card:nth-child(n) {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 2.5rem 0;
+  .story-card {
+    grid-template-columns: 1fr;
+    row-gap: 1.75rem;
+    padding: 3rem 0;
   }
-  .story-card:nth-child(n) > * {
-    margin-top: 0;
-  }
-  .story-card .metric-feature {
-    align-self: stretch;
+  .story-card:nth-child(even) .story-text {
+    order: 0;
   }
   .estimate-intro {
     padding-inline: var(--gutter);
-  }
-  .topbar {
-    padding-inline: 0.5rem;
   }
   .lang-switch button,
   .text-size {
     padding-inline: 0.5rem;
   }
-  .closing {
-    padding-left: var(--gutter);
-  }
 
   .receipt-slot {
     transform: rotate(-0.5deg);
-  }
-  .calc {
-    font-size: var(--step--1);
   }
   .thermal-receipt {
     padding-left: 1.1rem;

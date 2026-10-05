@@ -16,7 +16,7 @@ proportions (the photo is cropped to fit anyway), JPEG, under about 500 KB:
 | `money.jpg` | portrait 3:4 | A printed itemised bill or till receipt, close up, natural light. |
 | `scale.jpg` | wide 16:9 | An aerial view of a large data center campus. |
 
-The photos are listed in `public/cost.html`: search for **PHOTOGRAPHS**.
+The photos are listed in `public/index.html`: search for **PHOTOGRAPHS**.
 Each reading has one line like this:
 
 ```html

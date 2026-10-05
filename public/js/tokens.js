@@ -2,7 +2,7 @@
 // The visual split into pieces uses OpenAI's o200k tokenizer, bundled
 // locally: exact for OpenAI models, an honest approximation for others.
 import { CONFIG } from './config.js';
-import { TEXT } from './content.js';
+import { TEXT, TOKEN_EXAMPLES } from './content.js';
 import { int } from './format.js';
 import { t, pick } from './i18n.js';
 
@@ -69,6 +69,22 @@ function pill(piece) {
   return span;
 }
 
+// A token that starts with a vowel sign or virama (common in Nepali) belongs
+// to the letter before it. Pieces are inline so the browser can still join
+// the letters across them; line breaks are offered only before a piece that
+// starts a new letter, never inside one.
+const JOINS_PREVIOUS = /^[\u0900-\u0903\u093A-\u094F\u0951-\u0957\u0962\u0963\u200C\u200D]/;
+
+function pieces(list) {
+  const frag = document.createDocumentFragment();
+  list.forEach((p, i) => {
+    if (i > 0 && !JOINS_PREVIOUS.test(p)) frag.append(document.createElement('wbr'));
+    frag.append(pill(p));
+    if (p.includes('\n')) frag.append(document.createElement('br')); // keep the answer's line breaks
+  });
+  return frag;
+}
+
 async function group(label, text) {
   const wrap = document.createElement('div');
   wrap.className = 'token-group';
@@ -76,34 +92,45 @@ async function group(label, text) {
   head.className = 'token-group-label';
   head.textContent = label;
   const body = document.createElement('div');
-  const pieces = await split(text);
-  const frag = document.createDocumentFragment();
-  for (const p of pieces) {
-    frag.append(pill(p));
-    if (p.includes('\n')) frag.append(document.createElement('br')); // keep the answer's line breaks
-  }
-  body.append(frag);
+  const list = await split(text);
+  body.append(pieces(list));
   wrap.append(head, body);
-  return { el: wrap, count: pieces.length };
+  return { el: wrap, count: list.length };
 }
 
 let renderVersion = 0;
 
-/** Render all turns: visitor messages, answers, counts and the register. */
+// The lesson: one sentence in English and in Nepali, cut into tokens.
+async function renderExamples() {
+  for (const lang of ['en', 'ne']) {
+    const list = await split(TOKEN_EXAMPLES[lang]);
+    $(`token-example-${lang}`).replaceChildren(pieces(list));
+    $(`token-example-${lang}-count`).textContent = t('nTokens', { c: int(list.length) });
+  }
+}
+
+/** Render the lesson, then every turn: what was sent, what was written. */
 export async function renderTokens(turns) {
   const version = ++renderVersion;
-  $('token-explainer').innerHTML = pick(TEXT.tokenExplainer);
-  $('token-example').textContent = pick(TEXT.tokenExample);
+  await renderExamples();
 
   const inBox = $('input-tokens-visual');
   const outBox = $('output-tokens-visual');
   const inFrag = document.createDocumentFragment();
   const outFrag = document.createDocumentFragment();
-  const typed = [];
+  let totalTyped = 0;
+
+  // The note the exhibit sends before every question, shown so nobody has
+  // to wonder what the extra tokens are.
+  const note = await group('', CONFIG.systemPrompt);
+  note.el.classList.add('token-group--note');
+  note.el.firstChild.textContent = t('hiddenNote', { c: int(note.count) });
+  note.el.lang = 'en';
+  inFrag.append(note.el);
 
   for (const turn of turns) {
     const q = await group('', turn.question);
-    typed.push(q.count);
+    totalTyped += q.count;
     q.el.firstChild.textContent = t('groupQ', { n: int(turn.number), c: int(q.count) });
     inFrag.append(q.el);
 
@@ -119,62 +146,20 @@ export async function renderTokens(turns) {
   inBox.scrollTop = inBox.scrollHeight;
   outBox.scrollTop = outBox.scrollHeight;
 
-  const totalIn = turns.reduce((s, x) => s + x.input, 0);
-  const totalOut = turns.reduce((s, x) => s + x.output, 0);
+  const totalIn = turns.reduce((sum, x) => sum + x.input, 0);
+  const totalOut = turns.reduce((sum, x) => sum + x.output, 0);
   $('input-token-count').textContent = int(totalIn);
-  // Why "sent" is more than what was typed: instructions + earlier messages.
-  const totalTyped = typed.reduce((a, b) => a + b, 0);
-  $('input-breakdown').textContent = t('breakdown', { typed: int(totalTyped), rest: int(Math.max(0, totalIn - totalTyped)) });
   $('output-token-count').textContent = int(totalOut);
+  // Why "sent" is more than what was typed: the hidden note + earlier messages.
+  $('input-breakdown').textContent = t('breakdown', { typed: int(totalTyped), rest: int(Math.max(0, totalIn - totalTyped)) });
 
   // How honest is the split?
   const anySample = turns.some((x) => !x.live);
   const allSample = turns.every((x) => !x.live);
-  let note = pick(CONFIG.provider === 'openai' ? TEXT.splitExact : TEXT.splitApprox);
-  if (allSample) note = pick(TEXT.splitSample);
-  else if (anySample) note += ` ${t('footSample')}`;
-  $('split-note').textContent = note;
-
-  renderRegister(turns, typed);
-}
-
-function renderRegister(turns, typed) {
-  const table = $('token-register');
-  const body = table.tBodies[0];
-  body.replaceChildren();
-  let flagged = false;
-  for (const [i, turn] of turns.entries()) {
-    const mark = !turn.live ? ' †' : turn.stopped || !turn.exact?.output ? ' *' : '';
-    if (mark) flagged = true;
-    const tr = document.createElement('tr');
-    const cells = [t('qN', { n: int(turn.number) }) + mark, int(typed[i]), int(turn.input), int(turn.output)];
-    cells.forEach((v, c) => {
-      const td = document.createElement('td');
-      td.textContent = v;
-      if (c > 0) td.className = 'num';
-      tr.append(td);
-    });
-    body.append(tr);
-  }
-
-  table.tFoot?.remove();
-  const foot = table.createTFoot();
-  const tr = foot.insertRow();
-  const totalIn = turns.reduce((s, x) => s + x.input, 0);
-  const totalOut = turns.reduce((s, x) => s + x.output, 0);
-  const totalTyped = typed.reduce((a, b) => a + b, 0);
-  [t('total'), int(totalTyped), int(totalIn), int(totalOut)].forEach((v, c) => {
-    const td = tr.insertCell();
-    td.textContent = v;
-    if (c > 0) td.className = 'num';
-  });
-
-  $('resend-note').textContent = pick(TEXT.resendNote);
-
-  const notes = [];
-  if (turns.some((x) => !x.live)) notes.push(t('footSample'));
-  if (turns.some((x) => x.live && (x.stopped || !x.exact?.output))) notes.push(t('footStopped'));
-  $('register-footnote').textContent = flagged ? notes.join(' ') : '';
+  let splitNote = pick(CONFIG.provider === 'openai' ? TEXT.splitExact : TEXT.splitApprox);
+  if (allSample) splitNote = pick(TEXT.splitSample);
+  else if (anySample) splitNote += ` ${t('footSample')}`;
+  $('split-note').textContent = splitNote;
 }
 
 export function clearTokens() {
@@ -184,9 +169,5 @@ export function clearTokens() {
   $('input-token-count').textContent = '0';
   $('input-breakdown').textContent = '';
   $('output-token-count').textContent = '0';
-  $('token-register').tBodies[0].replaceChildren();
-  $('token-register').tFoot?.remove();
-  $('resend-note').textContent = '';
-  $('register-footnote').textContent = '';
   $('split-note').textContent = '';
 }

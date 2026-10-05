@@ -45,7 +45,7 @@ export function renderReceipt(turns, r) {
 
   $('thermal-receipt').innerHTML = `
     <header class="receipt-header">
-      <h2 lang="en">AI DEX</h2>
+      <h3 lang="en">AI DEX</h3>
       <p>${escapeHTML(when)}</p>
       <p>${t('r.model', { m: label })}</p>
       <p>${status}</p>

@@ -2,7 +2,7 @@
 // local server, with designed states for everything that can happen at a
 // kiosk: empty prompt, waiting, streaming, stopped, errors, sample answers
 // and the per-visit question limit. Finished turns are kept for the visit
-// (store.js), so coming back from the cost page shows the same conversation.
+// (store.js) for the bill and the explanations below the chat.
 import { CONFIG } from './config.js';
 import { PRESETS, sampleAnswerFor } from './demo-answers.js';
 import { renderMarkdown, plainText } from './markdown.js';
@@ -17,7 +17,7 @@ const $ = (id) => document.getElementById(id);
 // sent to the AI stays well formed. Never shown.
 const EMPTY_ANSWER = '(The visitor stopped this answer before it began.)';
 
-export function createChat({ onActivity }) {
+export function createChat({ onActivity, onTurnComplete }) {
   const app = $('chat-app');
   const form = $('prompt-box');
   const input = $('user-prompt');
@@ -508,6 +508,7 @@ export function createChat({ onActivity }) {
     };
     finishAnswerEl(c.el, turn);
     addTurn(turn, remaining);
+    onTurnComplete?.(turn);
 
     announcer.textContent = `${t('answerComplete')} ${plainText(c.text)}`;
     updateQuestionsLeft();

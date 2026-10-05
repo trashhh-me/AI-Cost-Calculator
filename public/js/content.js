@@ -271,6 +271,10 @@ export const STEPS = [
       en: 'The chips read your whole message at once, then write the answer one token at a time. Writing is slower, so a written token counts almost three times as much as a read one.',
       ne: 'चिपहरूले तपाईंको पूरै सन्देश एकैपटक पढ्छन्, अनि उत्तर एक-एक टोकन गरेर लेख्छन्। लेख्न बढी समय लाग्ने भएकाले लेखिएको एउटा टोकन पढिएको टोकनभन्दा झन्डै तीन गुणा भारी हुन्छ।',
     },
+    source: {
+      en: 'Epoch AI estimated that a typical ChatGPT answer of about 500 written tokens uses 0.3 Wh, so one written token is about 0.3 ÷ 500 = 0.0006 Wh. A 10,000-token prompt adds about 2.2 Wh, so one read token is about 0.00022 Wh. {{ref:epoch-2025}} The range comes from Google’s measured 0.24 Wh per prompt {{ref:google-2025}} and Jegham et al.’s 0.42 Wh. {{ref:jegham-2025}}',
+      ne: 'Epoch AI ले करिब ५०० लेखिएका टोकन भएको ChatGPT को सामान्य उत्तरमा ०.३ Wh लाग्ने अनुमान गर्‍यो, त्यसैले एउटा लेखिएको टोकन करिब ०.३ ÷ ५०० = ०.०००६ Wh हो। १०,००० टोकनको प्रश्नले करिब २.२ Wh थप्छ, त्यसैले एउटा पढिएको टोकन करिब ०.०००२२ Wh हो। {{ref:epoch-2025}} दायरा Google ले नापेको प्रति प्रश्न ०.२४ Wh {{ref:google-2025}} र Jegham र सहकर्मीहरूको ०.४२ Wh बाट लिइएको हो। {{ref:jegham-2025}}',
+    },
     research: {
       en: [
         'Median Gemini prompt: <b>0.24 Wh</b>, including the building’s overhead (PUE 1.09). Chips alone: 0.10 Wh. {{ref:google-2025}}',
@@ -298,6 +302,10 @@ export const STEPS = [
       en: 'Almost all the electricity a chip uses ends up as heat, which the building then has to cool away.',
       ne: 'चिपले खपत गर्ने लगभग सबै बिजुली अन्ततः तापमा बदलिन्छ, र भवनले त्यो ताप चिसो पारेर हटाउनुपर्छ।',
     },
+    source: {
+      en: 'Physics, not an estimate: 1 watt-hour is 3,600 joules, and the chips turn almost all the electricity they use into heat.',
+      ne: 'यो अनुमान होइन, भौतिकी हो: १ वाट-घण्टा बराबर ३,६०० जुल, र चिपले खपत गर्ने लगभग सबै बिजुली ताप बन्छ।',
+    },
     research: {
       en: [
         'Electricity used by chips ends up as heat: basic physics (conservation of energy).',
@@ -317,6 +325,10 @@ export const STEPS = [
     body: {
       en: 'Data centers evaporate water to stay cool, and power plants use water to make the electricity. We count both.',
       ne: 'डेटा सेन्टरहरू चिसो रहन पानी वाष्पीकरण गर्छन्, र बिजुली निकाल्न विद्युत् केन्द्रहरूले पनि पानी खर्चिन्छन्। हामी दुवै गन्छौं।',
+    },
+    source: {
+      en: '1.15 mL per Wh is the cooling water Google measured across its data centers in 2025. {{ref:google-2025}} 3.142 mL per Wh is the average water US power plants use to make electricity. {{ref:li-2023}}',
+      ne: 'प्रति Wh १.१५ mL Google ले २०२५ मा आफ्ना डेटा सेन्टरमा नापेको चिसो पार्ने पानी हो। {{ref:google-2025}} प्रति Wh ३.१४२ mL अमेरिकी विद्युत् केन्द्रहरूले बिजुली निकाल्न खर्चिने औसत पानी हो। {{ref:li-2023}}',
     },
     research: {
       en: [
@@ -345,6 +357,10 @@ export const STEPS = [
       en: 'Carbon depends on how the electricity was made. We use the world-average grid; coal-heavy grids emit more, wind, solar and hydro far less.',
       ne: 'कार्बन बिजुली कसरी निकालियो भन्नेमा भर पर्छ। हामी विश्वको औसत ग्रिड प्रयोग गर्छौं; कोइलामा निर्भर ग्रिडले बढी, हावा, सौर्य र जलविद्युत्‌ले धेरै कम उत्सर्जन गर्छन्।',
     },
+    source: {
+      en: '0.458 g per Wh is the world-average carbon intensity of electricity in 2025, from the energy think tank Ember. Cleaner grids are lower (EU 0.21), coal-heavy ones higher (China 0.525); those set the range. {{ref:ember-2026}}',
+      ne: 'प्रति Wh ०.४५८ g ऊर्जा अनुसन्धान संस्था Ember का अनुसार २०२५ मा विश्वको औसत बिजुलीको कार्बन तीव्रता हो। सफा ग्रिड कम (युरोपेली संघ ०.२१), कोइलामा निर्भर ग्रिड बढी (चीन ०.५२५) हुन्छन्; दायरा यिनैबाट हो। {{ref:ember-2026}}',
+    },
     research: {
       en: [
         'Grid average in 2025: world <b>458 g</b> CO₂e per kWh; EU 210; U.S. 384; China 525. {{ref:ember-2026}}',
@@ -370,6 +386,10 @@ export const STEPS = [
       en: 'This one is not an estimate. The provider bills every token, and writing costs more than reading. Each follow-up re-sends the whole conversation.',
       ne: 'यो अनुमान होइन। कम्पनीले हरेक टोकनको पैसा लिन्छ, र लेख्नु पढ्नुभन्दा महँगो छ। हरेक थप प्रश्नसँग पूरै कुराकानी फेरि पठाइन्छ।',
     },
+    source: {
+      en: '',
+      ne: '',
+    }, // filled in from the configured model's price list (explainer.js)
     research: { en: [], ne: [] }, // filled in from the configured model's prices (see explainer.js)
     disagree: { en: '', ne: '' },
   },
@@ -380,6 +400,10 @@ export const STEPS = [
     body: {
       en: 'One prompt is tiny. ChatGPT alone gets about 2.5 billion a day.',
       ne: 'एउटा प्रश्न सानो हो। तर ChatGPT ले मात्र दिनमा करिब २.५ अर्ब प्रश्न पाउँछ।',
+    },
+    source: {
+      en: '2.5 billion prompts a day is the figure OpenAI gave for ChatGPT in July 2025. Other AI services come on top of that. {{ref:openai-usage-2025}}',
+      ne: 'दिनमा २.५ अर्ब प्रश्न भन्ने अङ्क OpenAI ले जुलाई २०२५ मा ChatGPT का लागि दिएको हो। अरू एआई सेवाहरू यसमा थपिन्छन्। {{ref:openai-usage-2025}}',
     },
     research: {
       en: [
@@ -409,19 +433,9 @@ export const CLOSING = {
 
 /* ---------------- Token texts ---------------- */
 
+export const TOKEN_EXAMPLES = { en: 'I love pancakes!', ne: 'मलाई प्यानकेक मन पर्छ!' };
+
 export const TEXT = {
-  tokenExplainer: {
-    en: 'An AI doesn’t read letters or whole words. It reads <b>tokens</b>: small pieces of text. Every token is counted, and every token is billed.',
-    ne: 'एआईले अक्षर वा पूरा शब्द पढ्दैन। यसले <b>टोकन</b> पढ्छ: पाठका साना टुक्रा। हरेक टोकन गनिन्छ, र हरेक टोकनको पैसा लाग्छ।',
-  },
-  tokenExample: {
-    en: 'A token can be a word, part of a word or a punctuation mark. “I love pancakes!” is four tokens. In Nepali, “मलाई प्यानकेक मन पर्छ!” is ten, so the same sentence costs more. Each model splits text its own way.',
-    ne: 'टोकन एउटा शब्द, शब्दको टुक्रा वा चिह्न हुन सक्छ। अङ्ग्रेजीमा “I love pancakes!” चार टोकन हो, तर “मलाई प्यानकेक मन पर्छ!” दस टोकन। त्यसैले नेपालीमा उही कुरा भन्न प्रायः बढी टोकन, बढी ऊर्जा र बढी पैसा लाग्छ। हरेक मोडेलले पाठलाई आफ्नै तरिकाले टुक्र्याउँछ।',
-  },
-  resendNote: {
-    en: '“Sent” includes the exhibit’s short instructions to the AI and, for follow-ups, the whole conversation so far.',
-    ne: '“पठाइएको” मा प्रदर्शनीले एआईलाई दिने छोटो निर्देशन र, थप प्रश्नहरूमा, अहिलेसम्मको पूरै कुराकानी पनि पर्छ।',
-  },
   splitExact: { en: 'Split by OpenAI’s tokenizer. Counts are exact.', ne: 'OpenAI को टोकनाइजरले टुक्र्याइएको। सङ्ख्या ठ्याक्कै हो।' },
   splitApprox: { en: 'Approximate split. Counts are exact.', ne: 'टुक्रा अनुमानित हुन्। सङ्ख्या ठ्याक्कै हो।' },
   splitSample: { en: 'Sample answer: counted on this computer.', ne: 'नमुना उत्तर: यही कम्प्युटरमा गनिएको।' },

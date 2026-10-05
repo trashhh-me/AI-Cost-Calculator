@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="author" content="Body&amp;Data">
   <meta name="description" content="AI DEX: ask an AI anything, then see what it really cost in electricity, heat, water, carbon and money.">
-  <title data-i18n-title="title.chat">AI DEX</title>
+  <title>AI DEX</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/alegreya-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -15,19 +15,18 @@
 <body>
   <a class="skip-link" href="#user-prompt" data-i18n="skipToChat">Skip to the question box</a>
 
-  <!-- Language and text size, top right on every page -->
-  <header class="topbar">
-    <span class="topbar-start"></span>
-    <div class="topbar-controls">
-      <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:controls.language">
-        <button type="button" data-set-lang="en" lang="en" aria-pressed="true">English</button>
-        <button type="button" data-set-lang="ne" lang="ne" aria-pressed="false">नेपाली</button>
-      </div>
-      <button type="button" class="text-size" data-text-size-toggle aria-pressed="false" aria-label="Larger text" data-i18n-attr="aria-label:controls.textSize"><span aria-hidden="true">A+</span></button>
+  <!-- Language and text size: always at the top right -->
+  <div class="page-controls">
+    <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:controls.language">
+      <button type="button" data-set-lang="en" lang="en" aria-pressed="true">English</button>
+      <button type="button" data-set-lang="ne" lang="ne" aria-pressed="false">नेपाली</button>
     </div>
-  </header>
+    <button type="button" class="text-size" data-text-size-toggle aria-pressed="false" aria-label="Larger text" data-i18n-attr="aria-label:controls.textSize"><span aria-hidden="true">A+</span></button>
+  </div>
 
   <main id="main">
+
+    <!-- ================= THE CHAT ================= -->
     <div id="chat-app" class="chat-app" data-state="start">
 
       <header id="Landing-Page-Prompting" class="start-screen">
@@ -38,7 +37,7 @@
       <section id="Chat-Page" class="conversation" aria-labelledby="conversation-heading">
         <h2 id="conversation-heading" class="visually-hidden" data-i18n="conversation">Conversation</h2>
         <div id="conversation" class="message-list" role="log" aria-label="Messages" data-i18n-attr="aria-label:messages"></div>
-        <a id="see-cost" class="see-cost" href="cost.html" hidden data-i18n="seeCost">See what this cost →</a>
+        <button type="button" id="see-cost" class="see-cost" hidden data-i18n="seeCost">See what this cost ↓</button>
         <!-- Announces finished answers to screen readers (not every word). -->
         <p id="answer-announcer" class="visually-hidden" aria-live="polite"></p>
       </section>
@@ -76,6 +75,124 @@
           <span aria-hidden="true">·</span>
           <span id="questions-left"></span>
         </p>
+      </div>
+    </div>
+
+    <!-- Everything below appears after the first answer -->
+    <div id="cost-content" hidden>
+
+      <!-- ================= 1. THE BILL ================= -->
+      <section id="bill" class="bill-section" aria-labelledby="bill-heading" tabindex="-1">
+        <div class="section-inner bill-inner">
+          <h2 id="bill-heading" data-i18n="yourBill">Your bill</h2>
+          <div class="receipt-slot">
+            <article id="thermal-receipt" class="thermal-receipt" aria-label="Itemised receipt" data-i18n-attr="aria-label:receiptLabel"></article>
+          </div>
+          <p class="bill-note"><a href="#estimate" data-i18n="estimatesNote">Electricity, heat, water and carbon are estimates. How we get them is below.</a></p>
+        </div>
+      </section>
+
+      <!-- ================= 2. HOW THE AI READS YOUR TEXT ================= -->
+      <section id="Tokenization" class="tokens-section" aria-labelledby="tokens-heading">
+        <div class="section-inner">
+          <header class="token-lesson">
+            <h2 id="tokens-heading" data-i18n="tokensHeading">How the AI reads your text</h2>
+            <div class="token-define">
+              <p class="token-word" data-i18n="tokenWord">Token</p>
+              <p class="token-def" data-i18n="tokenDef"></p>
+            </div>
+            <p class="token-examples-label" data-i18n="tokenExamplesLabel"></p>
+            <div class="token-examples">
+              <figure class="token-example-row">
+                <div id="token-example-en" class="token-sample" lang="en"></div>
+                <figcaption id="token-example-en-count"></figcaption>
+              </figure>
+              <figure class="token-example-row">
+                <div id="token-example-ne" class="token-sample" lang="ne"></div>
+                <figcaption id="token-example-ne-count"></figcaption>
+              </figure>
+            </div>
+            <p class="token-after" data-i18n="tokenAfter"></p>
+          </header>
+
+          <h3 class="tokens-yours" data-i18n="tokensYours">Your conversation, in tokens</h3>
+          <div class="token-cards">
+            <article class="token-card" aria-labelledby="input-tokens-heading">
+              <header class="token-card-header">
+                <h4 id="input-tokens-heading" data-i18n="sent">Sent to the AI</h4>
+                <p class="tcount"><span id="input-token-count" class="tcount-value">0</span> <span class="tcount-unit" data-i18n="tokens">tokens</span></p>
+              </header>
+              <p id="input-breakdown" class="tcount-breakdown"></p>
+              <div id="input-tokens-visual" class="token-display-box" tabindex="0" aria-label="Your messages split into tokens" data-i18n-attr="aria-label:inputBoxLabel"></div>
+            </article>
+
+            <article class="token-card" aria-labelledby="output-tokens-heading">
+              <header class="token-card-header">
+                <h4 id="output-tokens-heading" data-i18n="written">Written by the AI</h4>
+                <p class="tcount"><span id="output-token-count" class="tcount-value">0</span> <span class="tcount-unit" data-i18n="tokens">tokens</span></p>
+              </header>
+              <p class="tcount-breakdown" data-i18n="writtenNote"></p>
+              <div id="output-tokens-visual" class="token-display-box" tabindex="0" aria-label="The AI’s answers split into tokens" data-i18n-attr="aria-label:outputBoxLabel"></div>
+            </article>
+          </div>
+          <p id="split-note" class="split-note"></p>
+        </div>
+      </section>
+
+      <!-- ================= 3. HOW WE ESTIMATE ================= -->
+      <section id="estimate" class="estimate" aria-labelledby="estimate-heading">
+        <div class="section-inner estimate-intro">
+          <h2 id="estimate-heading" data-i18n="howEstimate">How do we estimate this?</h2>
+          <p class="section-intro" data-i18n="howEstimateIntro">Step by step, from your exact token count.</p>
+        </div>
+
+        <!-- One section per reading, built from js/content.js -->
+        <div class="readings">
+          <div id="scrolling-story" class="scrolling-story"></div>
+        </div>
+
+        <!--
+          PHOTOGRAPHS: one per reading. Replace src, and describe the photo in
+          alt (English) and data-alt-ne (Nepali). Keep data-step.
+          Each is moved into its reading when the page loads; until the file
+          exists, a plain placeholder is shown instead.
+        -->
+        <div id="reading-photos" hidden>
+          <img data-step="electricity" src="elec.jpg" alt="Electricity pylons and power lines glowing against a dusk sky." data-alt-ne="साँझको आकाशमा चम्किरहेका बिजुलीका खम्बा र तार।" width="612" height="408">
+          <img data-step="heat" src="heat.jpeg" alt="An illustration of a thermometer in the red beside a flame." data-alt-ne="आगोको छेउमा रातो भएको थर्मामिटरको चित्र।" width="662" height="463">
+          <img data-step="water" src="water.jpeg" alt="Sunlight shining down through deep blue water." data-alt-ne="गहिरो नीलो पानीभित्र छिरेको घामको प्रकाश।" width="739" height="415">
+          <img data-step="carbon" src="carbon.jpeg" alt="Cooling towers releasing steam under a blue sky, with clouds shaped like CO2." data-alt-ne="नीलो आकाशमुनि बाफ फ्याँकिरहेका कुलिङ टावर, CO2 आकारका बादलसहित।" width="680" height="451">
+          <img data-step="money" src="coins.jpeg" alt="A stack of gold coins." data-alt-ne="सुनौला सिक्काको थाक।" width="554" height="554">
+          <img data-step="scale" src="scale.jpeg" alt="An aerial view of rows of cooling units on data center roofs." data-alt-ne="डेटा सेन्टरका छानामाथि लहरै राखिएका चिस्याउने मेसिनको हवाई दृश्य।" width="612" height="500">
+        </div>
+
+        <blockquote class="closing">
+          <p id="closing-thought" class="closing-quote"></p>
+        </blockquote>
+      </section>
+
+      <!-- ================= 4. DISCLAIMER ================= -->
+      <section id="disclaimer" class="disclaimer" aria-labelledby="disclaimer-heading">
+        <div class="section-inner disclaimer-inner">
+          <h2 id="disclaimer-heading" data-i18n="disclaimerHeading">These are estimates</h2>
+          <p data-i18n="disclaimer1"></p>
+          <p data-i18n="disclaimer2"></p>
+          <p data-i18n="disclaimer3"></p>
+        </div>
+      </section>
+
+      <!-- ================= 5. REFERENCES ================= -->
+      <section id="references" class="references" aria-labelledby="references-heading">
+        <div class="section-inner reader">
+          <h2 id="references-heading" data-i18n="references">References</h2>
+          <p class="references-intro" data-i18n="referencesIntro">Where every figure comes from.</p>
+          <div id="reference-list"></div>
+        </div>
+      </section>
+
+      <div class="end-actions">
+        <button type="button" id="ask-another" class="button-primary" data-i18n="askAnother">Ask another question</button>
+        <button type="button" id="reset-btn" class="button-quiet" data-i18n="startAgain">Start again</button>
       </div>
     </div>
   </main>

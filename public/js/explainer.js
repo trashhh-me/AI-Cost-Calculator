@@ -1,7 +1,7 @@
 // How we estimate: one static section per reading. Each shows, in plain
 // words, how the number is worked out, the calculation itself with the
 // visitor's own tokens and the coefficients from config.js, and beside it
-// a photograph with the result. The photographs are set in cost.html
+// a photograph with the result. The photographs are set in index.html
 // (search for PHOTOGRAPHS).
 import { CONFIG, costUSD } from './config.js';
 import { STEPS, CLOSING } from './content.js';
@@ -13,19 +13,17 @@ import * as f from './format.js';
 const $ = (id) => document.getElementById(id);
 
 const PRICING_REF = { anthropic: 'anthropic-pricing', openai: 'openai-pricing', gemini: 'google-pricing' };
-const PROMPTS_PER_DAY = 2.5e9; // OpenAI via Axios, July 2025 (see content.js)
+const COMPANY = { anthropic: 'Anthropic', openai: 'OpenAI', gemini: 'Google' };
 
-/** Money research line from the configured model's real prices. */
-export function moneyResearch() {
-  const model = CONFIG.models[CONFIG.provider];
+/** "Where the numbers come from" for the price: the configured model's list price. */
+function moneySource(r) {
+  const model = r.priceModel;
   const p = CONFIG.prices[model];
-  const ref = PRICING_REF[CONFIG.provider];
+  if (!p) return t('noPrice', { model });
   const label = CONFIG.modelLabels[model] || model;
-  if (!p) return [t('noPrice', { model: label })];
-  return [
-    `${t('moneyPrices', { model: label, in: f.num(p.input), out: f.num(p.output), r: f.sig(p.output / p.input, 2) })} {{ref:${ref}}}`,
-  ];
+  return `${t('sourceMoney', { model: label, in: f.num(p.input), out: f.num(p.output), company: COMPANY[CONFIG.provider] })} {{ref:${PRICING_REF[CONFIG.provider]}}}`;
 }
+const PROMPTS_PER_DAY = 2.5e9; // OpenAI via Axios, July 2025 (see content.js)
 
 /** Build the empty sections once; fillExplainer() writes the words and numbers. */
 export function buildExplainer() {
@@ -42,7 +40,11 @@ export function buildExplainer() {
         <p class="step-kicker" data-part="name"></p>
         <h3 id="${section.id}-title" data-part="headline"></h3>
         <p class="story-body" data-part="body"></p>
-        <div class="calc" data-part="calc"></div>
+        <div class="working">
+          <p class="working-label" data-part="working-label"></p>
+          <div class="calc" data-part="calc"></div>
+        </div>
+        <p class="source" data-part="source"></p>
         <details class="research" data-part="research-box">
           <summary data-part="research-label"></summary>
           <ul data-part="research"></ul>
@@ -63,7 +65,7 @@ export function buildExplainer() {
   placePhotos();
 }
 
-// Move each photograph from cost.html into its reading. A missing file
+// Move each photograph from index.html into its reading. A missing file
 // keeps the plain placeholder, never a broken image.
 function placePhotos() {
   document.querySelectorAll('#reading-photos img[data-step]').forEach((img) => {
@@ -96,8 +98,7 @@ function calculation(key, r) {
       return (
         calcLine(t('calc.read', { n: f.int(r.input), k: f.num(e.inputWhPerToken) }), wh(r.input * e.inputWhPerToken)) +
         calcLine(t('calc.written', { n: f.int(r.output), k: f.num(e.outputWhPerToken) }), wh(r.output * e.outputWhPerToken)) +
-        calcLine('=', wh(whMid), 'calc-total') +
-        `<p class="calc-key">${t('calc.rangeKey', { lo: f.num(e.lowFactor), hi: f.num(e.highFactor) })}</p>`
+        calcLine('=', wh(whMid), 'calc-total')
       );
     case 'heat':
       return (
@@ -107,14 +108,12 @@ function calculation(key, r) {
     case 'water':
       return (
         calcLine(t('calc.water', { wh: f.sig(whMid, 3), a: f.num(w.onSiteMlPerWh), b: f.num(w.generationMlPerWh) }), '') +
-        calcLine('=', f.str(f.water(r.ml.mid)), 'calc-total') +
-        `<p class="calc-key">${t('calc.waterKey', { a: f.num(w.onSiteMlPerWh), b: f.num(w.generationMlPerWh) })}</p>`
+        calcLine('=', f.str(f.water(r.ml.mid)), 'calc-total')
       );
     case 'carbon':
       return (
         calcLine(t('calc.carbon', { wh: f.sig(whMid, 3), k: f.num(gPerWh) }), '') +
-        calcLine('=', `${f.str(f.carbon(r.g.mid))} CO₂e`, 'calc-total') +
-        `<p class="calc-key">${t('calc.carbonKey', { grid: gridName() })}</p>`
+        calcLine('=', `${f.str(f.carbon(r.g.mid))} CO₂e`, 'calc-total')
       );
     case 'money': {
       const model = r.priceModel;
@@ -208,9 +207,12 @@ export function fillExplainer(r) {
     part('placeholder').textContent = pick(step.name);
     part('headline').textContent = pick(step.headline);
     part('body').textContent = pick(step.body);
+    part('working-label').textContent = t('workingLabel');
     part('calc').innerHTML = calculation(step.key, r);
+    const source = step.key === 'money' ? moneySource(r) : pick(step.source);
+    part('source').innerHTML = `<strong>${t('sourceLabel')}</strong> ${cite(source)}`;
 
-    const research = step.key === 'money' ? moneyResearch() : pick(step.research);
+    const research = pick(step.research);
     part('research-box').hidden = research.length === 0;
     part('research-label').textContent = t('research');
     part('research').innerHTML = research.map((x) => `<li>${cite(x)}</li>`).join('');
@@ -225,7 +227,7 @@ export function fillExplainer(r) {
     part('analogy').innerHTML = rd.analogy;
   }
 
-  // Photo descriptions follow the language (data-alt-ne in cost.html).
+  // Photo descriptions follow the language (data-alt-ne in index.html).
   for (const img of document.querySelectorAll('.reading-photo img')) {
     img.alt = getLang() === 'ne' && img.dataset.altNe ? img.dataset.altNe : img.dataset.altEn || img.alt;
   }

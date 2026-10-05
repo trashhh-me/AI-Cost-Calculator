@@ -2,17 +2,19 @@
 
 An interactive exhibit about the hidden physical and financial cost of talking
 to an AI, in English and Nepali. Visitors ask a question and get a real
-streamed answer. "See what this cost" opens a second page with:
+streamed answer. Below the chat, "See what this cost" leads to:
 
 1. **The bill**: an itemised receipt.
-2. **How do we estimate this?**: their words as tokens, then one section per
-   reading (electricity, heat, water, carbon, money, scale) showing the
-   calculation with their own numbers, beside a photograph.
-3. **A disclaimer**: what is exact, what is estimated, what is left out.
-4. **References** for every figure.
+2. **How the AI reads your text**: what a token is, and their conversation
+   cut into tokens (including the exhibit's hidden note to the AI).
+3. **How do we estimate this?**: one section per reading (electricity,
+   heat, water, carbon, money, scale) with the calculation using their own
+   numbers, where each number comes from, and a photograph.
+4. **A disclaimer**: what is exact, what is estimated, what is left out.
+5. **References** for every figure.
 
 A language switch (English / नेपाली) and a larger-text switch sit at the top
-right of both pages. Everything resets for the next visitor after a quiet
+right. Everything resets for the next visitor after a quiet
 spell, including the language.
 
 Everything runs on the exhibition computer. The only thing that needs the
@@ -131,7 +133,7 @@ Notes per provider:
 ## Research figures used
 
 All citations, with links, are in `public/js/content.js` and appear in the
-**References** section at the end of the cost page.
+**References** section at the end of the page.
 
 | Figure | Source | Date | What it covers |
 |---|---|---|---|
@@ -178,18 +180,17 @@ server.js                 local server: static files, /api/chat, /api/stop, /api
 server/providers/         anthropic.js · openai.js · gemini.js · demo.js (same output)
 server/limits.js          daily spend ledger, per-visit question limit
 server/tokenizer.js       local token counts (samples and stopped answers only)
-public/index.html         page 1: the chat
-public/cost.html          page 2: bill → how we estimate → disclaimer → references
+public/index.html         the exhibit: chat → bill → tokens → how we estimate → disclaimer → references
 public/style.css          all styles, organised by section
 public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya, Mukta (Nepali); SIL Open Font License
-public/*.jpg, *.jpeg      the reading photographs (listed in cost.html, search PHOTOGRAPHS)
+public/*.jpg, *.jpeg      the reading photographs (listed in index.html, search PHOTOGRAPHS)
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
 public/js/strings.js      interface text, English and Nepali
 public/js/content.js      explanations, research figures, references (English and Nepali)
 public/js/demo-answers.js template prompts and sample answers (English and Nepali)
 public/js/i18n.js         language and text-size switches
-public/js/store.js        the visit, shared by both pages (sessionStorage, wiped on reset)
-public/js/main.js         chat page · cost.js: cost page
+public/js/store.js        the visit's finished turns (sessionStorage, wiped on reset)
+public/js/main.js         wires the page together
 public/js/chat.js · tokens.js · explainer.js · bill.js · references.js
 public/js/calculate.js · format.js · markdown.js · kiosk.js
 public/js/vendor/         js-tiktoken with o200k_base (bundled, offline)
