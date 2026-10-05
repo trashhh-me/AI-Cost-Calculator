@@ -1,12 +1,11 @@
 // AI DEX: one page. The chat at the top; after the first answer, below it:
 // the bill, how the AI reads your text, how we estimate each reading, the
-// disclaimer and the references. Plus the language and text-size switches
+// disclaimer and a link to the References page. Plus the language and text-size switches
 // and the kiosk idle reset.
 import { createChat } from './chat.js';
 import { renderTokens, clearTokens } from './tokens.js';
-import { buildExplainer, fillExplainer, runtimeCitations } from './explainer.js';
+import { buildExplainer, fillExplainer } from './explainer.js';
 import { renderReceipt, initPrinting, clearReceipt } from './bill.js';
-import { buildReferences } from './references.js';
 import { calculate } from './calculate.js';
 import { initKiosk } from './kiosk.js';
 import { initControls, onLangChange, resetLang, resetTextSize, getLang } from './i18n.js';
@@ -29,17 +28,43 @@ function renderCost() {
   if (!turns.length) return;
   const result = calculate(turns);
   renderReceipt(turns, result);
-  renderTokens(turns);
   fillExplainer(result);
-  buildReferences(runtimeCitations());
   $('ask-another').hidden = remaining <= 0;
+  return renderTokens(turns);
 }
 
 chat = createChat({
   onActivity: () => kiosk?.activity(),
   onTurnComplete: renderCost,
 });
-renderCost();
+// Coming back from the References page: return to the same place, once the
+// page below the chat has been rebuilt.
+const SCROLL_KEY = 'aidex-scroll';
+history.scrollRestoration = 'manual';
+window.addEventListener('pagehide', () => {
+  try {
+    sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
+  } catch {
+    /* fine */
+  }
+});
+Promise.resolve(renderCost()).then(() => {
+  let y = 0;
+  try {
+    y = Number(sessionStorage.getItem(SCROLL_KEY)) || 0;
+    sessionStorage.removeItem(SCROLL_KEY);
+  } catch {
+    /* fine */
+  }
+  const go = () => {
+    if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'instant' });
+    else if (y && getVisit().turns.length) window.scrollTo({ top: y, behavior: 'instant' });
+  };
+  go();
+  // Photos and fonts can still change the page height: settle once loaded.
+  if (document.readyState === 'complete') requestAnimationFrame(go);
+  else window.addEventListener('load', () => requestAnimationFrame(go), { once: true });
+});
 onLangChange(renderCost);
 
 function goTo(id) {

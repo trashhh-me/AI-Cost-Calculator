@@ -13,7 +13,9 @@ export const STRINGS = {
   en: {
     /* Page titles and shared controls */
     'title.chat': 'AI DEX',
-    'title.cost': 'What it cost · AI DEX',
+    'title.references': 'References · AI DEX',
+    referencesLink: 'References →',
+    backToExhibit: '← Back to the exhibit',
     'controls.language': 'Language',
     'controls.textSize': 'Larger text',
     skipToChat: 'Skip to the question box',
@@ -193,7 +195,9 @@ export const STRINGS = {
 
   ne: {
     'title.chat': 'AI DEX',
-    'title.cost': 'यसको लागत · AI DEX',
+    'title.references': 'सन्दर्भ सामग्री · AI DEX',
+    referencesLink: 'सन्दर्भ सामग्री →',
+    backToExhibit: '← प्रदर्शनीमा फर्कनुहोस्',
     'controls.language': 'भाषा',
     'controls.textSize': 'ठूलो अक्षर',
     skipToChat: 'प्रश्न लेख्ने ठाउँमा जानुहोस्',

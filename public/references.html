@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="AI DEX: every source behind the exhibit's numbers.">
+  <title data-i18n-title="title.references">References · AI DEX</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/alegreya-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="js/references-page.js"></script>
+</head>
+<body class="references-page">
+  <div class="page-controls">
+    <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:controls.language">
+      <button type="button" data-set-lang="en" lang="en" aria-pressed="true">English</button>
+      <button type="button" data-set-lang="ne" lang="ne" aria-pressed="false">नेपाली</button>
+    </div>
+    <button type="button" class="text-size" data-text-size-toggle aria-pressed="false" aria-label="Larger text" data-i18n-attr="aria-label:controls.textSize"><span aria-hidden="true">A+</span></button>
+  </div>
+
+  <main id="main" class="references">
+    <div class="section-inner reader">
+      <p class="back-link"><a href="index.html" data-back data-i18n="backToExhibit">← Back to the exhibit</a></p>
+      <h1 id="references-heading" data-i18n="references">References</h1>
+      <p class="references-intro" data-i18n="referencesIntro">Where every figure comes from.</p>
+      <div id="reference-list"></div>
+      <p class="back-link back-link--end"><a href="index.html" data-back data-i18n="backToExhibit">← Back to the exhibit</a></p>
+    </div>
+  </main>
+
+  <!-- Kiosk: idle reset -->
+  <div id="idle-overlay" class="idle-overlay" hidden>
+    <div class="idle-dialog" role="alertdialog" aria-modal="true" aria-labelledby="idle-title" aria-describedby="idle-desc">
+      <h2 id="idle-title" data-i18n="stillThere">Still there?</h2>
+      <p id="idle-desc"></p>
+      <button type="button" id="idle-continue" class="button-primary" data-i18n="stillHere">I’m still here</button>
+    </div>
+  </div>
+</body>
+</html>

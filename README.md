@@ -11,7 +11,8 @@ streamed answer. Below the chat, "See what this cost" leads to:
    heat, water, carbon, money, scale) with the calculation using their own
    numbers, where each number comes from, and a photograph.
 4. **A disclaimer**: what is exact, what is estimated, what is left out.
-5. **References** for every figure.
+5. A link to the **References** page, listing every source; each numbered
+   citation opens it at that source, and "Back" returns to the same place.
 
 A language switch (English / नेपाली) and a larger-text switch sit at the top
 right. Everything resets for the next visitor after a quiet
@@ -133,7 +134,7 @@ Notes per provider:
 ## Research figures used
 
 All citations, with links, are in `public/js/content.js` and appear in the
-**References** section at the end of the page.
+**References** page (`public/references.html`).
 
 | Figure | Source | Date | What it covers |
 |---|---|---|---|
@@ -180,7 +181,8 @@ server.js                 local server: static files, /api/chat, /api/stop, /api
 server/providers/         anthropic.js · openai.js · gemini.js · demo.js (same output)
 server/limits.js          daily spend ledger, per-visit question limit
 server/tokenizer.js       local token counts (samples and stopped answers only)
-public/index.html         the exhibit: chat → bill → tokens → how we estimate → disclaimer → references
+public/index.html         the exhibit: chat → bill → tokens → how we estimate → disclaimer
+public/references.html    every source (opened from the References link and from citations)
 public/style.css          all styles, organised by section
 public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya, Mukta (Nepali); SIL Open Font License
 public/*.jpg, *.jpeg      the reading photographs (listed in index.html, search PHOTOGRAPHS)
@@ -190,7 +192,7 @@ public/js/content.js      explanations, research figures, references (English an
 public/js/demo-answers.js template prompts and sample answers (English and Nepali)
 public/js/i18n.js         language and text-size switches
 public/js/store.js        the visit's finished turns (sessionStorage, wiped on reset)
-public/js/main.js         wires the page together
+public/js/main.js         wires the page together · references-page.js: the References page
 public/js/chat.js · tokens.js · explainer.js · bill.js · references.js
 public/js/calculate.js · format.js · markdown.js · kiosk.js
 public/js/vendor/         js-tiktoken with o200k_base (bundled, offline)

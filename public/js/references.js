@@ -1,6 +1,6 @@
-// References: numbered citations in the text, and the reader-style
-// References section at the end of the cost page, listing every source,
-// what it was used for and where it is cited.
+// References: numbered citations in the exhibit, linking to the separate
+// References page (references.html), which lists every source, what it was
+// used for and where in the exhibit it is cited.
 import { REFERENCES, REFERENCE_GROUPS, STEPS } from './content.js';
 import { escapeHTML } from './markdown.js';
 import { t, pick, LANGS } from './i18n.js';
@@ -17,7 +17,7 @@ export function cite(html) {
     const ref = BY_ID.get(id);
     if (!n) return '';
     const label = escapeHTML(t('referenceN', { n: int(n), short: ref.short }));
-    return `<sup class="cite"><a href="#ref-${id}" aria-label="${label}">[${int(n)}]</a></sup>`;
+    return `<sup class="cite"><a href="references.html#ref-${id}" aria-label="${label}">[${int(n)}]</a></sup>`;
   });
 }
 
@@ -39,7 +39,7 @@ function citedIn(extra) {
     if (!map.get(id).includes(key)) map.get(id).push(key);
   };
   for (const step of STEPS) {
-    const text = LANGS.flatMap((l) => [...(step.research[l] || []), step.disagree[l] || '']).join(' ');
+    const text = LANGS.flatMap((l) => [...(step.research[l] || []), step.disagree[l] || '', step.source?.[l] || '']).join(' ');
     for (const [, id] of text.matchAll(CITE)) add(id, step.key);
   }
   for (const { id, step } of extra) add(id, step);
@@ -59,7 +59,7 @@ export function buildReferences(extraCitations = []) {
     const section = document.createElement('section');
     section.className = 'reference-group';
     section.setAttribute('aria-labelledby', `refgroup-${g.key}`);
-    section.innerHTML = `<h3 id="refgroup-${g.key}">${escapeHTML(pick(g.label))}</h3>`;
+    section.innerHTML = `<h2 id="refgroup-${g.key}">${escapeHTML(pick(g.label))}</h2>`;
     const ol = document.createElement('ol');
     ol.className = 'reference-list';
     for (const r of refs) {
@@ -68,7 +68,7 @@ export function buildReferences(extraCitations = []) {
       li.id = `ref-${r.id}`;
       li.tabIndex = -1;
       const back = (where.get(r.id) || [])
-        .map((key) => `<a href="#${cardId(key)}">${escapeHTML(names[key])}</a>`)
+        .map((key) => `<a href="index.html#${cardId(key)}">${escapeHTML(names[key])}</a>`)
         .join(', ');
       // Titles, authors and links stay as published (mostly English).
       li.innerHTML = `
