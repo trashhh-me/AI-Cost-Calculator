@@ -1,29 +1,23 @@
-// Part 1: the chat. A familiar AI chat screen that streams real answers
-// from the local server, with designed states for everything that can
-// happen at a kiosk: empty prompt, waiting, streaming, stopped, errors,
-// sample answers and the per-visit question limit.
+// The chat. A familiar AI chat screen that streams real answers from the
+// local server, with designed states for everything that can happen at a
+// kiosk: empty prompt, waiting, streaming, stopped, errors, sample answers
+// and the per-visit question limit. Finished turns are kept for the visit
+// (store.js), so coming back from the cost page shows the same conversation.
 import { CONFIG } from './config.js';
 import { PRESETS, sampleAnswerFor } from './demo-answers.js';
 import { renderMarkdown, plainText } from './markdown.js';
-import { int, str, energy } from './format.js';
+import { int, str, energy, seconds } from './format.js';
 import { countTokens, countConversation } from './tokens.js';
+import { t, pick, onLangChange } from './i18n.js';
+import { getVisit, addTurn, setRemaining } from './store.js';
 
 const $ = (id) => document.getElementById(id);
 
-// Plain, calm wording for every reason an answer is a sample.
-const SAMPLE_REASONS = {
-  demo: 'Sample answer.',
-  nokey: 'Sample answer.',
-  network: 'Sample answer: the live AI could not be reached.',
-  offline: 'Sample answer: the exhibit is offline.',
-  rate: 'Sample answer: the live AI is busy.',
-  credit: 'Sample answer: the live AI is unavailable.',
-  auth: 'Sample answer: the live AI is unavailable.',
-  cap: 'Sample answer: today’s live budget is used up.',
-  error: 'Sample answer: the live AI had a problem.',
-};
+// Stand-in for an answer stopped before its first word, so the conversation
+// sent to the AI stays well formed. Never shown.
+const EMPTY_ANSWER = '(The visitor stopped this answer before it began.)';
 
-export function createChat({ getVisitId, onTurnComplete, onActivity }) {
+export function createChat({ onActivity }) {
   const app = $('chat-app');
   const form = $('prompt-box');
   const input = $('user-prompt');
@@ -38,43 +32,48 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
   const modelName = $('model-name');
   const statusDot = document.querySelector('.status-dot');
   const announcer = $('answer-announcer');
-  const seeCostBtn = $('see-cost-btn');
+  const seeCost = $('see-cost');
+  const templates = $('templates');
+  const presetBox = $('presets');
 
   const maxChars = CONFIG.limits.maxPromptChars;
   input.maxLength = maxChars;
 
-  let messages = []; // what is sent to the server: [{ role, content }]
-  let remaining = CONFIG.limits.maxQuestionsPerVisit;
+  let remaining = getVisit().remaining;
   let busy = false;
   let current = null; // the answer currently streaming
   let modelLabel = CONFIG.modelLabels[CONFIG.models[CONFIG.provider]] || CONFIG.models[CONFIG.provider];
-  let turnNumber = 0;
+  let live = null; // null until the server has said
+  let noticeState = null; // { key, vars, kind }, so it can be re-said in another language
 
-  /* ---------- Suggestions ---------- */
-  const presetBox = $('presets');
-  // Template prompts: choosing one fills the box (the visitor can still
-  // edit it) and closes the list; it is not sent until they press Send.
-  const templates = $('templates');
-  for (const p of PRESETS) {
-    const li = document.createElement('li');
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'preset-btn';
-    b.innerHTML = '<span class="preset-text"></span><span class="preset-kind"></span>';
-    b.querySelector('.preset-text').textContent = p.prompt;
-    b.querySelector('.preset-kind').textContent = p.kind;
-    b.addEventListener('click', () => {
-      input.value = p.prompt;
-      templates.open = false;
-      autoGrow();
-      updateCharCount();
-      hideNotice();
-      input.removeAttribute('aria-invalid');
-      input.focus();
-      input.setSelectionRange(input.value.length, input.value.length);
-    });
-    li.append(b);
-    presetBox.append(li);
+  const turns = () => getVisit().turns;
+
+  /* ---------- Template prompts ---------- */
+  // Choosing one fills the box (the visitor can still edit it) and closes
+  // the list; it is not sent until they press Send.
+  function renderPresets() {
+    presetBox.replaceChildren();
+    for (const p of PRESETS) {
+      const li = document.createElement('li');
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'preset-btn';
+      b.innerHTML = '<span class="preset-text"></span><span class="preset-kind"></span>';
+      b.querySelector('.preset-text').textContent = pick(p.prompt);
+      b.querySelector('.preset-kind').textContent = pick(p.kind);
+      b.addEventListener('click', () => {
+        input.value = pick(p.prompt);
+        templates.open = false;
+        autoGrow();
+        updateCharCount();
+        hideNotice();
+        input.removeAttribute('aria-invalid');
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+      });
+      li.append(b);
+      presetBox.append(li);
+    }
   }
   // Close the list when tapping elsewhere or pressing Escape.
   document.addEventListener('click', (e) => {
@@ -123,18 +122,14 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
   stopBtn.addEventListener('click', stop);
 
-  seeCostBtn.addEventListener('click', () => {
-    $('Tokenization').scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
-    $('tokens-heading').setAttribute('tabindex', '-1');
-    $('tokens-heading').focus({ preventScroll: true });
-  });
-
-  function showNotice(text, kind = 'info') {
-    notice.textContent = text;
+  function showNotice(key, vars = {}, kind = 'info') {
+    noticeState = { key, vars, kind };
+    notice.textContent = t(key, vars);
     notice.dataset.kind = kind;
     notice.hidden = false;
   }
   function hideNotice() {
+    noticeState = null;
     notice.hidden = true;
     notice.textContent = '';
     delete notice.dataset.kind;
@@ -149,30 +144,37 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
   }
 
   function updateQuestionsLeft() {
-    questionsLeft.textContent =
-      remaining <= 0 ? 'no questions left' : `${remaining} question${remaining === 1 ? '' : 's'} left`;
+    questionsLeft.textContent = t('questionsLeft', { n: int(remaining), count: remaining });
+  }
+
+  function allUsedNotice() {
+    showNotice('allUsed', { n: int(CONFIG.limits.maxQuestionsPerVisit) }, 'info');
   }
 
   /* ---------- Status from the server ---------- */
   async function refreshStatus() {
     try {
-      const r = await fetch(`/api/status?visit=${encodeURIComponent(getVisitId())}`, { cache: 'no-store' });
+      const r = await fetch(`/api/status?visit=${encodeURIComponent(getVisit().visitId)}`, { cache: 'no-store' });
       const s = await r.json();
       modelLabel = s.modelLabel;
-      modelName.textContent = s.modelLabel;
-      setLive(s.live, s.reason);
+      setLive(s.live);
       remaining = s.remaining;
+      setRemaining(remaining);
     } catch {
-      modelName.textContent = modelLabel;
-      setLive(false, 'offline');
+      // No server (offline, or a static copy of the exhibit): sample answers,
+      // counting questions on this page.
+      setLive(false);
     }
+    modelName.textContent = modelLabel;
     updateQuestionsLeft();
     setBusy(false);
+    if (remaining <= 0 && turns().length) allUsedNotice();
   }
 
-  function setLive(live, reason) {
-    statusDot.dataset.state = live ? 'live' : 'sample';
-    modelStatus.textContent = live ? 'Live' : 'Sample answers';
+  function setLive(isLive) {
+    live = isLive;
+    statusDot.dataset.state = isLive ? 'live' : 'sample';
+    modelStatus.textContent = isLive ? t('live') : t('sampleAnswers');
   }
 
   /* ---------- Messages ---------- */
@@ -195,13 +197,13 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     list.append(el);
   }
 
-  function addAnswerShell() {
+  function addAnswerShell(n) {
     const el = document.createElement('article');
     el.className = 'message message--ai is-streaming';
-    el.setAttribute('aria-label', `Answer ${turnNumber}`);
+    el.setAttribute('aria-label', t('answerN', { n: int(n) }));
     el.innerHTML = `
       <p class="message-note" hidden></p>
-      <p class="thinking">Thinking <span class="thinking-time">0.0</span> s</p>
+      <p class="thinking"></p>
       <div class="answer-body"></div>`;
     list.append(el);
     return el;
@@ -209,8 +211,43 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
 
   function markSample(el, reason) {
     const note = el.querySelector('.message-note');
-    note.textContent = SAMPLE_REASONS[reason] || SAMPLE_REASONS.error;
+    note.textContent = t(`sample.${reason}`) === `sample.${reason}` ? t('sample.error') : t(`sample.${reason}`);
     note.hidden = false;
+  }
+
+  // The finishing touches under an answer: stopped note and the meter line.
+  function finishAnswerEl(el, turn) {
+    el.classList.remove('is-streaming');
+    el.querySelector('.thinking')?.remove();
+    if (!turn.live) markSample(el, turn.reason || 'demo');
+    if (turn.stopped) {
+      const note = document.createElement('p');
+      note.className = 'stopped-note';
+      note.textContent = t('stopped');
+      el.append(note);
+    }
+    // Meter line: ties this answer to the cost page
+    const wh = turn.input * CONFIG.energy.inputWhPerToken + turn.output * CONFIG.energy.outputWhPerToken;
+    const meter = document.createElement('p');
+    meter.className = 'meter-line';
+    meter.innerHTML = `<span>${t('meter', { in: int(turn.input), out: int(turn.output) })}</span><span>~<strong></strong></span>`;
+    meter.querySelector('span:last-child strong').textContent = str(energy(wh), 2);
+    el.append(meter);
+  }
+
+  /** Show every finished turn of this visit (after coming back, or a language change). */
+  function renderHistory() {
+    list.replaceChildren();
+    for (const turn of turns()) {
+      addVisitorMessage(turn.question);
+      const el = addAnswerShell(turn.number);
+      el.querySelector('.answer-body').innerHTML = renderMarkdown(turn.answer);
+      finishAnswerEl(el, turn);
+    }
+    const any = turns().length > 0;
+    app.dataset.state = any ? 'chat' : 'start';
+    seeCost.hidden = !any;
+    if (any) list.after(seeCost);
   }
 
   /* ---------- Sending ---------- */
@@ -220,16 +257,16 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     const text = (raw || '').trim();
     if (!text) {
       input.setAttribute('aria-invalid', 'true');
-      showNotice('Type a question first.', 'empty');
+      showNotice('typeFirst', {}, 'empty');
       input.focus();
       return;
     }
     if (remaining <= 0) {
-      showNotice(`That’s all ${CONFIG.limits.maxQuestionsPerVisit} questions. Scroll down to see the cost.`, 'warning');
+      allUsedNotice();
       return;
     }
     if (text.length > maxChars) {
-      showNotice(`Keep it under ${int(maxChars)} characters.`, 'warning');
+      showNotice('tooLong', { n: int(maxChars) }, 'warning');
       return;
     }
 
@@ -239,14 +276,20 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     input.value = '';
     autoGrow();
     updateCharCount();
-    turnNumber += 1;
+    const number = turns().length + 1;
     addVisitorMessage(text);
-    const el = addAnswerShell();
+    const el = addAnswerShell(number);
     scrollToEnd(true);
 
-    const payload = [...messages, { role: 'user', content: text }];
+    // Everything said so far, then the new question.
+    const history = turns().flatMap((tn) => [
+      { role: 'user', content: tn.question },
+      { role: 'assistant', content: tn.answer.trim() || EMPTY_ANSWER },
+    ]);
+    const payload = [...history, { role: 'user', content: text }];
     const c = (current = {
       el,
+      number,
       text: '',
       requestId: null,
       live: true,
@@ -258,28 +301,30 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
       firstDelta: false,
     });
     setBusy(true);
-    const timer = setInterval(() => {
-      const t = el.querySelector('.thinking-time');
-      if (t) t.textContent = ((performance.now() - c.started) / 1000).toFixed(1);
-    }, 100);
+    const tick = () => {
+      const p = el.querySelector('.thinking');
+      if (p) p.textContent = t('thinking', { s: seconds((performance.now() - c.started) / 1000) });
+    };
+    tick();
+    const timer = setInterval(tick, 100);
 
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ visitId: getVisitId(), messages: payload }),
+        body: JSON.stringify({ visitId: getVisit().visitId, messages: payload }),
         signal: c.controller.signal,
       });
       if (res.status === 429) {
         // The server says this visit has used its questions.
         el.remove();
         list.lastElementChild?.remove();
-        turnNumber -= 1;
         remaining = 0;
+        setRemaining(0);
         current = null;
         updateQuestionsLeft();
         setBusy(false);
-        showNotice(`That’s all ${CONFIG.limits.maxQuestionsPerVisit} questions. Scroll down to see the cost.`, 'warning');
+        allUsedNotice();
         return;
       }
       if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}`);
@@ -290,8 +335,8 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
         if (c.stopped) {
           c.usage = await localUsage(payload, c.text, c.live);
         } else {
-          // The local server itself could not be reached: answer from the
-          // sample answers bundled with the page, so the screen is never dead.
+          // The server itself could not be reached: answer from the sample
+          // answers bundled with the page, so the screen is never dead.
           await localSample(text, payload);
         }
       }
@@ -303,11 +348,11 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
   }
 
   // Token counts made in the browser, when no server reported them.
-  async function localUsage(payload, answer, live = false) {
+  async function localUsage(payload, answer, isLive = false) {
     return {
       type: 'usage',
-      live,
-      sample: !live,
+      live: isLive,
+      sample: !isLive,
       input: await countConversation(CONFIG.systemPrompt, payload),
       output: await countTokens(answer),
       thinking: 0,
@@ -345,7 +390,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
         c.reason = ev.reason;
         if (ev.modelLabel) modelLabel = ev.modelLabel;
         if (!ev.live) markSample(c.el, ev.reason);
-        setLive(ev.live, ev.reason);
+        setLive(ev.live);
         break;
       case 'fallback':
         // The live answer failed part-way: replace it with a labelled sample.
@@ -354,7 +399,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
         c.text = '';
         markSample(c.el, ev.reason);
         renderAnswer();
-        setLive(false, ev.reason);
+        setLive(false);
         break;
       case 'delta':
         if (!c.firstDelta) {
@@ -369,7 +414,7 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
         break;
       case 'done':
         remaining = ev.remaining;
-        if (ev.capReached) setLive(false, 'cap');
+        if (ev.capReached) setLive(false);
         break;
     }
   }
@@ -389,13 +434,13 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     current.el.querySelector('.answer-body').innerHTML = renderMarkdown(current.text);
   }
 
-  // Last resort if the local server is down: stream a bundled sample.
+  // Last resort if the server is down: stream a bundled sample.
   async function localSample(question, payload) {
     const c = current;
     c.live = false;
     c.reason = 'offline';
     markSample(c.el, 'offline');
-    setLive(false, 'offline');
+    setLive(false);
     const answer = sampleAnswerFor(question);
     const pieces = answer.match(/\S+\s*/g) || [];
     await new Promise((r) => setTimeout(r, 600));
@@ -435,8 +480,6 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     const c = current;
     current = null;
     renderQueued = false;
-    c.el.classList.remove('is-streaming');
-    c.el.querySelector('.thinking')?.remove();
     c.el.querySelector('.answer-body').innerHTML = renderMarkdown(c.text);
 
     const usage = c.usage || {
@@ -447,42 +490,8 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
       costUSD: null,
       priceModel: CONFIG.models[CONFIG.provider],
     };
-    if (c.stopped) {
-      const note = document.createElement('p');
-      note.className = 'stopped-note';
-      note.textContent = 'Stopped. Tokens so far still count.';
-      c.el.append(note);
-    }
-
-    // Meter line: ties this answer to the cost story further down
-    const wh = usage.input * CONFIG.energy.inputWhPerToken + usage.output * CONFIG.energy.outputWhPerToken;
-    const meter = document.createElement('p');
-    meter.className = 'meter-line';
-    meter.innerHTML = `<span><strong></strong> in · <strong></strong> out</span><span>~<strong></strong></span>`;
-    const [a, b, d] = meter.querySelectorAll('strong');
-    a.textContent = int(usage.input);
-    b.textContent = int(usage.output);
-    d.textContent = formatWh(wh);
-    c.el.append(meter);
-
-    announcer.textContent = `Answer complete. ${plainText(c.text)}`;
-
-    messages.push({ role: 'user', content: question });
-    messages.push({ role: 'assistant', content: c.text.trim() || '(The visitor stopped this answer before it began.)' });
-
-    updateQuestionsLeft();
-    setBusy(false);
-    list.after(seeCostBtn);
-    seeCostBtn.hidden = false;
-    if (remaining <= 0) {
-      showNotice(`That’s all ${CONFIG.limits.maxQuestionsPerVisit} questions. Scroll down to see the cost.`, 'info');
-    } else {
-      input.focus({ preventScroll: true });
-    }
-    scrollToEnd(true);
-
-    onTurnComplete({
-      number: turnNumber,
+    const turn = {
+      number: c.number,
       question,
       answer: c.text,
       input: usage.input,
@@ -496,11 +505,18 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
       priceModel: usage.priceModel,
       model: usage.model,
       modelLabel,
-    });
-  }
+    };
+    finishAnswerEl(c.el, turn);
+    addTurn(turn, remaining);
 
-  function formatWh(wh) {
-    return str(energy(wh), 2);
+    announcer.textContent = `${t('answerComplete')} ${plainText(c.text)}`;
+    updateQuestionsLeft();
+    setBusy(false);
+    list.after(seeCost);
+    seeCost.hidden = false;
+    if (remaining <= 0) allUsedNotice();
+    else input.focus({ preventScroll: true });
+    scrollToEnd(true);
   }
 
   /* ---------- Reset (new visitor) ---------- */
@@ -516,8 +532,6 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
       }
       current = null;
     }
-    messages = [];
-    turnNumber = 0;
     list.replaceChildren();
     announcer.textContent = '';
     input.value = '';
@@ -526,24 +540,32 @@ export function createChat({ getVisitId, onTurnComplete, onActivity }) {
     autoGrow();
     updateCharCount();
     hideNotice();
-    seeCostBtn.hidden = true;
+    seeCost.hidden = true;
     app.dataset.state = 'start';
-    remaining = CONFIG.limits.maxQuestionsPerVisit;
+    remaining = getVisit().remaining;
     updateQuestionsLeft();
     setBusy(false);
     return refreshStatus();
   }
 
   function hasContent() {
-    return messages.length > 0 || !!current || input.value.length > 0;
+    return turns().length > 0 || !!current || input.value.length > 0;
   }
 
+  // Another language: everything this file wrote is written again.
+  onLangChange(() => {
+    renderPresets();
+    if (live !== null) setLive(live);
+    updateQuestionsLeft();
+    if (noticeState) showNotice(noticeState.key, noticeState.vars, noticeState.kind);
+    if (!busy) renderHistory();
+  });
+
+  renderPresets();
+  renderHistory();
   updateQuestionsLeft();
   refreshStatus();
+  if (turns().length) scrollToEnd(true);
 
-  return { reset, hasContent, focus: () => input.focus() };
-}
-
-function prefersReducedMotion() {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return { reset, hasContent, isBusy: () => busy, focus: () => input.focus() };
 }

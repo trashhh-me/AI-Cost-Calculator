@@ -1,9 +1,10 @@
-// Part 2: the tokens. Counts always come from the AI provider's usage data.
+// How the AI reads your text: the tokens. Counts always come from the AI provider's usage data.
 // The visual split into pieces uses OpenAI's o200k tokenizer, bundled
 // locally: exact for OpenAI models, an honest approximation for others.
 import { CONFIG } from './config.js';
 import { TEXT } from './content.js';
 import { int } from './format.js';
+import { t, pick } from './i18n.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -91,7 +92,8 @@ let renderVersion = 0;
 /** Render all turns: visitor messages, answers, counts and the register. */
 export async function renderTokens(turns) {
   const version = ++renderVersion;
-  $('token-explainer').innerHTML = TEXT.tokenExplainer;
+  $('token-explainer').innerHTML = pick(TEXT.tokenExplainer);
+  $('token-example').textContent = pick(TEXT.tokenExample);
 
   const inBox = $('input-tokens-visual');
   const outBox = $('output-tokens-visual');
@@ -99,15 +101,15 @@ export async function renderTokens(turns) {
   const outFrag = document.createDocumentFragment();
   const typed = [];
 
-  for (const t of turns) {
-    const q = await group('', t.question);
+  for (const turn of turns) {
+    const q = await group('', turn.question);
     typed.push(q.count);
-    q.el.firstChild.textContent = `Q${t.number} · ${int(q.count)} typed`;
+    q.el.firstChild.textContent = t('groupQ', { n: int(turn.number), c: int(q.count) });
     inFrag.append(q.el);
 
-    const a = await group('', t.answer || ' ');
-    const hidden = t.thinking ? ` (${int(t.thinking)} hidden thinking)` : '';
-    a.el.firstChild.textContent = `A${t.number} · ${int(t.output)} tokens${hidden}`;
+    const a = await group('', turn.answer || ' ');
+    const hidden = turn.thinking ? t('hiddenThinking', { c: int(turn.thinking) }) : '';
+    a.el.firstChild.textContent = t('groupA', { n: int(turn.number), c: int(turn.output) }) + hidden;
     outFrag.append(a.el);
   }
   if (version !== renderVersion) return; // a newer render (or a reset) started
@@ -117,20 +119,20 @@ export async function renderTokens(turns) {
   inBox.scrollTop = inBox.scrollHeight;
   outBox.scrollTop = outBox.scrollHeight;
 
-  const totalIn = turns.reduce((s, t) => s + t.input, 0);
-  const totalOut = turns.reduce((s, t) => s + t.output, 0);
+  const totalIn = turns.reduce((s, x) => s + x.input, 0);
+  const totalOut = turns.reduce((s, x) => s + x.output, 0);
   $('input-token-count').textContent = int(totalIn);
   // Why "sent" is more than what was typed: instructions + earlier messages.
   const totalTyped = typed.reduce((a, b) => a + b, 0);
-  $('input-breakdown').textContent = `${int(totalTyped)} typed + ${int(Math.max(0, totalIn - totalTyped))} instructions & history`;
+  $('input-breakdown').textContent = t('breakdown', { typed: int(totalTyped), rest: int(Math.max(0, totalIn - totalTyped)) });
   $('output-token-count').textContent = int(totalOut);
 
   // How honest is the split?
-  const anySample = turns.some((t) => !t.live);
-  const allSample = turns.every((t) => !t.live);
-  let note = CONFIG.provider === 'openai' ? TEXT.splitExact : TEXT.splitApprox;
-  if (allSample) note = TEXT.splitSample;
-  else if (anySample) note += ' † Sample: counted on this computer.';
+  const anySample = turns.some((x) => !x.live);
+  const allSample = turns.every((x) => !x.live);
+  let note = pick(CONFIG.provider === 'openai' ? TEXT.splitExact : TEXT.splitApprox);
+  if (allSample) note = pick(TEXT.splitSample);
+  else if (anySample) note += ` ${t('footSample')}`;
   $('split-note').textContent = note;
 
   renderRegister(turns, typed);
@@ -141,11 +143,11 @@ function renderRegister(turns, typed) {
   const body = table.tBodies[0];
   body.replaceChildren();
   let flagged = false;
-  for (const [i, t] of turns.entries()) {
-    const mark = !t.live ? ' †' : t.stopped || !t.exact?.output ? ' *' : '';
+  for (const [i, turn] of turns.entries()) {
+    const mark = !turn.live ? ' †' : turn.stopped || !turn.exact?.output ? ' *' : '';
     if (mark) flagged = true;
     const tr = document.createElement('tr');
-    const cells = [`Q${t.number}${mark}`, int(typed[i]), int(t.input), int(t.output)];
+    const cells = [t('qN', { n: int(turn.number) }) + mark, int(typed[i]), int(turn.input), int(turn.output)];
     cells.forEach((v, c) => {
       const td = document.createElement('td');
       td.textContent = v;
@@ -158,20 +160,20 @@ function renderRegister(turns, typed) {
   table.tFoot?.remove();
   const foot = table.createTFoot();
   const tr = foot.insertRow();
-  const totalIn = turns.reduce((s, t) => s + t.input, 0);
-  const totalOut = turns.reduce((s, t) => s + t.output, 0);
+  const totalIn = turns.reduce((s, x) => s + x.input, 0);
+  const totalOut = turns.reduce((s, x) => s + x.output, 0);
   const totalTyped = typed.reduce((a, b) => a + b, 0);
-  ['Total', int(totalTyped), int(totalIn), int(totalOut)].forEach((v, c) => {
+  [t('total'), int(totalTyped), int(totalIn), int(totalOut)].forEach((v, c) => {
     const td = tr.insertCell();
     td.textContent = v;
     if (c > 0) td.className = 'num';
   });
 
-  $('resend-note').textContent = TEXT.resendNote;
+  $('resend-note').textContent = pick(TEXT.resendNote);
 
   const notes = [];
-  if (turns.some((t) => !t.live)) notes.push('† Sample: counted on this computer.');
-  if (turns.some((t) => t.live && (t.stopped || !t.exact?.output))) notes.push('* Stopped early: output counted on this computer.');
+  if (turns.some((x) => !x.live)) notes.push(t('footSample'));
+  if (turns.some((x) => x.live && (x.stopped || !x.exact?.output))) notes.push(t('footStopped'));
   $('register-footnote').textContent = flagged ? notes.join(' ') : '';
 }
 

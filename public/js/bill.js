@@ -1,9 +1,13 @@
-// Part 4: the bill. An itemised thermal-paper receipt, calculated from the
-// exact token counts and the coefficients in config.js, printed with a short
+// The bill. An itemised thermal-paper receipt, calculated from the exact
+// token counts and the coefficients in config.js, printed with a short
 // paper-feed animation when it comes into view.
 import { CONFIG, costUSD } from './config.js';
+import { STEPS } from './content.js';
 import { escapeHTML } from './markdown.js';
 import * as f from './format.js';
+import { t, pick } from './i18n.js';
+
+const name = (key) => pick(STEPS.find((s) => s.key === key).name);
 
 const $ = (id) => document.getElementById(id);
 let printedVersion = -1;
@@ -18,91 +22,76 @@ const line = (label, value, { id = '', cls = '', sub = '', resource = '' } = {})
 
 export function renderReceipt(turns, r) {
   version++;
-  const model = turns[turns.length - 1]?.priceModel || CONFIG.models[CONFIG.provider];
+  const model = r.priceModel;
   const label = escapeHTML(turns[turns.length - 1]?.modelLabel || CONFIG.modelLabels[model] || model);
   const price = CONFIG.prices[model];
-  const when = new Date().toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-  const status = r.allLive ? 'Live answers' : r.anyLive ? 'Live and sample answers' : 'Sample answers';
+  const when = f.dateTime();
+  const status = r.allLive ? t('r.live') : r.anyLive ? t('r.mixed') : t('r.sample');
   const n = CONFIG.scalePeople;
+  const co2 = (g) => `${f.str(f.carbon(g))} CO₂e`;
 
   const perTurn = turns
-    .map((t) => {
-      const mark = !t.live ? ' (sample)' : t.stopped ? ' (stopped)' : '';
+    .map((turn) => {
+      const mark = !turn.live ? t('r.markSample') : turn.stopped ? t('r.markStopped') : '';
+      const q = f.int(turn.number);
       return (
-        line(`Q${t.number} sent${mark}`, f.int(t.input)) +
-        line(`Q${t.number} written`, f.int(t.output), {
-          sub: t.thinking ? `incl. ${f.int(t.thinking)} hidden thinking tokens` : '',
+        line(t('r.sent', { n: q }) + mark, f.int(turn.input)) +
+        line(t('r.written', { n: q }), f.int(turn.output), {
+          sub: turn.thinking ? t('r.thinking', { n: f.int(turn.thinking) }) : '',
         })
       );
     })
     .join('');
 
-  const moneyLabel = r.allLive ? 'ACTUAL API COST' : 'PRICE OF THESE TOKENS';
-  const moneySub = r.allLive ? '' : 'Sample answers were not charged.';
-
   $('thermal-receipt').innerHTML = `
     <header class="receipt-header">
-      <h3>AI DEX</h3>
+      <h2 lang="en">AI DEX</h2>
       <p>${escapeHTML(when)}</p>
-      <p>Model: ${label}</p>
+      <p>${t('r.model', { m: label })}</p>
       <p>${status}</p>
     </header>
     <hr class="receipt-divider">
 
-    <p class="receipt-section-title">Tokens</p>
+    <p class="receipt-section-title">${t('r.tokens')}</p>
     ${perTurn}
     <hr class="receipt-divider">
-    ${line('Input tokens', f.int(r.input), { id: 'receipt-in-tokens' })}
-    ${line('Output tokens', f.int(r.output), { id: 'receipt-out-tokens' })}
-    ${line('Total tokens', f.int(r.total), { id: 'receipt-total-tokens', cls: 'sub-total' })}
+    ${line(t('r.input'), f.int(r.input), { id: 'receipt-in-tokens' })}
+    ${line(t('r.output'), f.int(r.output), { id: 'receipt-out-tokens' })}
+    ${line(t('r.total'), f.int(r.total), { id: 'receipt-total-tokens', cls: 'sub-total' })}
     <hr class="receipt-divider">
 
-    <p class="receipt-section-title">Estimated use</p>
-    ${line('Electricity', f.str(f.energy(r.wh.mid)), {
+    <p class="receipt-section-title">${t('r.estimated')}</p>
+    ${line(name('electricity'), f.str(f.energy(r.wh.mid)), {
       id: 'receipt-wh',
       resource: 'electricity',
       sub: f.range(f.energy, r.wh.low, r.wh.high),
     })}
-    ${line('Heat', f.str(f.heat(r.j.mid)), { id: 'receipt-heat', resource: 'heat', sub: f.range(f.heat, r.j.low, r.j.high) })}
-    ${line('Water', f.str(f.water(r.ml.mid)), {
-      id: 'receipt-ml',
-      resource: 'water',
-      sub: f.range(f.water, r.ml.low, r.ml.high),
-    })}
-    ${line('Carbon', `${f.str(f.carbon(r.g.mid))} CO2e`, {
-      id: 'receipt-co2',
-      resource: 'carbon',
-      sub: f.range(f.carbon, r.g.low, r.g.high),
-    })}
+    ${line(name('heat'), f.str(f.heat(r.j.mid)), { id: 'receipt-heat', resource: 'heat', sub: f.range(f.heat, r.j.low, r.j.high) })}
+    ${line(name('water'), f.str(f.water(r.ml.mid)), { id: 'receipt-ml', resource: 'water', sub: f.range(f.water, r.ml.low, r.ml.high) })}
+    ${line(name('carbon'), co2(r.g.mid), { id: 'receipt-co2', resource: 'carbon', sub: f.range(f.carbon, r.g.low, r.g.high) })}
     <hr class="receipt-divider receipt-divider--double">
 
-    ${line(moneyLabel, f.usd(r.money), { id: 'receipt-cost', cls: 'total-line', resource: 'money' })}
-    ${moneySub ? `<p class="receipt-note">${moneySub}</p>` : ''}
+    ${line(r.allLive ? t('r.costLive') : t('r.costSample'), f.usd(r.money), { id: 'receipt-cost', cls: 'total-line', resource: 'money' })}
+    ${r.allLive ? '' : `<p class="receipt-note">${t('notCharged')}</p>`}
     ${
       price
-        ? line(`${f.int(r.input)} in × $${price.input}/M`, f.usd(costUSD(model, r.input, 0)), { cls: 'sub-total' }) +
-          line(`${f.int(r.output)} out × $${price.output}/M`, f.usd(costUSD(model, 0, r.output)), { cls: 'sub-total' })
+        ? line(t('r.in', { n: f.int(r.input), p: f.num(price.input) }), f.usd(costUSD(model, r.input, 0)), { cls: 'sub-total' }) +
+          line(t('r.out', { n: f.int(r.output), p: f.num(price.output) }), f.usd(costUSD(model, 0, r.output)), { cls: 'sub-total' })
         : ''
     }
     <hr class="receipt-divider">
 
     <div class="receipt-scale" id="receipt-at-scale">
-      <p class="receipt-section-title">× ${f.int(n)} people</p>
-      ${line('Money', f.usd(r.money * n))}
-      ${line('Electricity', f.str(f.energy(r.wh.mid * n)))}
-      ${line('Water', f.str(f.water(r.ml.mid * n)))}
-      ${line('Carbon', `${f.str(f.carbon(r.g.mid * n))} CO2e`)}
+      <p class="receipt-section-title">${t('r.people', { n: f.int(n) })}</p>
+      ${line(name('money'), f.usd(r.money * n))}
+      ${line(name('electricity'), f.str(f.energy(r.wh.mid * n)))}
+      ${line(name('water'), f.str(f.water(r.ml.mid * n)))}
+      ${line(name('carbon'), co2(r.g.mid * n))}
     </div>
     <hr class="receipt-divider">
 
     <footer class="receipt-footer">
-      <p>*** THANK YOU ***</p>
+      <p>${t('r.thanks')}</p>
     </footer>`;
 }
 
@@ -122,7 +111,7 @@ export function initPrinting() {
     },
     { threshold: 0.2 },
   );
-  io.observe($('card-receipt'));
+  io.observe($('bill'));
 }
 
 export function clearReceipt() {

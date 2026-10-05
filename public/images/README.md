@@ -16,15 +16,17 @@ proportions (the photo is cropped to fit anyway), JPEG, under about 500 KB:
 | `money.jpg` | portrait 3:4 | A printed itemised bill or till receipt, close up, natural light. |
 | `scale.jpg` | wide 16:9 | An aerial view of a large data center campus. |
 
-The photos are listed in `public/index.html`: search for **PHOTOGRAPHS**.
+The photos are listed in `public/cost.html`: search for **PHOTOGRAPHS**.
 Each reading has one line like this:
 
 ```html
-<img data-step="water" src="images/water.jpg"
-     alt="Cooling towers on a data center roof, with water vapour rising."
-     width="1400" height="1400">
+<img data-step="water" src="water.jpeg"
+     alt="Sunlight shining down through deep blue water."
+     data-alt-ne="गहिरो नीलो पानीभित्र छिरेको घामको प्रकाश।"
+     width="739" height="415">
 ```
 
-Change `src` to your file and `alt` to a short description of what the photo
-shows (read aloud by screen readers). Set `width` and `height` to the photo's
-pixel size. Keep `data-step` as it is.
+Change `src` to your file, and describe what the photo shows in `alt`
+(English) and `data-alt-ne` (Nepali); screen readers read the one for the
+visitor's language. Set `width` and `height` to the photo's pixel size. Keep
+`data-step` as it is.

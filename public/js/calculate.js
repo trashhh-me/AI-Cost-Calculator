@@ -32,7 +32,10 @@ export function calculate(turns) {
     0,
   );
 
-  return { input, output, total: input + output, wh, j, ml, g, money, allLive, anyLive };
+  // The price list used for the worked calculation: the latest answer's model.
+  const priceModel = turns[turns.length - 1]?.priceModel || CONFIG.models[CONFIG.provider];
+
+  return { input, output, total: input + output, wh, j, ml, g, money, allLive, anyLive, priceModel };
 }
 
 /** Everyday comparisons for the central estimate. */
@@ -51,14 +54,15 @@ export function comparisons(r) {
 }
 
 // Drops, teaspoons or fractions of a glass, whichever is meaningful.
+// Returns a strings.js key and the value to put in it.
 function waterComparison(ml) {
   const c = CONFIG.comparisons;
   const drops = ml / c.dropMl;
-  if (drops < 1) return { value: f.sig(drops, 2), text: 'of a drop' };
-  if (drops < 60) return { value: f.sig(drops, 2), text: drops < 1.5 ? 'drop' : 'drops' };
+  if (drops < 1) return { value: f.sig(drops, 2), key: 'water.ofDrop' };
+  if (drops < 60) return { value: f.sig(drops, 2), key: drops < 1.5 ? 'water.drop' : 'water.drops' };
   const tsp = ml / c.teaspoonMl;
-  if (tsp < 15) return { value: f.sig(tsp, 2), text: tsp < 1.5 ? 'teaspoon' : 'teaspoons' };
+  if (tsp < 15) return { value: f.sig(tsp, 2), key: tsp < 1.5 ? 'water.tsp' : 'water.tsps' };
   const glasses = ml / c.glassMl;
-  if (glasses < 1) return { value: `${f.sig(glasses * 100, 2)}%`, text: 'of a glass' };
-  return { value: f.sig(glasses, 2), text: 'glasses' };
+  if (glasses < 1) return { value: `${f.sig(glasses * 100, 2)}%`, key: 'water.ofGlass' };
+  return { value: f.sig(glasses, 2), key: 'water.glasses' };
 }

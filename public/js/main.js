@@ -1,51 +1,29 @@
-// AI DEX: wires the four parts together.
-//   chat → tokens → explainer → bill, and the kiosk idle reset.
+// AI DEX, the chat page: the chat, the language and text-size controls,
+// and the kiosk idle reset. "See what this cost" opens cost.html, which
+// reads the same visit from store.js.
 import { createChat } from './chat.js';
-import { renderTokens, clearTokens } from './tokens.js';
-import { buildExplainer, updateExplainer, clearExplainer } from './explainer.js';
-import { renderReceipt, initPrinting, clearReceipt } from './bill.js';
-import { calculate } from './calculate.js';
 import { initKiosk } from './kiosk.js';
+import { initControls, resetLang, resetTextSize, getLang } from './i18n.js';
+import { clearVisit } from './store.js';
 
-const SECTIONS = ['Tokenization', 'exhibition-layout', 'card-receipt'];
+let chat = null;
+// No language switch mid-answer: the answer being written would be cut off.
+initControls({ canSwitch: () => !chat?.isBusy() });
 
-const newVisitId = () => (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2));
-
-let visitId = newVisitId();
-let turns = [];
-
-buildExplainer();
-initPrinting();
-
-const chat = createChat({
-  getVisitId: () => visitId,
-  onActivity: () => kiosk?.activity(),
-  onTurnComplete(turn) {
-    turns.push(turn);
-    for (const id of SECTIONS) document.getElementById(id).hidden = false;
-    const result = calculate(turns);
-    renderTokens(turns);
-    updateExplainer(result);
-    renderReceipt(turns, result);
-  },
-});
+chat = createChat({ onActivity: () => kiosk?.activity() });
 
 async function resetAll() {
   kiosk?.dismiss();
-  turns = [];
-  visitId = newVisitId();
-  clearTokens();
-  clearExplainer();
-  clearReceipt();
-  for (const id of SECTIONS) document.getElementById(id).hidden = true;
+  clearVisit();
+  resetLang();
+  resetTextSize();
   window.scrollTo({ top: 0, behavior: 'instant' });
-  if (location.hash) history.replaceState(null, '', location.pathname);
   await chat.reset();
 }
 
 const kiosk = initKiosk({
-  hasSomethingToClear: () => turns.length > 0 || chat.hasContent(),
+  // A language or text size left by the last visitor is reset too.
+  hasSomethingToClear: () =>
+    chat.hasContent() || getLang() !== 'en' || document.documentElement.dataset.textSize === 'large',
   onReset: resetAll,
 });
-
-document.getElementById('reset-btn').addEventListener('click', resetAll);

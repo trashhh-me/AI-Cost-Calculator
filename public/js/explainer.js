@@ -1,10 +1,13 @@
-// Part 3: the explainer. Six readings, each its own static section: the
-// explanation, and beside it a photograph with the visitor's own reading.
-// The photographs are set in index.html (search for PHOTOGRAPHS).
-import { CONFIG } from './config.js';
-import { STEPS } from './content.js';
+// How we estimate: one static section per reading. Each shows, in plain
+// words, how the number is worked out, the calculation itself with the
+// visitor's own tokens and the coefficients from config.js, and beside it
+// a photograph with the result. The photographs are set in cost.html
+// (search for PHOTOGRAPHS).
+import { CONFIG, costUSD } from './config.js';
+import { STEPS, CLOSING } from './content.js';
 import { cite, cardId } from './references.js';
 import { comparisons } from './calculate.js';
+import { t, pick, getLang } from './i18n.js';
 import * as f from './format.js';
 
 const $ = (id) => document.getElementById(id);
@@ -12,43 +15,22 @@ const $ = (id) => document.getElementById(id);
 const PRICING_REF = { anthropic: 'anthropic-pricing', openai: 'openai-pricing', gemini: 'google-pricing' };
 const PROMPTS_PER_DAY = 2.5e9; // OpenAI via Axios, July 2025 (see content.js)
 
-// IDs kept from the original layout, plus new ones for the new steps.
-const VALUE_IDS = {
-  electricity: { value: 'val-wh', analogy: 'analogy-phone' },
-  heat: { value: 'val-heat', analogy: 'analogy-bulb' },
-  water: { value: 'val-ml', analogy: 'analogy-water' },
-  carbon: { value: 'val-co2', analogy: 'analogy-car' },
-  money: { value: 'val-usd', analogy: 'analogy-money' },
-  scale: { value: 'val-scale', analogy: 'analogy-scale' },
-};
-
-const NAMES = {
-  electricity: 'Electricity',
-  heat: 'Heat',
-  water: 'Water',
-  carbon: 'Carbon',
-  money: 'Money',
-  scale: 'At scale',
-};
-
-/** Money research lines come from the configured model's real prices. */
+/** Money research line from the configured model's real prices. */
 export function moneyResearch() {
   const model = CONFIG.models[CONFIG.provider];
   const p = CONFIG.prices[model];
   const ref = PRICING_REF[CONFIG.provider];
   const label = CONFIG.modelLabels[model] || model;
-  if (!p) return [`No price is set for ${label} in config.js.`];
-  const ratio = p.output / p.input;
+  if (!p) return [t('noPrice', { model: label })];
   return [
-    `${label}: <b>$${p.input}</b> per million tokens read, <b>$${p.output}</b> per million written (${f.sig(ratio, 2)}× more). {{ref:${ref}}}`,
+    `${t('moneyPrices', { model: label, in: f.num(p.input), out: f.num(p.output), r: f.sig(p.output / p.input, 2) })} {{ref:${ref}}}`,
   ];
 }
 
+/** Build the empty sections once; fillExplainer() writes the words and numbers. */
 export function buildExplainer() {
   const story = $('scrolling-story');
-  STEPS.forEach((step) => {
-    const ids = VALUE_IDS[step.key];
-    const research = step.key === 'money' ? moneyResearch() : step.research;
+  for (const step of STEPS) {
     const section = document.createElement('article');
     section.className = 'story-card';
     section.id = cardId(step.key);
@@ -57,44 +39,37 @@ export function buildExplainer() {
     section.setAttribute('aria-labelledby', `${section.id}-title`);
     section.innerHTML = `
       <div class="story-text">
-        <p class="step-kicker">${NAMES[step.key]}</p>
-        <h3 id="${section.id}-title">${step.headline}</h3>
-        <div class="story-body">${step.body.map((p) => `<p>${cite(p)}</p>`).join('')}</div>
-        ${
-          research.length
-            ? `<details class="research">
-                <summary>What research says</summary>
-                <ul>${research.map((r) => `<li>${cite(r)}</li>`).join('')}</ul>
-                ${step.disagree ? `<p class="disagree">${cite(step.disagree)}</p>` : ''}
-              </details>`
-            : ''
-        }
+        <p class="step-kicker" data-part="name"></p>
+        <h3 id="${section.id}-title" data-part="headline"></h3>
+        <p class="story-body" data-part="body"></p>
+        <div class="calc" data-part="calc"></div>
+        <details class="research" data-part="research-box">
+          <summary data-part="research-label"></summary>
+          <ul data-part="research"></ul>
+          <p class="disagree" data-part="disagree"></p>
+        </details>
       </div>
       <div class="metric-feature">
         <figure class="reading-photo" data-photo="${step.key}">
-          <span class="photo-placeholder" aria-hidden="true">${NAMES[step.key]}</span>
+          <span class="photo-placeholder" aria-hidden="true" data-part="placeholder"></span>
         </figure>
-        <p class="metric-label" data-label="${step.key}">${NAMES[step.key]}</p>
-        <p class="metric-value"><span id="${ids.value}" data-reading="${step.key}">–</span><small data-unit="${step.key}"></small></p>
-        <p class="metric-range" data-range="${step.key}"></p>
-        <p class="analogy-badge" id="${ids.analogy}-line"></p>
+        <p class="metric-label" data-part="label"></p>
+        <p class="metric-value"><span data-part="value">–</span><small data-part="unit"></small></p>
+        <p class="metric-range" data-part="range"></p>
+        <p class="analogy-badge" data-part="analogy"></p>
       </div>`;
     story.append(section);
-  });
-
+  }
   placePhotos();
-
-  // The last step's closing thought gets a quiet section of its own.
-  const closing = STEPS.find((s) => s.closing)?.closing;
-  if (closing) $('closing-thought').innerHTML = cite(closing);
 }
 
-// Move each photograph from index.html into its reading. A missing file
+// Move each photograph from cost.html into its reading. A missing file
 // keeps the plain placeholder, never a broken image.
 function placePhotos() {
   document.querySelectorAll('#reading-photos img[data-step]').forEach((img) => {
     const figure = document.querySelector(`[data-photo="${img.dataset.step}"]`);
     if (!figure) return;
+    img.dataset.altEn = img.alt;
     const show = () => figure.classList.add('has-photo');
     const hide = () => figure.classList.remove('has-photo');
     img.addEventListener('load', show);
@@ -104,92 +79,164 @@ function placePhotos() {
   });
 }
 
-/* ---------- Visitor's readings ---------- */
+// One line of a worked calculation: the sum on the left, the result on the right.
+function calcLine(expr, value, cls = '') {
+  return `<p class="calc-line ${cls}"><span>${expr}</span><span class="calc-value">${value}</span></p>`;
+}
 
-export function updateExplainer(r) {
+const wh = (n) => `${f.sig(n, 3)} Wh`;
+
+function calculation(key, r) {
+  const e = CONFIG.energy;
+  const w = CONFIG.water;
+  const gPerWh = CONFIG.carbon.venueGrid?.gPerWh ?? CONFIG.carbon.centralGPerWh;
+  const whMid = r.wh.mid;
+  switch (key) {
+    case 'electricity':
+      return (
+        calcLine(t('calc.read', { n: f.int(r.input), k: f.num(e.inputWhPerToken) }), wh(r.input * e.inputWhPerToken)) +
+        calcLine(t('calc.written', { n: f.int(r.output), k: f.num(e.outputWhPerToken) }), wh(r.output * e.outputWhPerToken)) +
+        calcLine('=', wh(whMid), 'calc-total') +
+        `<p class="calc-key">${t('calc.rangeKey', { lo: f.num(e.lowFactor), hi: f.num(e.highFactor) })}</p>`
+      );
+    case 'heat':
+      return (
+        calcLine(t('calc.heat', { wh: f.sig(whMid, 3), k: f.num(CONFIG.joulesPerWh) }), '') +
+        calcLine('=', f.str(f.heat(r.j.mid)), 'calc-total')
+      );
+    case 'water':
+      return (
+        calcLine(t('calc.water', { wh: f.sig(whMid, 3), a: f.num(w.onSiteMlPerWh), b: f.num(w.generationMlPerWh) }), '') +
+        calcLine('=', f.str(f.water(r.ml.mid)), 'calc-total') +
+        `<p class="calc-key">${t('calc.waterKey', { a: f.num(w.onSiteMlPerWh), b: f.num(w.generationMlPerWh) })}</p>`
+      );
+    case 'carbon':
+      return (
+        calcLine(t('calc.carbon', { wh: f.sig(whMid, 3), k: f.num(gPerWh) }), '') +
+        calcLine('=', `${f.str(f.carbon(r.g.mid))} CO₂e`, 'calc-total') +
+        `<p class="calc-key">${t('calc.carbonKey', { grid: gridName() })}</p>`
+      );
+    case 'money': {
+      const model = r.priceModel;
+      const p = CONFIG.prices[model];
+      if (!p) return calcLine('=', f.usd(r.money), 'calc-total');
+      return (
+        calcLine(t('calc.moneyIn', { n: f.int(r.input), p: f.num(p.input) }), f.usd(costUSD(model, r.input, 0))) +
+        calcLine(t('calc.moneyOut', { n: f.int(r.output), p: f.num(p.output) }), f.usd(costUSD(model, 0, r.output))) +
+        calcLine('=', f.usd(r.money), 'calc-total')
+      );
+    }
+    case 'scale':
+      return (
+        calcLine(t('calc.scale', { wh: f.sig(whMid, 3), k: t('n.2_5bn') }), '') +
+        calcLine('=', t('calc.perDay', { v: f.str(f.energy(whMid * PROMPTS_PER_DAY), 3) }), 'calc-total')
+      );
+    default:
+      return '';
+  }
+}
+
+function gridName() {
+  const g = CONFIG.carbon.venueGrid;
+  return g ? g.label : t('worldAverage');
+}
+
+/** The visitor's reading for each step: value, unit, label, range, analogy. */
+function readings(r) {
   const c = comparisons(r);
   const e = f.energy(r.wh.mid);
   const h = f.heat(r.j.mid);
   const w = f.water(r.ml.mid);
   const g = f.carbon(r.g.mid);
   const scale = f.energy(r.wh.mid * PROMPTS_PER_DAY);
-  const grid = CONFIG.carbon.venueGrid ? CONFIG.carbon.venueGrid.label : 'world-average';
-
-  const readings = {
+  const range = (fn, lo, hi) => t('range', { r: f.range(fn, lo, hi) });
+  return {
     electricity: {
       ...e,
-      label: 'Your electricity',
-      range: `Range ${f.range(f.energy, r.wh.low, r.wh.high)}`,
-      analogy: `<strong></strong> of a phone charge`,
-      analogyValue: c.phone,
+      label: t('label.electricity'),
+      range: range(f.energy, r.wh.low, r.wh.high),
+      analogy: t('analogy.phone', { v: c.phone }),
     },
     heat: {
       ...h,
-      label: 'Your heat',
-      range: `Range ${f.range(f.heat, r.j.low, r.j.high)}`,
-      analogy: `<strong></strong> of a ${CONFIG.comparisons.bulbWatts} W bulb`,
-      analogyValue: c.bulb,
+      label: t('label.heat'),
+      range: range(f.heat, r.j.low, r.j.high),
+      analogy: t('analogy.bulb', { v: c.bulb, w: f.int(CONFIG.comparisons.bulbWatts) }),
     },
     water: {
       ...w,
-      label: 'Your water',
-      range: `Range ${f.range(f.water, r.ml.low, r.ml.high)}`,
-      analogy: `<strong></strong> ${c.water.text}`,
-      analogyValue: c.water.value,
+      label: t('label.water'),
+      range: range(f.water, r.ml.low, r.ml.high),
+      analogy: t(c.water.key, { v: c.water.value }),
     },
     carbon: {
       ...g,
-      unit: `${g.unit} CO2e`,
-      label: `Your carbon, ${grid} grid`,
-      range: `Range ${f.range(f.carbon, r.g.low, r.g.high)}`,
-      analogy: `<strong></strong> in a petrol car ${cite('{{ref:epa-vehicle}}')}`,
-      analogyValue: c.car,
+      unit: `${g.unit} CO₂e`,
+      label: t('label.carbon', { grid: gridName() }),
+      range: range(f.carbon, r.g.low, r.g.high),
+      analogy: t('analogy.car', { v: c.car, cite: cite('{{ref:epa-vehicle}}') }),
     },
     money: {
       value: r.money,
       unit: '',
       money: true,
-      label: r.allLive ? 'Actual API cost' : 'Live price of these tokens',
-      range: r.allLive ? 'Not an estimate.' : 'Sample answers were not charged.',
-      analogy: c.perDollar ? `$1 pays for <strong></strong> of these` : '',
-      analogyValue: c.perDollar ? f.int(c.perDollar) : '',
+      label: r.allLive ? t('label.moneyLive') : t('label.moneySample'),
+      range: r.allLive ? t('notEstimate') : t('notCharged'),
+      analogy: c.perDollar ? t('analogy.money', { v: f.int(c.perDollar) }) : '',
     },
     scale: {
       ...scale,
-      label: 'Your conversation × 2.5 billion, per day',
-      range: `plus ${f.str(f.water(r.ml.mid * PROMPTS_PER_DAY), 2)} water, ${f.str(f.carbon(r.g.mid * PROMPTS_PER_DAY), 2)} CO2e`,
+      label: t('label.scale'),
+      range: t('scalePlus', {
+        w: f.str(f.water(r.ml.mid * PROMPTS_PER_DAY), 2),
+        c: f.str(f.carbon(r.g.mid * PROMPTS_PER_DAY), 2),
+      }),
       analogy: '',
-      analogyValue: '',
     },
   };
-
-  for (const step of STEPS) {
-    const rd = readings[step.key];
-    document.querySelector(`[data-label="${step.key}"]`).textContent = rd.label;
-    document.querySelector(`[data-reading="${step.key}"]`).textContent = rd.money ? f.usd(rd.value) : f.sig(rd.value, 3);
-    document.querySelector(`[data-unit="${step.key}"]`).textContent = rd.unit ? ` ${rd.unit}` : '';
-    document.querySelector(`[data-range="${step.key}"]`).textContent = rd.range;
-    const analogyLine = $(`${VALUE_IDS[step.key].analogy}-line`);
-    analogyLine.innerHTML = rd.analogy;
-    const strong = analogyLine.querySelector('strong');
-    if (strong) {
-      strong.id = VALUE_IDS[step.key].analogy;
-      strong.textContent = rd.analogyValue;
-    }
-  }
 }
 
-export function clearExplainer() {
-  document.querySelectorAll('[data-reading]').forEach((el) => (el.textContent = '–'));
-  document.querySelectorAll('[data-unit], [data-range]').forEach((el) => (el.textContent = ''));
-  document.querySelectorAll('[data-label]').forEach((el) => (el.textContent = NAMES[el.dataset.label]));
-  document.querySelectorAll('.analogy-badge').forEach((el) => (el.textContent = ''));
+/** Write every section in the current language, with the visitor's numbers. */
+export function fillExplainer(r) {
+  const all = readings(r);
+  for (const step of STEPS) {
+    const card = $(cardId(step.key));
+    const part = (name) => card.querySelector(`[data-part="${name}"]`);
+    const rd = all[step.key];
+
+    part('name').textContent = pick(step.name);
+    part('placeholder').textContent = pick(step.name);
+    part('headline').textContent = pick(step.headline);
+    part('body').textContent = pick(step.body);
+    part('calc').innerHTML = calculation(step.key, r);
+
+    const research = step.key === 'money' ? moneyResearch() : pick(step.research);
+    part('research-box').hidden = research.length === 0;
+    part('research-label').textContent = t('research');
+    part('research').innerHTML = research.map((x) => `<li>${cite(x)}</li>`).join('');
+    const disagree = pick(step.disagree);
+    part('disagree').innerHTML = disagree ? cite(disagree) : '';
+    part('disagree').hidden = !disagree;
+
+    part('label').textContent = rd.label;
+    part('value').textContent = rd.money ? f.usd(rd.value) : f.sig(rd.value, 3);
+    part('unit').textContent = rd.unit ? ` ${rd.unit}` : '';
+    part('range').textContent = rd.range;
+    part('analogy').innerHTML = rd.analogy;
+  }
+
+  // Photo descriptions follow the language (data-alt-ne in cost.html).
+  for (const img of document.querySelectorAll('.reading-photo img')) {
+    img.alt = getLang() === 'ne' && img.dataset.altNe ? img.dataset.altNe : img.dataset.altEn || img.alt;
+  }
+
+  $('closing-thought').textContent = pick(CLOSING);
 }
 
 /** References cited at runtime (for the References back-links). */
 export function runtimeCitations() {
   return [
-    { id: PRICING_REF[CONFIG.provider], label: 'Money', href: `#${cardId('money')}` },
-    { id: 'epa-vehicle', label: 'Carbon', href: `#${cardId('carbon')}` },
+    { id: PRICING_REF[CONFIG.provider], step: 'money' },
+    { id: 'epa-vehicle', step: 'carbon' },
   ];
 }

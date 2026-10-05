@@ -1,7 +1,20 @@
 // Number formatting: every number should mean something. No "0.00": pick a
 // unit (mWh vs Wh, µL vs mL) and enough significant digits instead.
+// Digits follow the visitor's language: Devanagari (१२,३४५) in Nepali.
+// Converted here rather than by the browser, because many browsers ship
+// without Nepali number data.
+import { getLang, t } from './i18n.js';
 
-const nf = (opts) => new Intl.NumberFormat('en-US', opts);
+const DEVANAGARI = '०१२३४५६७८९';
+/** Western digits → the visitor's digits. */
+export function digits(s) {
+  return getLang() === 'ne' ? String(s).replace(/[0-9]/g, (d) => DEVANAGARI[d]) : String(s);
+}
+
+const nf = (opts) => {
+  const fmt = new Intl.NumberFormat('en-US', opts);
+  return { format: (n) => digits(fmt.format(n)) };
+};
 
 /** Integer with thousands separators: 12,345 */
 export function int(n) {
@@ -48,7 +61,7 @@ export function heat(j) {
 
 /** Water from mL → µL, mL, L, then thousands / millions of litres. */
 export function water(ml) {
-  if (ml >= 1e9) return { value: ml / 1e9, unit: 'million L' };
+  if (ml >= 1e9) return { value: ml / 1e9, unit: t('unit.millionL') };
   return scaled(ml, [
     { factor: 1e-3, unit: 'µL' },
     { factor: 1, unit: 'mL' },
@@ -91,15 +104,36 @@ export function range(fn, low, high) {
 
 /** Duration in seconds → "9 seconds", "2.5 minutes", "3.1 hours". */
 export function duration(s) {
-  if (s < 1) return `${sig(s, 2)} of a second`;
-  if (s < 120) return `${sig(s, 2)} seconds`;
-  if (s < 7200) return `${sig(s / 60, 2)} minutes`;
-  return `${sig(s / 3600, 2)} hours`;
+  if (s < 1) return t('time.ofSecond', { v: sig(s, 2) });
+  if (s < 120) return t('time.seconds', { v: sig(s, 2) });
+  if (s < 7200) return t('time.minutes', { v: sig(s / 60, 2) });
+  return t('time.hours', { v: sig(s / 3600, 2) });
 }
 
 /** Length in metres → "35 cm", "4.2 metres", "3.1 km". */
 export function distance(m) {
-  if (m < 1) return `${sig(m * 100, 2)} cm`;
-  if (m < 1000) return `${sig(m, 2)} metres`;
-  return `${sig(m / 1000, 2)} km`;
+  if (m < 1) return t('dist.cm', { v: sig(m * 100, 2) });
+  if (m < 1000) return t('dist.m', { v: sig(m, 2) });
+  return t('dist.km', { v: sig(m / 1000, 2) });
+}
+
+/** A plain number from config (e.g. 0.00022 or 3,600), in the visitor's digits. */
+export function num(n) {
+  return nf({ maximumFractionDigits: 6 }).format(n);
+}
+
+/** Seconds with one decimal: 2.4 */
+export function seconds(n) {
+  return nf({ minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
+}
+
+const MONTHS_NE = ['जनवरी', 'फेब्रुअरी', 'मार्च', 'अप्रिल', 'मे', 'जुन', 'जुलाई', 'अगस्ट', 'सेप्टेम्बर', 'अक्टोबर', 'नोभेम्बर', 'डिसेम्बर'];
+
+/** Date and time for the receipt: 05 Oct 2026, 14:05 / ०५ अक्टोबर २०२६, १४:०५ */
+export function dateTime(d = new Date()) {
+  const pad = (n) => String(n).padStart(2, '0');
+  const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  if (getLang() === 'ne') return digits(`${pad(d.getDate())} ${MONTHS_NE[d.getMonth()]} ${d.getFullYear()}, ${time}`);
+  const month = d.toLocaleString('en-GB', { month: 'short' });
+  return `${pad(d.getDate())} ${month} ${d.getFullYear()}, ${time}`;
 }

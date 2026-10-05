@@ -1,10 +1,19 @@
 # AI DEX
 
 An interactive exhibit about the hidden physical and financial cost of talking
-to an AI. Visitors ask a question, get a real streamed answer, then scroll
-through what it cost: their words as tokens, six "meter readings" (electricity,
-heat, water, carbon, money, scale) based on published research, an itemised
-receipt, and a full list of references.
+to an AI, in English and Nepali. Visitors ask a question and get a real
+streamed answer. "See what this cost" opens a second page with:
+
+1. **The bill**: an itemised receipt.
+2. **How do we estimate this?**: their words as tokens, then one section per
+   reading (electricity, heat, water, carbon, money, scale) showing the
+   calculation with their own numbers, beside a photograph.
+3. **A disclaimer**: what is exact, what is estimated, what is left out.
+4. **References** for every figure.
+
+A language switch (English / नेपाली) and a larger-text switch sit at the top
+right of both pages. Everything resets for the next visitor after a quiet
+spell, including the language.
 
 Everything runs on the exhibition computer. The only thing that needs the
 internet is the call to the AI provider, and if that fails the exhibit
@@ -64,6 +73,7 @@ Everything is in **`public/js/config.js`**:
 | Questions per visitor | `limits.maxQuestionsPerVisit` (default 3) |
 | Idle reset | `kiosk.idleSeconds` (90), `kiosk.countdownSeconds` (15) |
 | System prompt (kept short: it is re-sent with every question) | `systemPrompt` |
+| Wording on screen | `public/js/strings.js` (buttons, labels) and `public/js/content.js` (explanations), each in English and Nepali |
 | Local grid for carbon | `carbon.venueGrid`, e.g. `{ label: 'United States', gPerWh: 0.384 }` |
 
 Then put the matching key in `.env` (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or
@@ -109,7 +119,10 @@ Notes per provider:
    Jegham et al.'s 0.42 Wh (it sets the high end of the range).
 4. **Photographs** for the six readings: see `public/images/README.md`.
    Until they are added, each reading shows a plain tinted placeholder.
-5. **Stated assumptions** you may want to change in `config.js`: phone
+5. **Nepali text**: written for this exhibit. Have a native speaker read
+   `public/js/strings.js`, the `ne:` lines in `public/js/content.js` and the
+   Nepali sample answers in `public/js/demo-answers.js` once before opening.
+6. **Stated assumptions** you may want to change in `config.js`: phone
    battery 15 Wh, one drop = 0.05 mL, one glass = 250 mL. The car comparison
    uses the US EPA figure; for another country, replace `carGPerKm`.
 
@@ -118,7 +131,7 @@ Notes per provider:
 ## Research figures used
 
 All citations, with links, are in `public/js/content.js` and appear in the
-exhibit's **References** section.
+**References** section at the end of the cost page.
 
 | Figure | Source | Date | What it covers |
 |---|---|---|---|
@@ -154,7 +167,7 @@ exhibit's **References** section.
 
 No AI company publishes energy per token for its models, so the physical
 numbers are a well-sourced order of magnitude, not a meter reading. The
-exhibit says so in "Sources and method".
+exhibit says so in its disclaimer.
 
 ---
 
@@ -165,30 +178,24 @@ server.js                 local server: static files, /api/chat, /api/stop, /api
 server/providers/         anthropic.js · openai.js · gemini.js · demo.js (same output)
 server/limits.js          daily spend ledger, per-visit question limit
 server/tokenizer.js       local token counts (samples and stopped answers only)
-public/index.html         the exhibit: chat → tokens → readings → bill
-public/references.html    method and every source (opened from the bill and from citations)
+public/index.html         page 1: the chat
+public/cost.html          page 2: bill → how we estimate → disclaimer → references
 public/style.css          all styles, organised by section
-public/images/            photographs for the six readings (see its README)
-public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya (SIL Open Font License)
+public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya, Mukta (Nepali); SIL Open Font License
+public/*.jpg, *.jpeg      the reading photographs (listed in cost.html, search PHOTOGRAPHS)
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
-public/js/content.js      explainer text, research figures, references
-public/js/demo-answers.js suggestion buttons and sample answers
+public/js/strings.js      interface text, English and Nepali
+public/js/content.js      explanations, research figures, references (English and Nepali)
+public/js/demo-answers.js template prompts and sample answers (English and Nepali)
+public/js/i18n.js         language and text-size switches
+public/js/store.js        the visit, shared by both pages (sessionStorage, wiped on reset)
+public/js/main.js         chat page · cost.js: cost page
 public/js/chat.js · tokens.js · explainer.js · bill.js · references.js
-public/js/calculate.js · format.js · markdown.js · kiosk.js · main.js · references-page.js
+public/js/calculate.js · format.js · markdown.js · kiosk.js
 public/js/vendor/         js-tiktoken with o200k_base (bundled, offline)
 scripts/build-vendor.mjs  rebuilds the vendor bundle (npm install && npm run build:vendor)
+.github/workflows/pages.yml  publishes public/ to GitHub Pages from the "hosting" branch
 ```
 
-Changes from the original skeleton: `index.html` and `response.html` became
-one page (`public/index.html`). Existing IDs and classes were kept where they
-still fit: `#user-prompt`, `.prompt-input`, `#submit-prompt` (now a real
-`<button>`), `#Landing-Page-Prompting`, `#Chat-Page`, `#Tokenization`, the four
-token IDs, `.token-pill`, the scrolly classes, `data-step`, the sticky-panel
-IDs, the `#val-*`, `#analogy-*` and `#receipt-*` IDs and `#reset-btn`. Renamed or
-replaced: `#user-prompt-out`/`#response` (`.prompt-output`) → `#conversation`
-with `.message--visitor` / `.message--ai`; `#header` → `#tokens-heading`;
-`.step-badge` → `.meter-tag`; `.scroll-arrow` → `.next-reading`;
-`.highlight-*` → `data-resource`; the receipt section is now
-`#card-receipt.bill-section` (no longer `.story-card`); water and carbon are
-separate steps; money and scale steps, sources, references and the idle
-overlay were added.
+On GitHub Pages there is no server, so the exhibit answers with its labelled
+sample answers; everything else works the same.

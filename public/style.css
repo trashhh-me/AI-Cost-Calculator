@@ -3,8 +3,11 @@
    Quiet paper and ink: a humanist serif for headings and readings,
    a humanist sans for text, and monospace only where things are
    printed or counted (tokens, the receipt).
-   Sections: fonts · tokens · base · chat · tokens section · explainer ·
-   bill · references page · kiosk overlay · small screens · reduced motion
+   Sections: fonts · tokens · base · top bar · chat · cost page: bill ·
+   tokens · readings · disclaimer · references · kiosk overlay · small
+   screens · more contrast · reduced motion
+   Low vision: 20px text at the smallest, every text colour at least 7:1
+   on its background, a larger-text switch, and a thick focus ring.
    ===================================================================== */
 
 /* ---------- Fonts (self-hosted, SIL Open Font License) ----------
@@ -28,7 +31,7 @@
   src: url(fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2) format('woff2-variations');
   font-weight: 200 800;
   font-display: swap;
-  unicode-range: U+0000-002F, U+003A-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2190-21FF, U+2212, U+2215;
+  unicode-range: U+0000-002F, U+003A-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-200B, U+200E-206F, U+20AC, U+2122, U+2190-21FF, U+2212, U+2215;
 }
 @font-face {
   font-family: 'Alegreya';
@@ -43,6 +46,31 @@
   font-display: swap;
 }
 
+/* Nepali: Mukta, a humanist Devanagari face with open, even letters. It
+   has its own family name and comes next in every font stack, so English
+   keeps its own faces and Devanagari characters fall through to Mukta. */
+@font-face {
+  font-family: 'Exhibit Deva';
+  src: url(fonts/mukta-devanagari-400-normal.woff2) format('woff2');
+  font-weight: 100 500;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF;
+}
+@font-face {
+  font-family: 'Exhibit Deva';
+  src: url(fonts/mukta-devanagari-600-normal.woff2) format('woff2');
+  font-weight: 600;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF;
+}
+@font-face {
+  font-family: 'Exhibit Deva';
+  src: url(fonts/mukta-devanagari-700-normal.woff2) format('woff2');
+  font-weight: 700 900;
+  font-display: swap;
+  unicode-range: U+0900-097F, U+1CD0-1CF9, U+200C-200D, U+20A8, U+20B9, U+25CC, U+A830-A839, U+A8E0-A8FF;
+}
+
 /* ---------- Design tokens ---------- */
 :root {
   /* A near-black room with white text. Names kept from the paper version:
@@ -53,7 +81,7 @@
   --paper-receipt: #fbfaf6; /* the receipt stays real thermal paper */
   --field: #1a1d1b;
   --ink: #f1f3ef;
-  --ink-soft: #b3bab4;
+  --ink-soft: #c9cfca; /* 12:1 on --paper */
   --ink-faint: #6e7670; /* lines and decoration only */
   --rule: #2e3430;
   --bubble: #262b28;
@@ -82,11 +110,11 @@
   --pill-edge: #4f5751;
 
   /* Type */
-  --font-serif: 'Alegreya', Georgia, serif;
-  --font-sans: 'Exhibit Text', Verdana, sans-serif;
-  --font-mono: 'Atkinson Hyperlegible Mono', 'Courier New', monospace;
-  --step--1: 0.875rem;
-  --step-0: 1rem; /* body; the root is at least 18px */
+  --font-serif: 'Alegreya', 'Exhibit Deva', Georgia, serif;
+  --font-sans: 'Exhibit Text', 'Exhibit Deva', Verdana, sans-serif;
+  --font-mono: 'Atkinson Hyperlegible Mono', 'Exhibit Deva', 'Courier New', monospace;
+  --step--1: 0.9rem; /* the smallest text: 18px */
+  --step-0: 1rem; /* body: 20px */
   --step-1: 1.2rem;
   --step-2: 1.5rem;
   --step-3: 2.1rem;
@@ -119,12 +147,17 @@
 }
 
 html {
-  font-size: 112.5%; /* 18px: readable at about 1.5 m */
+  font-size: 125%; /* 20px: readable at about 1.5 m, and for low vision */
   -webkit-text-size-adjust: 100%;
   scroll-behavior: smooth;
 }
 @media (min-width: 1600px) {
-  html { font-size: 125%; }
+  html { font-size: 137.5%; }
+}
+/* The A+ switch: everything is sized in rem, so the whole page grows */
+html[data-text-size='large'] { font-size: 150%; }
+@media (min-width: 1600px) {
+  html[data-text-size='large'] { font-size: 165%; }
 }
 
 body {
@@ -160,8 +193,85 @@ a {
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 4px solid var(--focus);
   outline-offset: 3px;
+}
+
+/* Nepali: Devanagari needs more room above and below the line */
+:lang(ne) body,
+body:lang(ne) {
+  line-height: 1.75;
+  letter-spacing: 0;
+}
+:lang(ne) h1,
+:lang(ne) h2,
+:lang(ne) h3,
+:lang(ne) h4 {
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+
+/* ---------- Top bar: language and text size, top right ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem var(--gutter);
+}
+/* On the chat page it floats over the centred start screen */
+body:not(.cost-page) .topbar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 10;
+}
+.topbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.lang-switch {
+  display: flex;
+}
+.lang-switch button,
+.text-size {
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: 0.3rem 0.7rem;
+  background: none;
+  border: 0;
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+}
+.lang-switch button[lang='ne'] {
+  font-family: var(--font-sans);
+}
+.lang-switch button + button {
+  border-left: 1px solid var(--ink-faint);
+}
+.lang-switch button[aria-pressed='true'],
+.text-size[aria-pressed='true'] {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.35em;
+}
+.lang-switch button:hover,
+.text-size:hover {
+  color: var(--ink);
+}
+.text-size {
+  font-family: var(--font-serif);
+  font-size: var(--step-1);
+  line-height: 1;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--ink);
+  font-size: var(--step-0);
 }
 
 [hidden] {
@@ -199,15 +309,15 @@ a {
 /* Section openings are set differently on purpose: the tokens heading
    sits in its own column, the readings heading is set left and indented,
    the bill is centred on its counter. */
-.bill-section h2 {
+.bill-section h1 {
   font-size: var(--step-4);
   text-align: center;
 }
 
-.explainer-intro {
+.estimate-intro {
   text-align: center;
 }
-.explainer h2 {
+.estimate-intro h2 {
   font-size: calc(var(--step-4) * 1.15);
 }
 .section-intro {
@@ -236,6 +346,23 @@ button {
 .button-primary:hover {
   background: var(--signal-hover);
 }
+a.button-primary {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.button-quiet {
+  min-height: 3.25rem;
+  padding: 0.7rem 1.75rem;
+  background: none;
+  color: var(--ink);
+  border: 2px solid var(--ink-soft);
+  border-radius: 999px;
+  font-weight: 600;
+}
+.button-quiet:hover {
+  border-color: var(--ink);
+}
 
 /* =====================================================================
    PART 1: THE CHAT, familiar and quiet
@@ -247,7 +374,7 @@ button {
   min-height: 100dvh;
   max-width: 52rem;
   margin: 0 auto;
-  padding: 0 var(--gutter);
+  padding: 3.5rem var(--gutter) 0;
 }
 
 .chat-app[data-state='start'] {
@@ -411,6 +538,7 @@ button {
 
 .see-cost {
   display: inline-flex;
+  text-decoration: none;
   align-items: center;
   min-height: 3rem;
   margin-top: 1.5rem;
@@ -612,7 +740,7 @@ button {
   align-items: center;
   gap: 0.2rem 0.5rem;
   margin-top: 1.25rem;
-  font-size: 0.85rem;
+  font-size: var(--step--1);
   color: var(--ink-soft);
 }
 .chat-app[data-state='chat'] .model-line {
@@ -630,10 +758,11 @@ button {
 .status-dot[data-state='sample'] { background: var(--electricity-lit); box-shadow: inset 0 0 0 1px var(--electricity); }
 
 /* =====================================================================
-   PART 2: TOKENS
+   COST PAGE 2: HOW WE ESTIMATE, first the tokens
    ===================================================================== */
 .tokens-section {
-  padding: 6rem 0 5rem;
+  margin-top: 4rem;
+  padding: 5rem 0;
   background: var(--paper-deep);
 }
 
@@ -652,7 +781,7 @@ button {
   position: sticky;
   top: 4rem;
 }
-.tokens-intro h2 {
+.tokens-intro h3 {
   font-size: var(--step-4);
   line-height: 1.05;
 }
@@ -694,7 +823,7 @@ button {
   gap: 0.25rem 1rem;
   padding-bottom: 0.75rem;
 }
-.token-card-header h3 {
+.token-card-header h4 {
   font-size: var(--step-2);
 }
 
@@ -801,15 +930,15 @@ button {
 }
 
 /* =====================================================================
-   PART 3: THE EXPLAINER, six readings told like a magazine spread
+   COST PAGE 2 (continued): six readings told like a magazine spread
    ===================================================================== */
-.explainer {
-  padding: 7rem 0 3rem;
+.estimate {
+  padding: 6rem 0 3rem;
 }
 
-.scrolly-split-container {
+.readings {
   max-width: 72rem;
-  margin: 4rem auto 0;
+  margin: 2rem auto 0;
   padding: 0 var(--gutter);
 }
 
@@ -870,6 +999,40 @@ button {
   max-width: 32rem;
   font-size: var(--step-1);
   line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* The working, set like sums in a notebook: the visitor's own numbers */
+.calc {
+  max-width: 32rem;
+  font-family: var(--font-mono);
+  font-size: var(--step-0);
+  font-variant-numeric: tabular-nums;
+}
+.calc-line {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 1.25rem;
+  padding: 0.1rem 0;
+}
+.calc-value {
+  margin-left: auto; /* stays at the right edge when the line wraps */
+}
+.calc-value:empty {
+  display: none;
+}
+.calc-total {
+  margin-top: 0.2rem;
+  font-weight: 700;
+  font-size: var(--step-1);
+  color: var(--resource);
+  justify-content: flex-start;
+}
+.calc-key {
+  margin-top: 0.35rem;
+  font-family: var(--font-sans);
+  font-size: var(--step--1);
   color: var(--ink-soft);
 }
 
@@ -1021,12 +1184,12 @@ button {
 }
 
 /* =====================================================================
-   PART 4: THE BILL, printed on the counter
+   COST PAGE 1: THE BILL, printed on the counter
    ===================================================================== */
 .bill-section {
-  padding: 7rem 0;
-  border-top: 1px solid var(--rule);
+  padding: 2rem 0 5rem;
   background: var(--desk);
+  overflow-x: clip; /* the tilted receipt never makes the page scroll sideways */
   color: var(--desk-ink);
   --focus: var(--signal);
 }
@@ -1093,7 +1256,7 @@ button {
 .receipt-header {
   text-align: center;
 }
-.receipt-header h3 {
+.receipt-header h2 {
   font-family: var(--font-mono);
   font-size: 1.15rem;
   font-weight: 600;
@@ -1178,45 +1341,54 @@ button {
   color: var(--ink-soft);
 }
 
-#reset-btn {
-  min-height: 3.75rem;
-  padding: 0.8rem 2.25rem;
-  font-size: var(--step-1);
-}
 .bill-note {
-  margin-top: 1.25rem;
-  font-size: var(--step--1);
+  margin-top: 0.5rem;
+  max-width: 30rem;
   color: var(--desk-dim);
 }
-.bill-section .references-link {
-  margin-top: 3rem;
-  font-size: var(--step-2);
-}
-.references-link a {
+.bill-note a {
   display: inline-block;
-  padding: 0.5rem 0.25rem;
-  text-decoration-color: var(--desk-dim);
+  padding: 0.4rem 0;
+  color: inherit;
 }
 
 /* =====================================================================
-   REFERENCES PAGE: a reader's appendix
+   COST PAGE 3: THE DISCLAIMER, plainly said
    ===================================================================== */
-.references-page .reader {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 3rem var(--gutter) 6rem;
+.disclaimer {
+  padding: 5rem 0;
+  background: var(--paper-deep);
 }
-.back-link {
-  font-family: var(--font-serif);
+.disclaimer-inner {
+  max-width: 40rem;
+}
+.disclaimer h2 {
+  font-size: var(--step-3);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+.disclaimer p {
   font-size: var(--step-1);
+  line-height: 1.55;
 }
-.back-link a {
-  display: inline-block;
-  padding: 0.5rem 0;
+.disclaimer p + p {
+  margin-top: 1rem;
 }
-.references-page h1 {
-  margin-top: 2.5rem;
-  font-size: var(--step-4);
+.disclaimer p:last-child {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* =====================================================================
+   COST PAGE 4: REFERENCES, a reader's appendix
+   ===================================================================== */
+.references .reader {
+  max-width: 44rem;
+  padding-top: 5rem;
+  padding-bottom: 3rem;
+}
+.references h2 {
+  font-size: var(--step-3);
   text-align: center;
 }
 .references-intro {
@@ -1224,16 +1396,29 @@ button {
   text-align: center;
   color: var(--ink-soft);
 }
-.references-page h2 {
-  margin-top: 3.5rem;
-  font-size: var(--step-2);
-  text-align: center;
-}
-.method-text {
-  display: grid;
+
+.end-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 1rem;
-  margin-top: 1.25rem;
-  line-height: 1.65;
+  padding: 2rem var(--gutter) 6rem;
+}
+.end-actions .button-primary,
+.end-actions .button-quiet {
+  min-height: 3.75rem;
+  font-size: var(--step-1);
+}
+
+.no-visit {
+  display: grid;
+  justify-items: center;
+  gap: 1.5rem;
+  max-width: 34rem;
+  margin: 20vh auto;
+  padding: 0 var(--gutter);
+  font-size: var(--step-1);
+  text-align: center;
 }
 .reference-group {
   margin-top: 2rem;
@@ -1258,7 +1443,8 @@ button {
   scroll-margin-top: 2rem;
   line-height: 1.5;
 }
-.reference:target {
+.reference:target,
+.reference:focus {
   background: var(--paper-deep);
   box-shadow: -0.75rem 0 0 var(--paper-deep), 0.75rem 0 0 var(--paper-deep);
 }
@@ -1375,13 +1561,26 @@ button {
   .story-card .metric-feature {
     align-self: stretch;
   }
-  .explainer-intro {
+  .estimate-intro {
     padding-inline: var(--gutter);
+  }
+  .topbar {
+    padding-inline: 0.5rem;
+  }
+  .lang-switch button,
+  .text-size {
+    padding-inline: 0.5rem;
   }
   .closing {
     padding-left: var(--gutter);
   }
 
+  .receipt-slot {
+    transform: rotate(-0.5deg);
+  }
+  .calc {
+    font-size: var(--step--1);
+  }
   .thermal-receipt {
     padding-left: 1.1rem;
     padding-right: 1.1rem;
@@ -1389,6 +1588,22 @@ button {
   }
   .reference {
     grid-template-columns: 2rem 1fr;
+  }
+}
+
+/* =====================================================================
+   MORE CONTRAST: when the visitor's system asks for it
+   ===================================================================== */
+@media (prefers-contrast: more) {
+  :root {
+    --paper: #000;
+    --paper-deep: #000;
+    --desk: #000;
+    --ink: #fff;
+    --ink-soft: #fff;
+    --desk-dim: #fff;
+    --rule: #8a918c;
+    --ink-faint: #8a918c;
   }
 }
 

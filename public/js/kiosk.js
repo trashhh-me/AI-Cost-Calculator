@@ -1,10 +1,13 @@
 // Kiosk privacy: after a quiet spell, ask "Still there?" with a countdown,
 // then reset everything so the next visitor never sees the last conversation.
 import { CONFIG } from './config.js';
+import { t } from './i18n.js';
+import { int } from './format.js';
 
 export function initKiosk({ hasSomethingToClear, onReset }) {
   const overlay = document.getElementById('idle-overlay');
-  const countdown = document.getElementById('idle-countdown');
+  const desc = document.getElementById('idle-desc');
+  const say = (n) => (desc.textContent = t('startingOver', { n: int(n) }));
   const keepBtn = document.getElementById('idle-continue');
   const { idleSeconds, countdownSeconds } = CONFIG.kiosk;
 
@@ -27,12 +30,12 @@ export function initKiosk({ hasSomethingToClear, onReset }) {
     }
     lastFocus = document.activeElement;
     left = countdownSeconds;
-    countdown.textContent = String(left);
+    say(left);
     overlay.hidden = false;
     keepBtn.focus();
     tickTimer = setInterval(() => {
       left -= 1;
-      countdown.textContent = String(Math.max(0, left));
+      say(Math.max(0, left));
       if (left <= 0) {
         close(false);
         onReset();
