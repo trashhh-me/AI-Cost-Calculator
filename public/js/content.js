@@ -266,7 +266,7 @@ export const STEPS = [
   {
     key: 'electricity',
     name: { en: 'Electricity', ne: 'बिजुली' },
-    headline: { en: 'How we estimate electricity', ne: 'बिजुली कसरी अनुमान गर्छौं' },
+    headline: { en: 'Where the electricity goes', ne: 'बिजुली कहाँ खर्च हुन्छ' },
     body: {
       en: 'The chips read your whole message at once, then write the answer one token at a time. Writing is slower, so a written token counts almost three times as much as a read one.',
       ne: 'चिपहरूले तपाईंको पूरै सन्देश एकैपटक पढ्छन्, अनि उत्तर एक-एक टोकन गरेर लेख्छन्। लेख्न बढी समय लाग्ने भएकाले लेखिएको एउटा टोकन पढिएको टोकनभन्दा झन्डै तीन गुणा भारी हुन्छ।',
@@ -297,7 +297,7 @@ export const STEPS = [
   {
     key: 'heat',
     name: { en: 'Heat', ne: 'ताप' },
-    headline: { en: 'How we estimate heat', ne: 'ताप कसरी अनुमान गर्छौं' },
+    headline: { en: 'Every watt ends up as heat', ne: 'सबै बिजुली अन्ततः ताप बन्छ' },
     body: {
       en: 'Almost all the electricity a chip uses ends up as heat, which the building then has to cool away.',
       ne: 'चिपले खपत गर्ने लगभग सबै बिजुली अन्ततः तापमा बदलिन्छ, र भवनले त्यो ताप चिसो पारेर हटाउनुपर्छ।',
@@ -321,7 +321,7 @@ export const STEPS = [
   {
     key: 'water',
     name: { en: 'Water', ne: 'पानी' },
-    headline: { en: 'How we estimate water', ne: 'पानी कसरी अनुमान गर्छौं' },
+    headline: { en: 'Water, counted twice', ne: 'पानी, दुई ठाउँमा गनिएको' },
     body: {
       en: 'Data centers evaporate water to stay cool, and power plants use water to make the electricity. We count both.',
       ne: 'डेटा सेन्टरहरू चिसो रहन पानी वाष्पीकरण गर्छन्, र बिजुली निकाल्न विद्युत् केन्द्रहरूले पनि पानी खर्चिन्छन्। हामी दुवै गन्छौं।',
@@ -352,7 +352,7 @@ export const STEPS = [
   {
     key: 'carbon',
     name: { en: 'Carbon', ne: 'कार्बन' },
-    headline: { en: 'How we estimate carbon', ne: 'कार्बन कसरी अनुमान गर्छौं' },
+    headline: { en: 'It depends on the grid', ne: 'कुन ग्रिड, त्यसैमा भर' },
     body: {
       en: 'Carbon depends on how the electricity was made. We use the world-average grid; coal-heavy grids emit more, wind, solar and hydro far less.',
       ne: 'कार्बन बिजुली कसरी निकालियो भन्नेमा भर पर्छ। हामी विश्वको औसत ग्रिड प्रयोग गर्छौं; कोइलामा निर्भर ग्रिडले बढी, हावा, सौर्य र जलविद्युत्‌ले धेरै कम उत्सर्जन गर्छन्।',
@@ -381,7 +381,7 @@ export const STEPS = [
   {
     key: 'money',
     name: { en: 'Money', ne: 'पैसा' },
-    headline: { en: 'How we work out the price', ne: 'मूल्य कसरी निकाल्छौं' },
+    headline: { en: 'The one exact number', ne: 'ठ्याक्कै हुने एउटै अङ्क' },
     body: {
       en: 'This one is not an estimate. The provider bills every token, and writing costs more than reading. Each follow-up re-sends the whole conversation.',
       ne: 'यो अनुमान होइन। कम्पनीले हरेक टोकनको पैसा लिन्छ, र लेख्नु पढ्नुभन्दा महँगो छ। हरेक थप प्रश्नसँग पूरै कुराकानी फेरि पठाइन्छ।',

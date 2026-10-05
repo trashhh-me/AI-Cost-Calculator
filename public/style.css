@@ -771,9 +771,9 @@ a.button-primary {
 }
 .token-define {
   margin: 3rem auto 0;
-  padding: 2.25rem 2rem 2.5rem;
-  background: var(--surface);
-  border-radius: 6px;
+  padding: 2.25rem 0 2.5rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 .token-word {
   font-family: var(--font-serif);
@@ -969,9 +969,7 @@ a.button-primary {
 
 /* The working: the visitor's own numbers, set like sums on a slip */
 .working {
-  padding: 1rem 1.25rem 1.1rem;
-  background: var(--surface);
-  border-radius: 6px;
+  max-width: 30rem;
 }
 .working-label {
   margin-bottom: 0.4rem;
@@ -984,20 +982,23 @@ a.button-primary {
   font-variant-numeric: tabular-nums;
 }
 .calc-line {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0 1.25rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 1.5rem;
+  align-items: baseline;
   padding: 0.1rem 0;
 }
 .calc-value {
-  margin-left: auto; /* stays at the right edge when the line wraps */
+  text-align: right;
+  white-space: nowrap; /* a result never breaks onto its own line */
 }
 .calc-value:empty {
   display: none;
 }
 .calc-total {
-  margin-top: 0.3rem;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid var(--ink-faint); /* the line drawn under a sum */
   font-weight: 700;
   font-size: var(--step-1);
   color: var(--resource);
