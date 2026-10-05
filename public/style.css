@@ -932,7 +932,14 @@ a.button-primary {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   column-gap: 5rem;
   align-items: start;
-  padding: 4.5rem 0;
+  padding: 7rem 0;
+}
+/* A quiet line between readings, with plenty of room on either side */
+.story-card + .story-card {
+  border-top: 1px solid var(--rule);
+}
+.story-card:first-child {
+  padding-top: 3rem;
 }
 .story-card:nth-child(even) .story-text {
   order: 2;
@@ -1539,7 +1546,7 @@ a.button-primary {
   .story-card {
     grid-template-columns: 1fr;
     row-gap: 1.75rem;
-    padding: 3rem 0;
+    padding: 4rem 0;
   }
   .story-card:nth-child(even) .story-text {
     order: 0;
