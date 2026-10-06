@@ -117,11 +117,12 @@ body {
   color: var(--ink);
   font-family: var(--font);
   font-size: var(--step-0);
-  line-height: 1.6;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
 }
 :lang(ne) body,
 body:lang(ne) {
-  line-height: 1.75;
+  line-height: 1.85;
 }
 h1, h2, h3, h4, p, ul, ol, dl, dd, figure, blockquote {
   margin: 0;
@@ -223,7 +224,7 @@ button {
 .page {
   max-width: var(--column);
   margin: 0 auto;
-  padding: 4.5rem var(--gutter) 5rem;
+  padding: 5rem var(--gutter) 7rem;
 }
 
 /* ---------- Title ---------- */
@@ -235,9 +236,10 @@ button {
   letter-spacing: -0.01em;
 }
 .subtitle {
-  margin-top: 0.4rem;
+  margin-top: 0.9rem;
   font-size: var(--step-1);
   font-style: italic;
+  line-height: 1.5;
 }
 :lang(ne) .subtitle {
   font-style: normal; /* Devanagari has no true italic */
@@ -245,7 +247,7 @@ button {
 
 /* ---------- Question ---------- */
 .chat-app {
-  margin-top: 2rem;
+  margin-top: 3.5rem;
 }
 .composer {
   display: flex;
@@ -329,7 +331,7 @@ button {
 /* Sample prompts: a drop-down under the box; a choice fills the box */
 .templates {
   position: relative;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   text-align: center;
 }
 .templates summary {
@@ -395,24 +397,24 @@ details[open] > .bar::after,
 }
 
 .chat-notice {
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   text-align: center;
   font-weight: 600;
 }
 
 /* ---------- Answer ---------- */
 .answer-panel {
-  margin-top: 1rem;
+  margin-top: 2rem;
   max-height: 32rem;
   overflow-y: auto;
-  padding: 1.5rem 1.75rem;
+  padding: 2rem 2.25rem;
   background: var(--panel);
   border-radius: 4px;
 }
 .message-list {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 2rem;
   min-height: 5rem;
 }
 .message-list:empty::before {
@@ -443,7 +445,7 @@ details[open] > .bar::after,
   margin-bottom: 0.3rem;
 }
 .answer-body > * + * {
-  margin-top: 0.75em;
+  margin-top: 1em;
 }
 .answer-body h3,
 .answer-body h4,
@@ -489,7 +491,7 @@ details[open] > .bar::after,
 .meter-line {
   display: flex;
   gap: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
@@ -503,7 +505,7 @@ details[open] > .bar::after,
   justify-content: center;
   align-items: center;
   gap: 0.2rem 0.5rem;
-  margin-top: 0.6rem;
+  margin-top: 1.1rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
@@ -541,7 +543,7 @@ details[open] > .bar::after,
   background: var(--purple-hover);
 }
 .bar--big {
-  margin-top: 1.5rem;
+  margin-top: 3.5rem;
   min-height: 3.6rem;
   font-size: var(--step-2);
   font-weight: 700;
@@ -549,7 +551,7 @@ details[open] > .bar::after,
 
 /* ---------- The bill: a small slip with three lines ---------- */
 .cost-content {
-  margin-top: 1.5rem;
+  margin-top: 3rem;
 }
 .bill {
   display: flex;
@@ -694,25 +696,25 @@ details[open] > .bar::after,
 
 /* ---------- How do we estimate this? ---------- */
 .estimate {
-  margin-top: 2.5rem;
+  margin-top: 4.5rem;
 }
 .estimate h2 {
   font-size: var(--step-3);
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
 }
 .est-block {
   max-width: 44rem;
-  margin: 0.6rem auto 0;
+  margin: 1.1rem auto 0;
 }
 .est-body {
-  padding: 1.25rem 0.25rem 1.5rem;
+  padding: 2rem 0.5rem 2.5rem;
 }
 .est-body > * + * {
-  margin-top: 0.85rem;
+  margin-top: 1.3rem;
 }
 .est-body h3 {
-  margin-top: 1.75rem;
+  margin-top: 2.75rem;
   font-size: var(--step-1);
 }
 .working-label {
@@ -728,20 +730,22 @@ details[open] > .bar::after,
   grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 1.5rem;
   align-items: baseline;
+  padding: 0.2rem 0;
 }
 .calc-value {
   text-align: right;
   white-space: nowrap;
 }
 .calc-total {
-  margin-top: 0.3rem;
-  padding-top: 0.3rem;
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
   border-top: 1px solid var(--ink);
   font-weight: 700;
 }
 .source {
   font-size: var(--step--1);
   color: var(--ink-soft);
+  line-height: 1.75;
 }
 .source strong {
   color: var(--ink);
@@ -760,7 +764,7 @@ details[open] > .bar::after,
 /* Tokens */
 .token-examples {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.9rem;
 }
 .token-sample {
   font-family: var(--mono);
@@ -773,29 +777,30 @@ details[open] > .bar::after,
 .token-cards {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 1.5rem;
+  gap: 2.5rem;
 }
 .token-card {
   min-width: 0;
 }
 .token-card + .token-card {
-  padding-left: 1.5rem;
+  padding-left: 2.5rem;
   border-left: 1px solid var(--rule);
 }
 .token-card-title {
   font-weight: 600;
+  margin-bottom: 0.4rem;
 }
 .token-display-box {
   max-height: 16rem;
   overflow-y: auto;
-  margin-top: 0.5rem;
+  margin-top: 1rem;
   font-family: var(--mono);
   font-size: 0.9rem;
-  line-height: 1.7;
+  line-height: 1.9;
 }
 .token-group + .token-group {
-  margin-top: 1rem;
-  padding-top: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
   border-top: 1px solid var(--rule);
 }
 .token-group-label {
@@ -803,6 +808,7 @@ details[open] > .bar::after,
   font-family: var(--font);
   font-size: var(--step--1);
   color: var(--ink-soft);
+  margin-bottom: 0.4rem;
 }
 .token-group--note .token-pill {
   color: var(--ink-soft);
@@ -826,7 +832,7 @@ details[open] > .bar::after,
 /* ---------- Disclaimer ---------- */
 .disclaimer {
   max-width: 40rem;
-  margin: 3rem auto 0;
+  margin: 5rem auto 0;
   font-style: italic;
   text-align: center;
 }
@@ -834,7 +840,8 @@ details[open] > .bar::after,
   font-size: var(--step-2);
 }
 .disclaimer p {
-  margin-top: 0.6rem;
+  margin-top: 1rem;
+  line-height: 1.75;
 }
 :lang(ne) .disclaimer {
   font-style: normal;
@@ -842,7 +849,7 @@ details[open] > .bar::after,
 
 /* ---------- References link and end buttons ---------- */
 .references-link {
-  margin-top: 2.5rem;
+  margin-top: 4rem;
   text-align: center;
   font-size: var(--step-1);
 }
@@ -854,8 +861,8 @@ details[open] > .bar::after,
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 1rem;
-  margin-top: 2rem;
+  gap: 1.25rem;
+  margin-top: 2.5rem;
 }
 .button-primary,
 .button-quiet {
@@ -903,7 +910,7 @@ details[open] > .bar::after,
   text-align: center;
 }
 .reference-group {
-  margin-top: 2rem;
+  margin-top: 3rem;
 }
 .reference-group h2 {
   font-size: var(--step-1);
@@ -918,10 +925,10 @@ details[open] > .bar::after,
   display: grid;
   grid-template-columns: 2.5rem 1fr;
   gap: 0 0.5rem;
-  padding: 1rem 0;
+  padding: 1.4rem 0;
   border-bottom: 1px solid var(--rule);
   scroll-margin-top: 4rem;
-  line-height: 1.5;
+  line-height: 1.65;
 }
 .reference:target,
 .reference:focus {
@@ -934,7 +941,7 @@ details[open] > .bar::after,
 .reference-used,
 .reference-backlinks,
 .reference-url {
-  margin-top: 0.35rem;
+  margin-top: 0.6rem;
   font-size: var(--step--1);
   color: var(--ink-soft);
 }
