@@ -247,7 +247,6 @@ export function createChat({ onActivity, onTurnComplete }) {
     const any = turns().length > 0;
     app.dataset.state = any ? 'chat' : 'start';
     seeCost.hidden = !any;
-    if (any) list.after(seeCost);
   }
 
   /* ---------- Sending ---------- */
@@ -513,7 +512,6 @@ export function createChat({ onActivity, onTurnComplete }) {
     announcer.textContent = `${t('answerComplete')} ${plainText(c.text)}`;
     updateQuestionsLeft();
     setBusy(false);
-    list.after(seeCost);
     seeCost.hidden = false;
     if (remaining <= 0) allUsedNotice();
     else input.focus({ preventScroll: true });

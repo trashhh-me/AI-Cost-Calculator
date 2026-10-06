@@ -1,22 +1,17 @@
-# AI DEX
+# AI Cost Calculator (AI DEX)
 
-An interactive exhibit about the hidden physical and financial cost of talking
-to an AI, in English and Nepali. Visitors ask a question and get a real
-streamed answer. Below the chat, "See what this cost" leads to:
+An interactive exhibit, in English and Nepali, about the hidden cost of
+talking to an AI. Visitors ask a question and get a real streamed answer.
+"See the Cost of Your Query" then opens:
 
-1. **The bill**: an itemised receipt.
-2. **How the AI reads your text**: what a token is, and their conversation
-   cut into tokens (including the exhibit's hidden note to the AI).
-3. **How do we estimate this?**: one section per reading (electricity,
-   heat, water, carbon, money, scale) with the calculation using their own
-   numbers, where each number comes from, and a photograph.
-4. **A disclaimer**: what is exact, what is estimated, what is left out.
-5. A link to the **References** page, listing every source; each numbered
-   citation opens it at that source, and "Back" returns to the same place.
+1. **The bill**: electricity, water and carbon for their conversation.
+2. **How do we estimate this?**: four bars that each open on demand: how AI
+   processes the text (tokens), and how electricity, water and carbon are
+   worked out, with the sum using the visitor's own tokens and the sources.
+3. **A disclaimer** and a link to the **References** page.
 
 A language switch (English / नेपाली) and a larger-text switch sit at the top
-right. Everything resets for the next visitor after a quiet
-spell, including the language.
+right. Everything resets for the next visitor after a quiet spell.
 
 Everything runs on the exhibition computer. The only thing that needs the
 internet is the call to the AI provider, and if that fails the exhibit
@@ -120,8 +115,6 @@ Notes per provider:
    worth reading in the original: Epoch AI's 2.5 Wh / 10,000-token figure
    (it sets the input-token weighting), Li et al.'s 3.142 L/kWh, and
    Jegham et al.'s 0.42 Wh (it sets the high end of the range).
-4. **Photographs** for the six readings: see `public/images/README.md`.
-   Until they are added, each reading shows a plain tinted placeholder.
 5. **Nepali text**: written for this exhibit. Have a native speaker read
    `public/js/strings.js`, the `ne:` lines in `public/js/content.js` and the
    Nepali sample answers in `public/js/demo-answers.js` once before opening.
@@ -181,11 +174,10 @@ server.js                 local server: static files, /api/chat, /api/stop, /api
 server/providers/         anthropic.js · openai.js · gemini.js · demo.js (same output)
 server/limits.js          daily spend ledger, per-visit question limit
 server/tokenizer.js       local token counts (samples and stopped answers only)
-public/index.html         the exhibit: chat → bill → tokens → how we estimate → disclaimer
+public/index.html         the calculator: question → answer → bill → how we estimate → disclaimer
 public/references.html    every source (opened from the References link and from citations)
 public/style.css          all styles, organised by section
-public/fonts/             Atkinson Hyperlegible Next & Mono, Alegreya, Mukta (Nepali); SIL Open Font License
-public/*.jpg, *.jpeg      the reading photographs (listed in index.html, search PHOTOGRAPHS)
+public/fonts/             Atkinson Hyperlegible Next & Mono, Mukta (Nepali); SIL Open Font License
 public/js/config.js       provider, model, prices, limits, coefficients (server + browser)
 public/js/strings.js      interface text, English and Nepali
 public/js/content.js      explanations, research figures, references (English and Nepali)
@@ -193,7 +185,7 @@ public/js/demo-answers.js template prompts and sample answers (English and Nepal
 public/js/i18n.js         language and text-size switches
 public/js/store.js        the visit's finished turns (sessionStorage, wiped on reset)
 public/js/main.js         wires the page together · references-page.js: the References page
-public/js/chat.js · tokens.js · explainer.js · bill.js · references.js
+public/js/chat.js · tokens.js · explainer.js (bill + estimates) · references.js
 public/js/calculate.js · format.js · markdown.js · kiosk.js
 public/js/vendor/         js-tiktoken with o200k_base (bundled, offline)
 scripts/build-vendor.mjs  rebuilds the vendor bundle (npm install && npm run build:vendor)

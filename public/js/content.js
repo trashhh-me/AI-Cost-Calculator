@@ -268,8 +268,8 @@ export const STEPS = [
     name: { en: 'Electricity', ne: 'बिजुली' },
     headline: { en: 'Where the electricity goes', ne: 'बिजुली कहाँ खर्च हुन्छ' },
     body: {
-      en: 'The chips read your whole message at once, then write the answer one token at a time. Writing is slower, so a written token counts almost three times as much as a read one.',
-      ne: 'चिपहरूले तपाईंको पूरै सन्देश एकैपटक पढ्छन्, अनि उत्तर एक-एक टोकन गरेर लेख्छन्। लेख्न बढी समय लाग्ने भएकाले लेखिएको एउटा टोकन पढिएको टोकनभन्दा झन्डै तीन गुणा भारी हुन्छ।',
+      en: 'Computer chips in a data center read your question and write the answer, one token at a time. We count your tokens and multiply by the energy each one needs. Writing a token takes more energy than reading one.',
+      ne: 'डेटा सेन्टरका कम्प्युटर चिपहरूले तपाईंको प्रश्न पढ्छन् र उत्तर एक-एक टोकन गरेर लेख्छन्। हामी तपाईंका टोकन गन्छौं, र एउटा टोकनलाई लाग्ने ऊर्जाले गुणा गर्छौं। टोकन पढ्नुभन्दा लेख्न बढी ऊर्जा लाग्छ।',
     },
     source: {
       en: 'Epoch AI estimated that a typical ChatGPT answer of about 500 written tokens uses 0.3 Wh, so one written token is about 0.3 ÷ 500 = 0.0006 Wh. A 10,000-token prompt adds about 2.2 Wh, so one read token is about 0.00022 Wh. {{ref:epoch-2025}} The range comes from Google’s measured 0.24 Wh per prompt {{ref:google-2025}} and Jegham et al.’s 0.42 Wh. {{ref:jegham-2025}}',
@@ -323,8 +323,8 @@ export const STEPS = [
     name: { en: 'Water', ne: 'पानी' },
     headline: { en: 'Water, counted twice', ne: 'पानी, दुई ठाउँमा गनिएको' },
     body: {
-      en: 'Data centers evaporate water to stay cool, and power plants use water to make the electricity. We count both.',
-      ne: 'डेटा सेन्टरहरू चिसो रहन पानी वाष्पीकरण गर्छन्, र बिजुली निकाल्न विद्युत् केन्द्रहरूले पनि पानी खर्चिन्छन्। हामी दुवै गन्छौं।',
+      en: 'Data centers use water to keep their chips cool, and power plants use water to make the electricity. We take your electricity and count both.',
+      ne: 'डेटा सेन्टरले चिप चिसो राख्न पानी प्रयोग गर्छ, र विद्युत् केन्द्रले बिजुली निकाल्न पानी प्रयोग गर्छ। हामी तपाईंको बिजुलीबाट दुवै गन्छौं।',
     },
     source: {
       en: '1.15 mL per Wh is the cooling water Google measured across its data centers in 2025. {{ref:google-2025}} 3.142 mL per Wh is the average water US power plants use to make electricity. {{ref:li-2023}}',
@@ -354,8 +354,8 @@ export const STEPS = [
     name: { en: 'Carbon', ne: 'कार्बन' },
     headline: { en: 'It depends on the grid', ne: 'कुन ग्रिड, त्यसैमा भर' },
     body: {
-      en: 'Carbon depends on how the electricity was made. We use the world-average grid; coal-heavy grids emit more, wind, solar and hydro far less.',
-      ne: 'कार्बन बिजुली कसरी निकालियो भन्नेमा भर पर्छ। हामी विश्वको औसत ग्रिड प्रयोग गर्छौं; कोइलामा निर्भर ग्रिडले बढी, हावा, सौर्य र जलविद्युत्‌ले धेरै कम उत्सर्जन गर्छन्।',
+      en: 'Making electricity releases carbon dioxide. How much depends on how the power is made: coal releases a lot, sun, wind and water very little. We use the world average.',
+      ne: 'बिजुली निकाल्दा कार्बन डाइअक्साइड निस्कन्छ। कति निस्कन्छ भन्ने कुरा बिजुली कसरी निकालियो भन्नेमा भर पर्छ: कोइलाले धेरै, घाम, हावा र पानीले धेरै कम। हामी विश्वको औसत प्रयोग गर्छौं।',
     },
     source: {
       en: '0.458 g per Wh is the world-average carbon intensity of electricity in 2025, from the energy think tank Ember. Cleaner grids are lower (EU 0.21), coal-heavy ones higher (China 0.525); those set the range. {{ref:ember-2026}}',

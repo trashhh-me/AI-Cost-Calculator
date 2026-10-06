@@ -22,12 +22,9 @@ export function cite(html) {
 }
 
 export const CARD_IDS = {
-  electricity: 'card-energy',
-  heat: 'card-heat',
-  water: 'card-water',
-  carbon: 'card-carbon',
-  money: 'card-money',
-  scale: 'card-scale',
+  electricity: 'est-electricity',
+  water: 'est-water',
+  carbon: 'est-carbon',
 };
 export const cardId = (key) => CARD_IDS[key];
 
@@ -38,7 +35,7 @@ function citedIn(extra) {
     if (!map.has(id)) map.set(id, []);
     if (!map.get(id).includes(key)) map.get(id).push(key);
   };
-  for (const step of STEPS) {
+  for (const step of STEPS.filter((x) => CARD_IDS[x.key])) {
     const text = LANGS.flatMap((l) => [...(step.research[l] || []), step.disagree[l] || '', step.source?.[l] || '']).join(' ');
     for (const [, id] of text.matchAll(CITE)) add(id, step.key);
   }

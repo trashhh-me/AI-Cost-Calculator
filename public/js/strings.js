@@ -12,10 +12,21 @@
 export const STRINGS = {
   en: {
     /* Page titles and shared controls */
-    'title.chat': 'AI DEX',
-    'title.references': 'References · AI DEX',
+    'title.chat': 'AI Cost Calculator',
+    appTitle: 'AI Cost Calculator',
+    appSubtitle: 'Ask AI. See the energy, water, and emissions behind your query.',
+    answerPlaceholder: 'Your answer will appear here.',
+    billTitle: 'Your AI query costs',
+    electricity: 'Electricity',
+    water: 'Water',
+    carbon: 'Carbon',
+    'est.text': 'How AI processes the text',
+    'est.electricity': 'How electricity consumption is measured',
+    'est.water': 'How the water consumption is measured',
+    'est.carbon': 'How carbon impact is calculated',
+    'title.references': 'References · AI Cost Calculator',
     referencesLink: 'References →',
-    backToExhibit: '← Back to the exhibit',
+    backToExhibit: '← Back to the calculator',
     'controls.language': 'Language',
     'controls.textSize': 'Larger text',
     skipToChat: 'Skip to the question box',
@@ -27,10 +38,10 @@ export const STRINGS = {
     placeholder: 'Ask anything',
     send: 'Send',
     stop: 'Stop',
-    templates: 'Template prompts',
+    templates: 'Sample prompts',
     conversation: 'Conversation',
     messages: 'Messages',
-    seeCost: 'See what this cost ↓',
+    seeCost: 'See the Cost of Your Query',
     live: 'Live',
     sampleAnswers: 'Sample answers',
     aiModel: 'AI model',
@@ -77,7 +88,7 @@ export const STRINGS = {
     tokensHeading: 'How the AI reads your text',
     tokenWord: 'Token',
     tokenDef:
-      'A small piece of text: a short word, part of a longer word, or a punctuation mark. The AI never sees letters or whole sentences, only tokens. Every token is counted, and every token is billed.',
+      'A token is a small piece of text: a short word, part of a longer word, or a punctuation mark. The AI never sees letters or whole sentences, only tokens. Every token is counted, and every token is billed.',
     tokenExamplesLabel: 'The same sentence in English and in Nepali:',
     tokenAfter:
       'Nepali is cut into more pieces, so the same question costs more. Each AI model cuts text its own way; these pieces come from OpenAI’s tokenizer.',
@@ -182,7 +193,7 @@ export const STRINGS = {
     /* Disclaimer */
     disclaimerHeading: 'These are estimates',
     disclaimer1:
-      'Token counts and the price come straight from the AI provider. Electricity, heat, water and carbon are estimates built on published research.',
+      'Token counts come straight from the AI provider. Electricity, water and carbon are estimates built on published research.',
     disclaimer2:
       'No AI company publishes the energy used per token, and we can’t know which data center answered you or how its power was made. Training the model and making the chips are not included.',
     disclaimer3: 'Read the physical numbers as a rough size, not a meter reading.',
@@ -194,10 +205,21 @@ export const STRINGS = {
   },
 
   ne: {
-    'title.chat': 'AI DEX',
-    'title.references': 'सन्दर्भ सामग्री · AI DEX',
+    'title.chat': 'एआई लागत क्याल्कुलेटर',
+    appTitle: 'एआई लागत क्याल्कुलेटर',
+    appSubtitle: 'एआईलाई सोध्नुहोस्। तपाईंको प्रश्नपछाडिको ऊर्जा, पानी र उत्सर्जन हेर्नुहोस्।',
+    answerPlaceholder: 'तपाईंको उत्तर यहाँ देखिनेछ।',
+    billTitle: 'तपाईंको एआई प्रश्नको लागत',
+    electricity: 'बिजुली',
+    water: 'पानी',
+    carbon: 'कार्बन',
+    'est.text': 'एआईले पाठ कसरी प्रशोधन गर्छ',
+    'est.electricity': 'बिजुली खपत कसरी नापिन्छ',
+    'est.water': 'पानी खपत कसरी नापिन्छ',
+    'est.carbon': 'कार्बन प्रभाव कसरी गणना गरिन्छ',
+    'title.references': 'सन्दर्भ सामग्री · एआई लागत क्याल्कुलेटर',
     referencesLink: 'सन्दर्भ सामग्री →',
-    backToExhibit: '← प्रदर्शनीमा फर्कनुहोस्',
+    backToExhibit: '← क्याल्कुलेटरमा फर्कनुहोस्',
     'controls.language': 'भाषा',
     'controls.textSize': 'ठूलो अक्षर',
     skipToChat: 'प्रश्न लेख्ने ठाउँमा जानुहोस्',
@@ -211,7 +233,7 @@ export const STRINGS = {
     templates: 'नमुना प्रश्नहरू',
     conversation: 'कुराकानी',
     messages: 'सन्देशहरू',
-    seeCost: 'यसको लागत हेर्नुहोस् ↓',
+    seeCost: 'तपाईंको प्रश्नको लागत हेर्नुहोस्',
     live: 'लाइभ',
     sampleAnswers: 'नमुना उत्तर',
     aiModel: 'एआई मोडेल',
@@ -255,7 +277,7 @@ export const STRINGS = {
     tokensHeading: 'एआईले तपाईंको पाठ कसरी पढ्छ',
     tokenWord: 'टोकन',
     tokenDef:
-      'पाठको सानो टुक्रा: छोटो शब्द, लामो शब्दको एक भाग, वा चिह्न। एआईले अक्षर वा पूरा वाक्य देख्दैन, टोकन मात्र देख्छ। हरेक टोकन गनिन्छ, र हरेक टोकनको पैसा लाग्छ।',
+      'टोकन भनेको पाठको सानो टुक्रा हो: छोटो शब्द, लामो शब्दको एक भाग, वा चिह्न। एआईले अक्षर वा पूरा वाक्य देख्दैन, टोकन मात्र देख्छ। हरेक टोकन गनिन्छ, र हरेक टोकनको पैसा लाग्छ।',
     tokenExamplesLabel: 'उही वाक्य अङ्ग्रेजी र नेपालीमा:',
     tokenAfter:
       'नेपाली वाक्य धेरै टुक्रामा काटिन्छ, त्यसैले उही प्रश्नको लागत बढी हुन्छ। हरेक एआई मोडेलले पाठलाई आफ्नै तरिकाले काट्छ; यहाँका टुक्रा OpenAI को टोकनाइजरबाट हुन्।',
@@ -356,7 +378,7 @@ export const STRINGS = {
 
     disclaimerHeading: 'यी अनुमान मात्र हुन्',
     disclaimer1:
-      'टोकनको सङ्ख्या र मूल्य सिधै एआई कम्पनीबाट आउँछन्। बिजुली, ताप, पानी र कार्बन भने प्रकाशित अनुसन्धानमा आधारित अनुमान हुन्।',
+      'टोकनको सङ्ख्या सिधै एआई कम्पनीबाट आउँछ। बिजुली, पानी र कार्बन भने प्रकाशित अनुसन्धानमा आधारित अनुमान हुन्।',
     disclaimer2:
       'कुनै पनि एआई कम्पनीले प्रति टोकन कति ऊर्जा लाग्छ भनेर सार्वजनिक गर्दैन, र तपाईंको उत्तर कुन डेटा सेन्टरले दियो वा त्यहाँको बिजुली कसरी निकालियो भन्ने हामीलाई थाहा हुँदैन। मोडेलको तालिम र चिप बनाउँदाको खपत यसमा गनिएको छैन।',
     disclaimer3: 'यी भौतिक अङ्कलाई मिटरको ठ्याक्कै रिडिङ होइन, मोटामोटी आकारका रूपमा बुझ्नुहोस्।',

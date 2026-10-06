@@ -3,19 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="author" content="Body&amp;Data">
-  <meta name="description" content="AI DEX: ask an AI anything, then see what it really cost in electricity, heat, water, carbon and money.">
-  <title>AI DEX</title>
+  <meta name="description" content="AI Cost Calculator: ask an AI anything, then see the energy, water and emissions behind your question.">
+  <title data-i18n-title="title.chat">AI Cost Calculator</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="preload" href="fonts/atkinson-hyperlegible-next-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="fonts/alegreya-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="js/main.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#user-prompt" data-i18n="skipToChat">Skip to the question box</a>
 
-  <!-- Language and text size: always at the top right -->
+  <!-- Language and text size, top right -->
   <div class="page-controls">
     <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:controls.language">
       <button type="button" data-set-lang="en" lang="en" aria-pressed="true">English</button>
@@ -24,164 +22,143 @@
     <button type="button" class="text-size" data-text-size-toggle aria-pressed="false" aria-label="Larger text" data-i18n-attr="aria-label:controls.textSize"><span aria-hidden="true">A+</span></button>
   </div>
 
-  <main id="main">
+  <main id="main" class="page">
 
-    <!-- ================= THE CHAT ================= -->
+    <!-- ================= TITLE ================= -->
+    <header class="masthead">
+      <h1 data-i18n="appTitle">AI Cost Calculator</h1>
+      <p class="subtitle" data-i18n="appSubtitle">Ask AI. See the energy, water, and emissions behind your query.</p>
+    </header>
+
+    <!-- ================= QUESTION ================= -->
     <div id="chat-app" class="chat-app" data-state="start">
+      <form id="prompt-box" class="composer" novalidate>
+        <label for="user-prompt" class="visually-hidden" data-i18n="yourQuestion">Your question</label>
+        <textarea id="user-prompt" class="prompt-input" name="message" rows="1"
+          maxlength="2000" placeholder="Ask anything" autocomplete="off"
+          data-i18n-attr="placeholder:placeholder"
+          aria-describedby="char-count"></textarea>
+        <p id="char-count" class="char-count" aria-live="polite"></p>
+        <button type="button" id="stop-btn" class="icon-button stop-button" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+          <span class="visually-hidden" data-i18n="stop">Stop</span>
+        </button>
+        <button type="submit" id="submit-prompt" class="icon-button send-button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+          <span class="visually-hidden" data-i18n="send">Send</span>
+        </button>
+      </form>
 
-      <header id="Landing-Page-Prompting" class="start-screen">
-        <h1 id="exhibit-title" class="wordmark">AI DEX</h1>
-        <p class="lede" data-i18n="lede">Ask anything. Then see what it cost.</p>
-      </header>
+      <details id="templates" class="templates">
+        <summary data-i18n="templates">Sample prompts</summary>
+        <ul id="presets" class="template-list" aria-label="Sample prompts" data-i18n-attr="aria-label:templates"></ul>
+      </details>
 
-      <section id="Chat-Page" class="conversation" aria-labelledby="conversation-heading">
+      <p id="chat-notice" class="chat-notice" role="status" hidden></p>
+
+      <!-- ================= ANSWER ================= -->
+      <section id="Chat-Page" class="answer-panel" aria-labelledby="conversation-heading">
         <h2 id="conversation-heading" class="visually-hidden" data-i18n="conversation">Conversation</h2>
-        <div id="conversation" class="message-list" role="log" aria-label="Messages" data-i18n-attr="aria-label:messages"></div>
-        <button type="button" id="see-cost" class="see-cost" hidden data-i18n="seeCost">See what this cost ↓</button>
-        <!-- Announces finished answers to screen readers (not every word). -->
+        <div id="conversation" class="message-list" role="log" aria-label="Messages"
+          data-i18n-attr="aria-label:messages; data-placeholder:answerPlaceholder"
+          data-placeholder="Your answer will appear here."></div>
         <p id="answer-announcer" class="visually-hidden" aria-live="polite"></p>
       </section>
 
-      <div class="composer-dock">
-        <p id="chat-notice" class="chat-notice" role="status" hidden></p>
-
-        <form id="prompt-box" class="composer" novalidate>
-          <label for="user-prompt" class="visually-hidden" data-i18n="yourQuestion">Your question</label>
-          <textarea id="user-prompt" class="prompt-input" name="message" rows="1"
-            maxlength="2000" placeholder="Ask anything" autocomplete="off"
-            data-i18n-attr="placeholder:placeholder"
-            aria-describedby="char-count"></textarea>
-          <p id="char-count" class="char-count" aria-live="polite"></p>
-          <button type="button" id="stop-btn" class="icon-button stop-button" hidden>
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
-            <span class="visually-hidden" data-i18n="stop">Stop</span>
-          </button>
-          <button type="submit" id="submit-prompt" class="icon-button send-button">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
-            <span class="visually-hidden" data-i18n="send">Send</span>
-          </button>
-        </form>
-
-        <details id="templates" class="templates">
-          <summary data-i18n="templates">Template prompts</summary>
-          <ul id="presets" class="template-list" aria-label="Template prompts" data-i18n-attr="aria-label:templates"></ul>
-        </details>
-
-        <p class="model-line">
-          <span class="status-dot" aria-hidden="true"></span>
-          <span id="model-status"></span>
-          <span aria-hidden="true">·</span>
-          <span id="model-name"></span>
-          <span aria-hidden="true">·</span>
-          <span id="questions-left"></span>
-        </p>
-      </div>
+      <p class="model-line">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="model-status"></span>
+        <span aria-hidden="true">·</span>
+        <span id="model-name"></span>
+        <span aria-hidden="true">·</span>
+        <span id="questions-left"></span>
+      </p>
     </div>
 
-    <!-- Everything below appears after the first answer -->
-    <div id="cost-content" hidden>
+    <!-- ================= SEE THE COST ================= -->
+    <button type="button" id="see-cost" class="bar bar--big" aria-expanded="false" aria-controls="cost-content" hidden>
+      <span data-i18n="seeCost">See the Cost of Your Query</span>
+    </button>
 
-      <!-- ================= 1. THE BILL ================= -->
-      <section id="bill" class="bill-section" aria-labelledby="bill-heading" tabindex="-1">
-        <div class="section-inner bill-inner">
-          <h2 id="bill-heading" data-i18n="yourBill">Your bill</h2>
-          <div class="receipt-slot">
-            <article id="thermal-receipt" class="thermal-receipt" aria-label="Itemised receipt" data-i18n-attr="aria-label:receiptLabel"></article>
+    <div id="cost-content" class="cost-content" hidden>
+
+      <!-- The bill: three readings -->
+      <section id="bill" class="bill" aria-labelledby="bill-heading" tabindex="-1">
+        <h2 id="bill-heading" data-i18n="billTitle">Your AI query costs</h2>
+        <dl class="bill-rows">
+          <div class="bill-row" data-resource="electricity">
+            <dt data-i18n="electricity">Electricity</dt>
+            <dd class="bill-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.5 2 5 13.5h6L9.5 22 19 9.5h-6.2L13.5 2Z"/></svg></dd>
+            <dd class="bill-value" id="bill-electricity">–</dd>
           </div>
-          <p class="bill-note"><a href="#estimate" data-i18n="estimatesNote">Electricity, heat, water and carbon are estimates. How we get them is below.</a></p>
-        </div>
+          <div class="bill-row" data-resource="water">
+            <dt data-i18n="water">Water</dt>
+            <dd class="bill-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5S5 10.2 5 14.8A7 7 0 0 0 19 14.8C19 10.2 12 2.5 12 2.5Z"/></svg></dd>
+            <dd class="bill-value" id="bill-water">–</dd>
+          </div>
+          <div class="bill-row" data-resource="carbon">
+            <dt data-i18n="carbon">Carbon</dt>
+            <dd class="bill-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21v-8.5M12 12.5C12 8 8.5 5.5 4 5.5c0 4.5 3.5 7 8 7Zm0 0c0-4.5 3.5-7 8-7 0 4.5-3.5 7-8 7Z"/></svg></dd>
+            <dd class="bill-value" id="bill-carbon">–</dd>
+          </div>
+        </dl>
       </section>
 
-      <!-- ================= 2. HOW THE AI READS YOUR TEXT ================= -->
-      <section id="Tokenization" class="tokens-section" aria-labelledby="tokens-heading">
-        <div class="section-inner">
-          <header class="token-lesson">
-            <h2 id="tokens-heading" data-i18n="tokensHeading">How the AI reads your text</h2>
-            <div class="token-define">
-              <p class="token-word" data-i18n="tokenWord">Token</p>
-              <p class="token-def" data-i18n="tokenDef"></p>
-            </div>
+      <!-- How do we estimate this? Each part opens only when wanted. -->
+      <section id="estimate" class="estimate" aria-labelledby="estimate-heading">
+        <h2 id="estimate-heading" data-i18n="howEstimate">How do we estimate this?</h2>
+
+        <details class="est-block" id="Tokenization">
+          <summary class="bar"><span data-i18n="est.text">How AI processes the text</span></summary>
+          <div class="est-body">
+            <p data-i18n="tokenDef"></p>
             <p class="token-examples-label" data-i18n="tokenExamplesLabel"></p>
             <div class="token-examples">
-              <figure class="token-example-row">
-                <div id="token-example-en" class="token-sample" lang="en"></div>
-                <figcaption id="token-example-en-count"></figcaption>
-              </figure>
-              <figure class="token-example-row">
-                <div id="token-example-ne" class="token-sample" lang="ne"></div>
-                <figcaption id="token-example-ne-count"></figcaption>
-              </figure>
+              <p class="token-example-row"><span id="token-example-en" class="token-sample" lang="en"></span> <span id="token-example-en-count" class="token-count"></span></p>
+              <p class="token-example-row"><span id="token-example-ne" class="token-sample" lang="ne"></span> <span id="token-example-ne-count" class="token-count"></span></p>
             </div>
-            <p class="token-after" data-i18n="tokenAfter"></p>
-          </header>
+            <p data-i18n="tokenAfter"></p>
 
-          <h3 class="tokens-yours" data-i18n="tokensYours">Your conversation, in tokens</h3>
-          <div class="token-cards">
-            <article class="token-card" aria-labelledby="input-tokens-heading">
-              <header class="token-card-header">
-                <h4 id="input-tokens-heading" data-i18n="sent">Sent to the AI</h4>
-                <p class="tcount"><span id="input-token-count" class="tcount-value">0</span> <span class="tcount-unit" data-i18n="tokens">tokens</span></p>
-              </header>
-              <p id="input-breakdown" class="tcount-breakdown"></p>
-              <div id="input-tokens-visual" class="token-display-box" tabindex="0" aria-label="Your messages split into tokens" data-i18n-attr="aria-label:inputBoxLabel"></div>
-            </article>
-
-            <article class="token-card" aria-labelledby="output-tokens-heading">
-              <header class="token-card-header">
-                <h4 id="output-tokens-heading" data-i18n="written">Written by the AI</h4>
-                <p class="tcount"><span id="output-token-count" class="tcount-value">0</span> <span class="tcount-unit" data-i18n="tokens">tokens</span></p>
-              </header>
-              <p class="tcount-breakdown" data-i18n="writtenNote"></p>
-              <div id="output-tokens-visual" class="token-display-box" tabindex="0" aria-label="The AI’s answers split into tokens" data-i18n-attr="aria-label:outputBoxLabel"></div>
-            </article>
+            <h3 data-i18n="tokensYours">Your conversation, in tokens</h3>
+            <div class="token-cards">
+              <div class="token-card">
+                <p class="token-card-title"><span data-i18n="sent">Sent to the AI</span>: <strong id="input-token-count">0</strong> <span data-i18n="tokens">tokens</span></p>
+                <p id="input-breakdown" class="small"></p>
+                <div id="input-tokens-visual" class="token-display-box" tabindex="0" aria-label="Your messages split into tokens" data-i18n-attr="aria-label:inputBoxLabel"></div>
+              </div>
+              <div class="token-card">
+                <p class="token-card-title"><span data-i18n="written">Written by the AI</span>: <strong id="output-token-count">0</strong> <span data-i18n="tokens">tokens</span></p>
+                <p class="small" data-i18n="writtenNote"></p>
+                <div id="output-tokens-visual" class="token-display-box" tabindex="0" aria-label="The AI’s answers split into tokens" data-i18n-attr="aria-label:outputBoxLabel"></div>
+              </div>
+            </div>
+            <p id="split-note" class="small"></p>
           </div>
-          <p id="split-note" class="split-note"></p>
-        </div>
+        </details>
+
+        <details class="est-block" id="est-electricity" data-est="electricity">
+          <summary class="bar"><span data-i18n="est.electricity">How electricity consumption is measured</span></summary>
+          <div class="est-body"></div>
+        </details>
+
+        <details class="est-block" id="est-water" data-est="water">
+          <summary class="bar"><span data-i18n="est.water">How the water consumption is measured</span></summary>
+          <div class="est-body"></div>
+        </details>
+
+        <details class="est-block" id="est-carbon" data-est="carbon">
+          <summary class="bar"><span data-i18n="est.carbon">How carbon impact is calculated</span></summary>
+          <div class="est-body"></div>
+        </details>
       </section>
 
-      <!-- ================= 3. HOW WE ESTIMATE ================= -->
-      <section id="estimate" class="estimate" aria-labelledby="estimate-heading">
-        <div class="section-inner estimate-intro">
-          <h2 id="estimate-heading" data-i18n="howEstimate">How do we estimate this?</h2>
-          <p class="section-intro" data-i18n="howEstimateIntro">Step by step, from your exact token count.</p>
-        </div>
-
-        <!-- One section per reading, built from js/content.js -->
-        <div class="readings">
-          <div id="scrolling-story" class="scrolling-story"></div>
-        </div>
-
-        <!--
-          PHOTOGRAPHS: one per reading. Replace src, and describe the photo in
-          alt (English) and data-alt-ne (Nepali). Keep data-step.
-          Each is moved into its reading when the page loads; until the file
-          exists, a plain placeholder is shown instead.
-        -->
-        <div id="reading-photos" hidden>
-          <img data-step="electricity" src="elec.jpg" alt="Electricity pylons and power lines glowing against a dusk sky." data-alt-ne="साँझको आकाशमा चम्किरहेका बिजुलीका खम्बा र तार।" width="612" height="408">
-          <img data-step="heat" src="heat.jpeg" alt="An illustration of a thermometer in the red beside a flame." data-alt-ne="आगोको छेउमा रातो भएको थर्मामिटरको चित्र।" width="662" height="463">
-          <img data-step="water" src="water.jpeg" alt="Sunlight shining down through deep blue water." data-alt-ne="गहिरो नीलो पानीभित्र छिरेको घामको प्रकाश।" width="739" height="415">
-          <img data-step="carbon" src="carbon.jpeg" alt="Cooling towers releasing steam under a blue sky, with clouds shaped like CO2." data-alt-ne="नीलो आकाशमुनि बाफ फ्याँकिरहेका कुलिङ टावर, CO2 आकारका बादलसहित।" width="680" height="451">
-          <img data-step="money" src="coins.jpeg" alt="A stack of gold coins." data-alt-ne="सुनौला सिक्काको थाक।" width="554" height="554">
-          <img data-step="scale" src="scale.jpeg" alt="An aerial view of rows of cooling units on data center roofs." data-alt-ne="डेटा सेन्टरका छानामाथि लहरै राखिएका चिस्याउने मेसिनको हवाई दृश्य।" width="612" height="500">
-        </div>
-
-        <blockquote class="closing">
-          <p id="closing-thought" class="closing-quote"></p>
-        </blockquote>
-      </section>
-
-      <!-- ================= 4. DISCLAIMER ================= -->
+      <!-- Disclaimer -->
       <section id="disclaimer" class="disclaimer" aria-labelledby="disclaimer-heading">
-        <div class="section-inner disclaimer-inner">
-          <h2 id="disclaimer-heading" data-i18n="disclaimerHeading">These are estimates</h2>
-          <p data-i18n="disclaimer1"></p>
-          <p data-i18n="disclaimer2"></p>
-          <p data-i18n="disclaimer3"></p>
-        </div>
+        <h2 id="disclaimer-heading" data-i18n="disclaimerHeading">These are estimates</h2>
+        <p data-i18n="disclaimer1"></p>
+        <p data-i18n="disclaimer2"></p>
       </section>
 
-      <!-- ================= 5. REFERENCES (their own page) ================= -->
       <p class="references-link"><a href="references.html" data-i18n="referencesLink">References →</a></p>
 
       <div class="end-actions">
