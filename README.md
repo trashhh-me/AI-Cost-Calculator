@@ -115,10 +115,10 @@ Notes per provider:
    worth reading in the original: Epoch AI's 2.5 Wh / 10,000-token figure
    (it sets the input-token weighting), Li et al.'s 3.142 L/kWh, and
    Jegham et al.'s 0.42 Wh (it sets the high end of the range).
-5. **Nepali text**: written for this exhibit. Have a native speaker read
+4. **Nepali text**: written for this exhibit. Have a native speaker read
    `public/js/strings.js`, the `ne:` lines in `public/js/content.js` and the
    Nepali sample answers in `public/js/demo-answers.js` once before opening.
-6. **Stated assumptions** you may want to change in `config.js`: phone
+5. **Stated assumptions** you may want to change in `config.js`: phone
    battery 15 Wh, one drop = 0.05 mL, one glass = 250 mL. The car comparison
    uses the US EPA figure; for another country, replace `carGPerKm`.
 
