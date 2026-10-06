@@ -468,6 +468,11 @@ body:has(.chat-app[data-state='chat']) .subtitle {
 .send-button:hover {
   background: var(--coral-deep);
 }
+/* grey until there is something to send */
+.composer:has(.prompt-input:placeholder-shown) .send-button {
+  background: transparent;
+  color: var(--ink-soft);
+}
 .send-button:disabled {
   background: var(--panel);
   color: var(--ink-soft);
@@ -561,7 +566,20 @@ body:has(.chat-app[data-state='chat']) .subtitle {
   overflow-wrap: anywhere;
 }
 .message--ai {
+  position: relative;
   align-self: stretch;
+  padding-left: 2.6rem;
+}
+/* a small plum circle with a speech bubble beside each answer */
+.message--ai::before {
+  content: '';
+  position: absolute;
+  top: 0.1rem;
+  left: 0;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  background: var(--plum) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fde688' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z'/%3E%3C/svg%3E") center / 0.9rem no-repeat;
 }
 .message-note,
 .thinking,
@@ -759,6 +777,13 @@ body:has(.chat-app[data-state='chat']) .subtitle {
   height: 3px;
   background: var(--coral-deep);
 }
+.bill-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+}
 .bill-text h2 {
   color: var(--plum);
   font-size: var(--step-4);
@@ -876,11 +901,23 @@ body:has(.chat-app[data-state='chat']) .subtitle {
 .estimate {
   margin-top: 4.5rem;
 }
-.estimate h2 {
-  margin-bottom: 2rem;
+.estimate-head {
+  margin: 0 calc(50% - 50vw) 2.5rem;
+  padding: 0 max(var(--gutter), calc(50vw - 34rem));
+}
+.estimate-head > * + * {
+  margin-top: 0.8rem;
+}
+.estimate-head h2 {
   color: var(--plum);
-  font-size: var(--step-3);
-  text-align: center;
+  font-size: var(--step-4);
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+.estimate-head > p:last-child {
+  max-width: 40rem;
+  font-size: var(--step-1);
+  color: var(--ink-soft);
 }
 .est-block {
   margin: 0 calc(50% - 50vw);
@@ -1164,31 +1201,44 @@ body:has(.chat-app[data-state='chat']) .subtitle {
   gap: 1.25rem;
   margin-top: 2rem;
 }
-.closing-band .button-primary,
-.closing-band .button-quiet {
+/* Square band buttons: coral, or a plum outline; with a small icon */
+.band-btn {
   display: inline-flex;
   align-items: center;
+  gap: 0.6rem;
   min-height: 3.2rem;
-  padding: 0.6rem 1.75rem;
+  padding: 0.6rem 1.6rem;
+  border: 2px solid var(--plum);
   border-radius: 0;
+  background: transparent;
+  color: var(--plum);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
 }
-.closing-band .button-primary {
-  background: #e8473b;
+.band-btn svg {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.band-btn--outline:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+.band-btn--coral {
+  /* white text 4.6:1 */
+  background: #e0392c;
+  border-color: #e0392c;
   color: #ffffff;
 }
-.closing-band .button-primary:hover {
-  background: #c9372c;
-}
-.closing-band .button-quiet {
-  border: 2px solid var(--plum);
-  color: var(--plum);
-}
-.closing-band .button-quiet:hover {
-  background: rgba(255, 255, 255, 0.4);
+.band-btn--coral:hover {
+  background: var(--coral-deep);
+  border-color: var(--coral-deep);
 }
 .button-text {
   margin-top: 1.5rem;
@@ -1201,8 +1251,7 @@ body:has(.chat-app[data-state='chat']) .subtitle {
 }
 
 /* Buttons elsewhere (the "Still there?" dialog) */
-.button-primary,
-.button-quiet {
+.button-primary {
   min-height: 3rem;
   padding: 0.6rem 1.5rem;
   border-radius: 6px;
@@ -1216,24 +1265,18 @@ body:has(.chat-app[data-state='chat']) .subtitle {
 .button-primary:hover {
   background: #44071c;
 }
-.button-quiet {
-  background: transparent;
-  color: var(--ink);
-  border: 2px solid var(--ink-soft);
-}
 
 /* Spaced capitals suit English only: Devanagari letters must stay joined */
 :lang(ne) .receipt-header h3,
 :lang(ne) .kicker,
 :lang(ne) .bill-text h2,
+:lang(ne) .estimate-head h2,
 :lang(ne) .token-card-title,
-:lang(ne) .closing-band .button-primary,
-:lang(ne) .closing-band .button-quiet {
+:lang(ne) .band-btn {
   letter-spacing: 0;
 }
 :lang(ne) .closing-band h2,
-:lang(ne) .closing-band .button-primary,
-:lang(ne) .closing-band .button-quiet {
+:lang(ne) .band-btn {
   text-transform: none;
 }
 

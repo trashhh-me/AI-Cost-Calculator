@@ -59,6 +59,7 @@ function renderCost() {
   renderReceipt(turns, result);
   fillExplainer(result);
   $('ask-another').hidden = remaining <= 0;
+  $('bill-ask').hidden = remaining <= 0;
   return renderTokens(turns);
 }
 
@@ -99,9 +100,14 @@ Promise.resolve(renderCost()).then(() => {
 });
 onLangChange(renderCost);
 
-$('ask-another').addEventListener('click', () => {
+function askAnother() {
   window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
   chat.focus();
+}
+$('ask-another').addEventListener('click', askAnother);
+$('bill-ask').addEventListener('click', askAnother);
+$('to-estimate').addEventListener('click', () => {
+  $('estimate').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'start' });
 });
 
 // keepSettings: "New chat" keeps the visitor's language and text size;
