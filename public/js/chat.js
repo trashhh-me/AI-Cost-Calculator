@@ -181,9 +181,10 @@ export function createChat({ onActivity, onTurnComplete }) {
   function scrollToEnd(force = false) {
     // Large screens scroll the conversation box; small screens scroll the page.
     if (getComputedStyle(scroller).overflowY === 'visible') {
-      const doc = document.scrollingElement;
-      const nearBottom = doc.scrollHeight - doc.scrollTop - window.innerHeight < 200;
-      if (force || nearBottom) window.scrollTo({ top: doc.scrollHeight });
+      const last = list.lastElementChild;
+      if (!last) return;
+      const nearBottom = last.getBoundingClientRect().bottom - window.innerHeight < 200;
+      if (force || nearBottom) last.scrollIntoView({ block: 'end' });
       return;
     }
     const nearBottom = scroller.scrollHeight - scroller.scrollTop - scroller.clientHeight < 120;

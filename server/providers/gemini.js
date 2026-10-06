@@ -35,7 +35,7 @@ export async function* streamChat({ apiKey, model, system, messages, maxTokens, 
     if (!options?.thinkingConfig || !/thinking/i.test(String(err?.message))) throw err;
     const rest = { ...options };
     delete rest.thinkingConfig;
-    console.warn('[ai-dex] Gemini rejected the thinking setting; using the model default.');
+    console.warn('[ai-cost-calculator] Gemini rejected the thinking setting; using the model default.');
     opened = await open(rest);
   }
   usage.model = model;

@@ -1,5 +1,5 @@
 /*
- * AI DEX: local exhibition server
+ * AI Cost Calculator: local exhibition server
  * ------------------------------------------------------------------
  * - Serves the exhibit from ./public
  * - POST /api/chat   streams an AI answer as newline-delimited JSON
@@ -40,7 +40,7 @@ const ADAPTERS = {
   gemini: () => import('./server/providers/gemini.js'),
 };
 if (!ADAPTERS[PROVIDER]) throw new Error(`Unknown provider "${PROVIDER}" in public/js/config.js`);
-if (!CONFIG.prices[MODEL]) console.warn(`[ai-dex] No price for "${MODEL}" in config.js; the cost line will be blank.`);
+if (!CONFIG.prices[MODEL]) console.warn(`[ai-cost-calculator] No price for "${MODEL}" in config.js; the cost line will be blank.`);
 
 const ledger = new SpendLedger(path.join(ROOT, 'data'));
 const visits = new VisitCounter(CONFIG.limits.maxQuestionsPerVisit);
@@ -211,7 +211,7 @@ async function handleChat(req, res) {
         // A busy provider often recovers within a second or two: retry once,
         // but only if nothing has been shown to the visitor yet.
         if (text || job.stopped || controller.signal.aborted || !isOverloaded(err)) throw err;
-        console.warn('[ai-dex] provider busy, retrying once…');
+        console.warn('[ai-cost-calculator] provider busy, retrying once…');
         await new Promise((r) => setTimeout(r, 1500));
         if (job.stopped || controller.signal.aborted) throw err;
         await run(adapter, opts);
@@ -221,7 +221,7 @@ async function handleChat(req, res) {
         // The live AI failed: record anything already generated, then answer
         // with a clearly labelled sample instead of leaving a dead screen.
         reason = job.timedOut ? 'network' : classifyError(err);
-        console.warn(`[ai-dex] live answer failed (${reason}):`, err?.message || err);
+        console.warn(`[ai-cost-calculator] live answer failed (${reason}):`, err?.message || err);
         if (text) {
           const partial = costUSD(MODEL, usage.input ?? countConversation(CONFIG.systemPrompt, messages), countTokens(text));
           ledger.add(partial ?? 0);
@@ -384,7 +384,7 @@ const server = http.createServer((req, res) => {
 
 server.on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Is AI DEX already running? Set PORT in .env to use another port.`);
+    console.error(`Port ${PORT} is already in use. Is AI Cost Calculator already running? Set PORT in .env to use another port.`);
     process.exit(1);
   }
   throw err;
@@ -392,7 +392,7 @@ server.on('error', (err) => {
 
 server.listen(PORT, HOST, () => {
   const mode = DEMO_FORCED ? 'DEMO (sample answers)' : API_KEY ? `LIVE via ${PROVIDER}` : 'DEMO (no API key found)';
-  console.log(`AI DEX running at http://${HOST}:${PORT}`);
+  console.log(`AI Cost Calculator running at http://${HOST}:${PORT}`);
   console.log(`Mode: ${mode} · model: ${modelLabel(MODEL)}`);
   console.log(`Daily cap: $${CONFIG.limits.dailySpendCapUSD.toFixed(2)} · spent today: $${ledger.spentToday().toFixed(4)}`);
   if (!DEMO_FORCED && !API_KEY) explainMissingKey();

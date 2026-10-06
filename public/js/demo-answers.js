@@ -1,5 +1,5 @@
 /*
- * AI DEX: suggestion buttons and pre-written sample answers
+ * AI Cost Calculator: suggestion buttons and pre-written sample answers
  * ------------------------------------------------------------------
  * Sample answers are streamed in demo mode, or when the live AI cannot be
  * reached. They are deliberately different lengths so visitors can compare

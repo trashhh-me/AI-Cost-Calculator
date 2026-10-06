@@ -1,5 +1,5 @@
 /*
- * AI DEX: exhibit configuration
+ * AI Cost Calculator: exhibit configuration
  * ------------------------------------------------------------------
  * This one file is read by BOTH the server (server.js) and the browser.
  * The server only ever trusts its own copy, so a visitor editing this file

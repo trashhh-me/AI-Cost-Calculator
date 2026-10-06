@@ -13,14 +13,25 @@
 <body>
   <a class="skip-link" href="#user-prompt" data-i18n="skipToChat">Skip to the question box</a>
 
-  <!-- Language and text size, top right -->
-  <div class="page-controls">
-    <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:controls.language">
-      <button type="button" data-set-lang="en" lang="en" aria-pressed="true">English</button>
-      <button type="button" data-set-lang="ne" lang="ne" aria-pressed="false">नेपाली</button>
+  <!-- Top bar: logo on the left; new chat, language and text size on the right.
+       It stays at the top of the screen all the way down the page. -->
+  <header class="topbar">
+    <!-- swap the placeholder for the real image later -->
+    <div class="site-logo logo-placeholder" aria-hidden="true">Logo</div>
+    <div class="topbar-right">
+      <button type="button" id="new-chat" class="pill-btn">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span data-i18n="newChat">New chat</span>
+      </button>
+    <div class="page-controls">
+      <div class="lang-switch" role="group" aria-label="Language" data-i18n-attr="aria-label:controls.language">
+        <button type="button" data-set-lang="en" lang="en" aria-pressed="true">English</button>
+        <button type="button" data-set-lang="ne" lang="ne" aria-pressed="false">नेपाली</button>
+      </div>
+      <button type="button" class="text-size" data-text-size-toggle aria-pressed="false" aria-label="Larger text" data-i18n-attr="aria-label:controls.textSize"><span aria-hidden="true">A+</span></button>
     </div>
-    <button type="button" class="text-size" data-text-size-toggle aria-pressed="false" aria-label="Larger text" data-i18n-attr="aria-label:controls.textSize"><span aria-hidden="true">A+</span></button>
-  </div>
+    </div>
+  </header>
 
   <main id="main" class="page">
 
@@ -49,10 +60,9 @@
         </button>
       </form>
 
-      <details id="templates" class="templates">
-        <summary data-i18n="templates">Sample prompts</summary>
+      <div id="templates" class="templates">
         <ul id="presets" class="template-list" aria-label="Sample prompts" data-i18n-attr="aria-label:templates"></ul>
-      </details>
+      </div>
 
       <p id="chat-notice" class="chat-notice" role="status" hidden></p>
 
@@ -60,10 +70,26 @@
       <section id="Chat-Page" class="answer-panel" aria-labelledby="conversation-heading">
         <h2 id="conversation-heading" class="visually-hidden" data-i18n="conversation">Conversation</h2>
         <div id="conversation" class="message-list" role="log" aria-label="Messages"
-          data-i18n-attr="aria-label:messages; data-placeholder:answerPlaceholder"
-          data-placeholder="Your answer will appear here."></div>
+          data-i18n-attr="aria-label:messages"></div>
         <p id="answer-announcer" class="visually-hidden" aria-live="polite"></p>
       </section>
+
+      <!-- ================= SEE THE COST ================= -->
+      <div class="cost-card">
+        <div class="mini-receipt">
+          <p class="mini-title" data-i18n="billTitle">Your AI query costs</p>
+          <p class="mini-line" data-resource="electricity"><span data-i18n="electricity">Electricity</span> <strong id="mini-electricity"></strong></p>
+          <p class="mini-line" data-resource="water"><span data-i18n="water">Water</span> <strong id="mini-water"></strong></p>
+          <p class="mini-line" data-resource="carbon"><span data-i18n="carbon">Carbon</span> <strong id="mini-carbon"></strong></p>
+        </div>
+        <div class="cost-card-text">
+          <h2 data-i18n="cardTitle">This answer wasn’t free for the planet</h2>
+          <p data-i18n="cardText"></p>
+          <button type="button" id="see-cost" class="card-button" aria-expanded="false" aria-controls="cost-content" hidden>
+            <span data-i18n="seeCost">See how the cost is calculated</span>
+          </button>
+        </div>
+      </div>
 
       <p class="model-line">
         <span class="status-dot" aria-hidden="true"></span>
@@ -75,16 +101,16 @@
       </p>
     </div>
 
-    <!-- ================= SEE THE COST ================= -->
-    <button type="button" id="see-cost" class="bar bar--big" aria-expanded="false" aria-controls="cost-content" hidden>
-      <span data-i18n="seeCost">See the Cost of Your Query</span>
-    </button>
 
     <div id="cost-content" class="cost-content" hidden>
 
       <!-- The bill: an itemised receipt -->
       <section id="bill" class="bill" aria-labelledby="bill-heading" tabindex="-1">
-        <h2 id="bill-heading" class="visually-hidden" data-i18n="billTitle">Your AI query costs</h2>
+        <div class="bill-text">
+          <p class="kicker" data-i18n="receiptKicker">Your receipt</p>
+          <h2 id="bill-heading" data-i18n="receiptHeading">What your question used</h2>
+          <p data-i18n="receiptIntro"></p>
+        </div>
         <div class="receipt-slot">
           <article id="thermal-receipt" class="thermal-receipt" aria-label="Itemised receipt" data-i18n-attr="aria-label:receiptLabel"></article>
         </div>
@@ -95,45 +121,44 @@
         <h2 id="estimate-heading" data-i18n="howEstimate">How do we estimate this?</h2>
 
         <details class="est-block" id="Tokenization">
-          <summary class="bar"><span data-i18n="est.text">How AI processes the text</span></summary>
-          <div class="est-body">
-            <p data-i18n="tokenDef"></p>
-            <p class="token-examples-label" data-i18n="tokenExamplesLabel"></p>
-            <div class="token-examples">
-              <p class="token-example-row"><span id="token-example-en" class="token-sample" lang="en"></span> <span id="token-example-en-count" class="token-count"></span></p>
-              <p class="token-example-row"><span id="token-example-ne" class="token-sample" lang="ne"></span> <span id="token-example-ne-count" class="token-count"></span></p>
+          <summary class="bar"><span class="step-num">01</span><span data-i18n="est.text">How AI processes the text</span><span class="step-value" id="value-text"></span></summary>
+          <div class="est-body token-body">
+            <div class="est-text">
+              <p data-i18n="tokenDef"></p>
+              <p class="token-examples-label" data-i18n="tokenExamplesLabel"></p>
+              <div class="token-examples">
+                <p class="token-example-row"><span id="token-example-en" class="token-sample" lang="en"></span> <span id="token-example-en-count" class="token-count"></span></p>
+                <p class="token-example-row"><span id="token-example-ne" class="token-sample" lang="ne"></span> <span id="token-example-ne-count" class="token-count"></span></p>
+              </div>
+              <p data-i18n="tokenAfter"></p>
+              <p id="split-note" class="note-box"></p>
             </div>
-            <p data-i18n="tokenAfter"></p>
-
-            <h3 data-i18n="tokensYours">Your conversation, in tokens</h3>
             <div class="token-cards">
               <div class="token-card">
-                <p class="token-card-title"><span data-i18n="sent">Sent to the AI</span>: <strong id="input-token-count">0</strong> <span data-i18n="tokens">tokens</span></p>
+                <p class="token-card-title"><span data-i18n="sent">Sent to the AI</span> <strong><span id="input-token-count">0</span> <span data-i18n="tokens">tokens</span></strong></p>
                 <p id="input-breakdown" class="small"></p>
                 <div id="input-tokens-visual" class="token-display-box" tabindex="0" aria-label="Your messages split into tokens" data-i18n-attr="aria-label:inputBoxLabel"></div>
               </div>
               <div class="token-card">
-                <p class="token-card-title"><span data-i18n="written">Written by the AI</span>: <strong id="output-token-count">0</strong> <span data-i18n="tokens">tokens</span></p>
-                <p class="small" data-i18n="writtenNote"></p>
+                <p class="token-card-title"><span data-i18n="written">Written by the AI</span> <strong><span id="output-token-count">0</span> <span data-i18n="tokens">tokens</span></strong></p>
                 <div id="output-tokens-visual" class="token-display-box" tabindex="0" aria-label="The AI’s answers split into tokens" data-i18n-attr="aria-label:outputBoxLabel"></div>
               </div>
             </div>
-            <p id="split-note" class="small"></p>
           </div>
         </details>
 
         <details class="est-block" id="est-electricity" data-est="electricity">
-          <summary class="bar"><span data-i18n="est.electricity">How electricity consumption is measured</span></summary>
+          <summary class="bar"><span class="step-num">02</span><span data-i18n="est.electricity">How electricity consumption is measured</span><span class="step-value" id="value-electricity"></span></summary>
           <div class="est-body"></div>
         </details>
 
         <details class="est-block" id="est-water" data-est="water">
-          <summary class="bar"><span data-i18n="est.water">How the water consumption is measured</span></summary>
+          <summary class="bar"><span class="step-num">03</span><span data-i18n="est.water">How the water consumption is measured</span><span class="step-value" id="value-water"></span></summary>
           <div class="est-body"></div>
         </details>
 
         <details class="est-block" id="est-carbon" data-est="carbon">
-          <summary class="bar"><span data-i18n="est.carbon">How carbon impact is calculated</span></summary>
+          <summary class="bar"><span class="step-num">04</span><span data-i18n="est.carbon">How carbon impact is calculated</span><span class="step-value" id="value-carbon"></span></summary>
           <div class="est-body"></div>
         </details>
       </section>
@@ -145,12 +170,16 @@
         <p data-i18n="disclaimer2"></p>
       </section>
 
-      <p class="references-link"><a href="references.html" data-i18n="referencesLink">References →</a></p>
-
-      <div class="end-actions">
-        <button type="button" id="ask-another" class="button-primary" data-i18n="askAnother">Ask another question</button>
-        <button type="button" id="reset-btn" class="button-quiet" data-i18n="startAgain">Start again</button>
-      </div>
+      <!-- The closing band -->
+      <section class="closing-band" aria-labelledby="closing-heading">
+        <h2 id="closing-heading" data-i18n="closingTitle">Small per question. Huge at scale.</h2>
+        <p data-i18n="closingText"></p>
+        <div class="end-actions">
+          <button type="button" id="ask-another" class="button-primary" data-i18n="askAnother">Ask another question</button>
+          <a class="button-quiet" href="references.html" data-i18n="seeReferences">See all references</a>
+        </div>
+        <button type="button" id="reset-btn" class="button-text" data-i18n="startAgain">Start again</button>
+      </section>
     </div>
   </main>
 

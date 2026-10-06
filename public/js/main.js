@@ -104,24 +104,32 @@ $('ask-another').addEventListener('click', () => {
   chat.focus();
 });
 
-async function resetAll() {
+// keepSettings: "New chat" keeps the visitor's language and text size;
+// the idle reset and "Start again" clear everything for the next visitor.
+async function resetAll({ keepSettings = false } = {}) {
   kiosk?.dismiss();
   clearVisit();
   clearTokens();
   clearReceipt();
   setOpen(false);
   for (const d of document.querySelectorAll('.est-block')) d.open = false;
-  resetLang();
-  resetTextSize();
+  if (!keepSettings) {
+    resetLang();
+    resetTextSize();
+  }
   window.scrollTo({ top: 0, behavior: 'instant' });
   if (location.hash) history.replaceState(null, '', location.pathname);
   await chat.reset();
 }
-$('reset-btn').addEventListener('click', resetAll);
+$('reset-btn').addEventListener('click', () => resetAll());
+$('new-chat').addEventListener('click', async () => {
+  await resetAll({ keepSettings: true });
+  chat.focus();
+});
 
 const kiosk = initKiosk({
   // A language or text size left by the last visitor is reset too.
   hasSomethingToClear: () =>
     chat.hasContent() || getLang() !== 'en' || document.documentElement.dataset.textSize === 'large',
-  onReset: resetAll,
+  onReset: () => resetAll(),
 });

@@ -1,17 +1,22 @@
-# AI Cost Calculator (AI DEX)
+# AI Cost Calculator
 
 An interactive exhibit, in English and Nepali, about the hidden cost of
 talking to an AI. Visitors ask a question and get a real streamed answer.
-"See the Cost of Your Query" then opens:
+Under the answer a card shows what it used, and "See how the cost is
+calculated" opens:
 
-1. **The bill**: electricity, water and carbon for their conversation.
-2. **How do we estimate this?**: four bars that each open on demand: how AI
-   processes the text (tokens), and how electricity, water and carbon are
-   worked out, with the sum using the visitor's own tokens and the sources.
-3. **A disclaimer** and a link to the **References** page.
+1. **The receipt**: electricity, water and carbon for their conversation,
+   each with an everyday comparison.
+2. **How do we estimate this?**: four colour bands that each open on
+   demand: how AI processes the text (tokens), and how electricity, water
+   and carbon are worked out, with the sum using the visitor's own tokens
+   and the sources.
+3. **A disclaimer**, then a closing band with "Ask another question" and a
+   link to the **References** page.
 
-A language switch (English / नेपाली) and a larger-text switch sit at the top
-right. Everything resets for the next visitor after a quiet spell.
+A top bar holds the logo, "New chat", the language switch (English /
+नेपाली) and a larger-text switch (A+). Everything resets for the next
+visitor after a quiet spell.
 
 Everything runs on the exhibition computer. The only thing that needs the
 internet is the call to the AI provider, and if that fails the exhibit

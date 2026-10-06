@@ -1,5 +1,5 @@
 /*
- * AI DEX: explainer text, research figures and references
+ * AI Cost Calculator: explainer text, research figures and references
  * ------------------------------------------------------------------
  * Edit words and figures here without touching the layout code.
  *

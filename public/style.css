@@ -1,13 +1,14 @@
 /* =====================================================================
    AI Cost Calculator
-   A light, plain page: one humanist face (Atkinson Hyperlegible Next),
-   its mono for tokens and sums, Mukta for Nepali. One purple for the
-   bars you can open, a pale yellow slip for the bill.
-   Low vision: 20px text at the smallest, every text colour at least 7:1
-   on its background, a larger-text switch, a thick focus ring.
-   Sections: fonts · tokens · base · controls · title · question ·
-   answer · bars · bill · estimates · disclaimer · references ·
-   kiosk overlay · small screens · more contrast · reduced motion
+   Ask an AI a question, then see the electricity, water and carbon
+   behind it. One humanist face (Atkinson Hyperlegible Next), its mono
+   for tokens and sums, Mukta for Nepali.
+   Low vision: 20px text at the smallest, strong contrast, a larger-text
+   switch (A+), a thick focus ring.
+   Sections: fonts · tokens · base · top bar · title · question ·
+   answer · cost card · receipt · estimates · disclaimer · closing band ·
+   references page · kiosk overlay · small screens · more contrast ·
+   reduced motion
    ===================================================================== */
 
 /* ---------- Fonts (self-hosted, SIL Open Font License) ---------- */
@@ -56,20 +57,28 @@
 
 /* ---------- Design tokens ---------- */
 :root {
-  --bg: #f7f5ef; /* warm paper */
-  --ink: #1d1d1b;
-  --ink-soft: #46463f; /* 8.9:1 on --bg */
-  --rule: #d6d2c6;
-  --panel: #ebe9e2; /* the answer area */
+  --bg: #fffbf7; /* warm paper */
+  /* the page: warm paper with soft lavender, peach and butter glows */
+  --page-bg:
+    radial-gradient(45% 50% at 30% 32%, rgba(175, 158, 215, 0.3), transparent 72%) fixed,
+    radial-gradient(45% 50% at 72% 68%, rgba(253, 201, 180, 0.45), transparent 72%) fixed,
+    radial-gradient(70% 70% at 50% 50%, rgba(253, 230, 136, 0.2), transparent 80%) fixed,
+    #fffbf7;
+  --ink: #2c1210;
+  --ink-soft: #5b4a4e; /* 8.6:1 on --bg */
+  --rule: #e6dcdd;
+  --hair: rgba(44, 18, 16, 0.14); /* fine outlines */
+  --tint: rgba(44, 18, 16, 0.06); /* the grey of the top-bar buttons */
+  --panel: #f4ece8;
   --field: #ffffff;
-  --field-edge: #8a877d;
+  --field-edge: #9e8c90;
 
-  --purple: #573a92; /* the bars: white text 9:1 */
-  --purple-hover: #462e78;
-  --on-purple: #ffffff;
+  --plum: #5c0a26; /* text on the coloured bands; white on it 13:1 */
+  --coral: #ef473a; /* the send button */
+  --coral-deep: #cc3326;
+  --lavender: #5e46b0; /* focus ring on the question box */
 
-  --bill-bg: #faf6c4; /* the pale yellow slip */
-  --bill-edge: #5c5a4f;
+  --bill-bg: #faf6c4;
 
   --electricity: #b36a00;
   --water: #1c6fa8;
@@ -89,7 +98,7 @@
   --step-4: 2.8rem;
   --gutter: clamp(1rem, 4vw, 3rem);
   --column: 52rem;
-  --focus: #1d1d1b;
+  --focus: #2c1210;
 }
 
 /* ---------- Base ---------- */
@@ -113,7 +122,7 @@ html[data-text-size='large'] { font-size: 150%; }
 }
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--page-bg);
   color: var(--ink);
   font-family: var(--font);
   font-size: var(--step-0);
@@ -177,54 +186,141 @@ button {
   color: var(--ink-soft);
 }
 
-/* ---------- Language and text size, top right ---------- */
-.page-controls {
-  position: fixed;
-  top: 0.6rem;
-  right: 0.6rem;
+/* ---------- Top bar: logo, new chat, language and text size ---------- */
+.topbar {
+  position: relative;
   z-index: 20;
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
-  gap: 0.25rem;
-  padding: 0 0.35rem;
-  background: var(--bg);
-  border: 1px solid var(--rule);
+  gap: 0.5rem;
+  padding: 0.6rem 0.9rem;
+  background: var(--page-bg);
+}
+/* On wider screens the bar stays at the top all the way down.
+   (On phones it scrolls away: there it can take two lines.) */
+@media (min-width: 30rem) {
+  .topbar {
+    position: sticky;
+    top: 0;
+  }
+  /* jumps (to the bill, a step) land below the bar, not under it */
+  html {
+    scroll-padding-top: 4.5rem;
+  }
+}
+.logo-placeholder {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 8rem;
+  height: 2.6rem;
+  border: 2px dashed var(--field-edge);
+  border-radius: 10px;
+  color: var(--ink-soft);
+  font-size: var(--step--1);
+}
+.topbar-right {
+  margin-left: auto;
+  display: flex;
+  flex-wrap: wrap; /* very large text on a phone: a second line, not off screen */
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+}
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.3rem 1rem;
+  background: var(--tint);
+  border: 0;
+  border-radius: 999px;
+  color: var(--ink);
+  font-size: var(--step--1);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.pill-btn:hover {
+  background: rgba(44, 18, 16, 0.1);
+}
+.pill-btn svg {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+/* "New chat" only once a chat has started */
+body:has(.chat-app[data-state='start']) #new-chat {
+  display: none;
+}
+/* Language and text size: one segmented control; the chosen one is white */
+.page-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  background: var(--tint);
   border-radius: 999px;
 }
 .lang-switch {
   display: flex;
+  gap: 0.15rem;
 }
 .lang-switch button,
 .text-size {
-  min-height: 2.75rem;
-  min-width: 2.75rem;
-  padding: 0.3rem 0.7rem;
+  min-height: 2.1rem;
+  min-width: 2.4rem;
+  padding: 0.2rem 0.8rem;
   background: none;
   border: 0;
+  border-radius: 999px;
   color: var(--ink-soft);
   font-size: var(--step--1);
 }
-.lang-switch button + button {
-  border-left: 1px solid var(--rule);
+.lang-switch button:hover,
+.text-size:hover {
+  color: var(--ink);
 }
 .lang-switch button[aria-pressed='true'],
 .text-size[aria-pressed='true'] {
+  background: #ffffff;
   color: var(--ink);
   font-weight: 700;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 0.35em;
+  box-shadow: 0 1px 3px rgba(44, 18, 16, 0.14);
 }
 .text-size {
-  font-size: var(--step-1);
+  font-size: var(--step-0);
+  font-weight: 700;
   line-height: 1;
+}
+/* phones: a smaller logo, tighter buttons, and "New chat" shows just its + */
+@media (max-width: 30rem) {
+  .topbar { padding-inline: 0.5rem; }
+  .topbar-right { gap: 0.3rem; }
+  .logo-placeholder { width: 3.5rem; }
+  .pill-btn { padding-inline: 0.7rem; }
+  .pill-btn span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .lang-switch button,
+  .text-size { min-width: 2.2rem; padding-inline: 0.5rem; }
 }
 
 /* ---------- The page: one centred column ---------- */
 .page {
   max-width: var(--column);
   margin: 0 auto;
-  padding: 5rem var(--gutter) 7rem;
+  padding: 1.5rem var(--gutter) 7rem;
 }
 
 /* ---------- Title ---------- */
@@ -232,34 +328,91 @@ button {
   text-align: center;
 }
 .masthead h1 {
-  font-size: var(--step-4);
-  letter-spacing: -0.01em;
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 .subtitle {
-  margin-top: 0.9rem;
+  margin-top: 0.6rem;
   font-size: var(--step-1);
-  font-style: italic;
   line-height: 1.5;
+  color: var(--ink-soft);
 }
-:lang(ne) .subtitle {
-  font-style: normal; /* Devanagari has no true italic */
+/* Before the first question the title and box sit in the middle of the screen */
+body:has(.chat-app[data-state='start']) .page {
+  padding-top: max(1.5rem, 16vh);
+}
+/* the title gets out of the way once the chat has started */
+body:has(.chat-app[data-state='chat']) .masthead h1 {
+  font-size: var(--step-2);
+}
+body:has(.chat-app[data-state='chat']) .subtitle {
+  display: none;
 }
 
 /* ---------- Question ---------- */
 .chat-app {
-  margin-top: 3.5rem;
+  margin-top: 2.2rem;
+}
+/* After the first question: the answers on top, the box at the bottom */
+.chat-app[data-state='chat'] {
+  display: flex;
+  flex-direction: column;
 }
 .composer {
   display: flex;
   align-items: flex-end;
   gap: 0.5rem;
-  padding: 0.45rem 0.45rem 0.45rem 1.1rem;
+  padding: 0.4rem 0.4rem 0.4rem 1.4rem;
   background: var(--field);
-  border: 2px solid var(--field-edge);
-  border-radius: 10px;
+  border-radius: 1.6rem;
+  box-shadow:
+    0 0 0 1px var(--hair),
+    0 2px 6px rgba(44, 18, 16, 0.04),
+    0 14px 36px -14px rgba(60, 70, 140, 0.22);
 }
 .composer:focus-within {
-  border-color: var(--ink);
+  box-shadow:
+    0 0 0 2px var(--lavender),
+    0 2px 6px rgba(44, 18, 16, 0.04),
+    0 18px 42px -14px rgba(60, 70, 140, 0.28);
+}
+/* In a chat the box stays at the bottom of the screen while the answers
+   scroll under it, but only within the chat. */
+.chat-app[data-state='chat'] .composer {
+  position: sticky;
+  bottom: 1rem;
+  z-index: 5;
+  background: transparent;
+  box-shadow: none;
+}
+/* Around the box: the page's own colours, fading in at the top, so text
+   going under it disappears. The box's white and border are drawn on top. */
+.chat-app[data-state='chat'] .composer::before {
+  content: '';
+  position: absolute;
+  top: -2.5rem;
+  bottom: -1rem;
+  left: -1rem;
+  right: -1rem;
+  z-index: -2;
+  background: var(--page-bg);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 2.5rem);
+  mask-image: linear-gradient(to bottom, transparent, #000 2.5rem);
+  pointer-events: none;
+}
+.chat-app[data-state='chat'] .composer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--field);
+  box-shadow: 0 0 0 1px var(--hair);
+  pointer-events: none;
+}
+.chat-app[data-state='chat'] .composer:focus-within::after {
+  box-shadow: 0 0 0 2px var(--lavender);
 }
 .prompt-input {
   flex: 1;
@@ -295,15 +448,15 @@ button {
   width: 2.75rem;
   height: 2.75rem;
   border: 0;
-  border-radius: 8px;
+  border-radius: 50%;
 }
 .icon-button svg {
   width: 1.3rem;
   height: 1.3rem;
 }
 .send-button {
-  background: var(--purple);
-  color: var(--on-purple);
+  background: var(--coral);
+  color: #ffffff;
 }
 .send-button svg {
   fill: none;
@@ -313,10 +466,10 @@ button {
   stroke-linejoin: round;
 }
 .send-button:hover {
-  background: var(--purple-hover);
+  background: var(--coral-deep);
 }
 .send-button:disabled {
-  background: var(--rule);
+  background: var(--panel);
   color: var(--ink-soft);
   cursor: not-allowed;
 }
@@ -328,72 +481,47 @@ button {
   fill: currentColor;
 }
 
-/* Sample prompts: a drop-down under the box; a choice fills the box */
+/* Sample prompts: pills under the box; a choice fills the box */
 .templates {
-  position: relative;
   margin-top: 1rem;
-  text-align: center;
 }
-.templates summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  min-height: 2.75rem;
-  padding: 0.3rem 0.75rem;
-  cursor: pointer;
-  list-style: none;
-}
-.templates summary::-webkit-details-marker {
+.chat-app[data-state='chat'] .templates {
   display: none;
 }
-.templates summary::after,
-.bar::after {
-  content: '';
-  flex: none;
-  width: 0.5em;
-  height: 0.5em;
-  border-right: 2px solid currentColor;
-  border-bottom: 2px solid currentColor;
-  transform: translateY(-0.15em) rotate(45deg);
-}
-.templates[open] summary::after,
-details[open] > .bar::after,
-.bar[aria-expanded='true']::after {
-  transform: translateY(0.1em) rotate(-135deg);
-}
 .template-list {
-  position: absolute;
-  left: 50%;
-  z-index: 5;
-  width: min(30rem, 100%);
-  margin: 0.25rem 0 0;
-  padding: 0.4rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0.4rem 0 0;
+  padding: 0;
   list-style: none;
-  text-align: left;
-  background: var(--field);
-  border: 1px solid var(--field-edge);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  transform: translateX(-50%);
 }
 .preset-btn {
   display: block;
-  width: 100%;
-  min-height: 2.75rem;
-  padding: 0.55rem 1rem;
-  background: none;
+  min-height: 2.5rem;
+  padding: 0.5rem 1.1rem;
+  background: rgba(255, 255, 255, 0.72);
   border: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px var(--hair);
   color: var(--ink);
-  text-align: left;
+  font-size: var(--step--1);
+  text-align: center;
 }
-.preset-btn:hover,
-.preset-btn:focus-visible {
-  background: var(--panel);
+.preset-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--lavender);
+}
+.preset-text {
+  display: block;
+  max-width: min(22rem, 100vw - 6rem);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .preset-kind {
-  display: block;
-  font-size: var(--step--1);
-  color: var(--ink-soft);
+  display: none;
 }
 
 .chat-notice {
@@ -404,12 +532,15 @@ details[open] > .bar::after,
 
 /* ---------- Answer ---------- */
 .answer-panel {
+  order: -2;
+  width: 100%;
+  max-width: 44rem;
+  align-self: center;
   margin-top: 2rem;
-  max-height: 32rem;
-  overflow-y: auto;
-  padding: 2rem 2.25rem;
-  background: var(--panel);
-  border-radius: 4px;
+}
+/* no empty answer area before the first question */
+.chat-app[data-state='start'] .answer-panel {
+  display: none;
 }
 .message-list {
   display: flex;
@@ -417,18 +548,15 @@ details[open] > .bar::after,
   gap: 2rem;
   min-height: 5rem;
 }
-.message-list:empty::before {
-  content: attr(data-placeholder);
-  margin: auto;
-  color: var(--ink-soft);
-  font-size: var(--step-1);
+.message {
+  scroll-margin-bottom: 7rem; /* never hidden behind the question box */
 }
 .message--visitor {
   align-self: flex-end;
   max-width: 80%;
-  padding: 0.5rem 0.9rem;
-  background: var(--field);
-  border-radius: 10px;
+  padding: 0.6rem 1rem;
+  background: rgba(175, 158, 215, 0.25);
+  border-radius: 1.2rem 0.3rem 1.2rem 1.2rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
@@ -518,45 +646,124 @@ details[open] > .bar::after,
 .status-dot[data-state='live'] { background: var(--carbon); }
 .status-dot[data-state='sample'] { background: var(--electricity); }
 
-/* ---------- Bars: the purple things you can open ---------- */
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
+/* ---------- The card under the answer: a small receipt, the way in ---------- */
+.cost-card {
+  order: -1;
   width: 100%;
-  min-height: 3rem;
-  padding: 0.5rem 1.25rem;
-  background: var(--purple);
-  color: var(--on-purple);
-  border: 0;
-  border-radius: 6px;
-  font-size: var(--step-1);
-  text-align: center;
-  cursor: pointer;
-  list-style: none;
+  max-width: 44rem;
+  align-self: center;
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: center;
+  margin-top: 2.5rem;
+  padding: 2rem;
+  background: linear-gradient(135deg, var(--plum), #8a1c34);
+  color: #ffffff;
+  border-radius: 14px;
 }
-.bar::-webkit-details-marker {
+.chat-app[data-state='chat'] .cost-card {
+  margin-bottom: 2rem;
+}
+/* only once there is an answer (the button is shown then) */
+.cost-card:has(#see-cost[hidden]) {
   display: none;
 }
-.bar:hover {
-  background: var(--purple-hover);
+.mini-receipt {
+  padding: 1.1rem 1.25rem 1.4rem;
+  background: #fffefa;
+  color: #1b1f1d;
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  transform: rotate(-2deg);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
 }
-.bar--big {
-  margin-top: 3.5rem;
-  min-height: 3.6rem;
-  font-size: var(--step-2);
+.mini-title {
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1.5px dashed #6b6b62;
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mini-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.15rem 0;
+}
+.mini-line strong {
+  white-space: nowrap;
+}
+.cost-card-text > * + * {
+  margin-top: 1rem;
+}
+.cost-card-text h2 {
+  font-size: var(--step-3);
+  line-height: 1.15;
+}
+.card-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3rem;
+  padding: 0.6rem 1.5rem;
+  background: #f7e07b;
+  color: var(--plum);
+  border: 0;
+  border-radius: 999px;
   font-weight: 700;
 }
+.card-button::after {
+  content: '→';
+}
+.card-button[aria-expanded='true']::after {
+  content: '↓';
+}
+.card-button:hover {
+  background: #fbeba5;
+}
 
-/* ---------- The bill: a small slip with three lines ---------- */
+/* ---------- The receipt band: words on the left, the receipt on the right ---------- */
 .cost-content {
   margin-top: 3rem;
 }
 .bill {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 3rem;
+  align-items: center;
   justify-content: center;
+  margin: 0 calc(50% - 50vw);
+  padding: 4rem max(var(--gutter), calc(50vw - 34rem));
+  background: #e9cba0;
   overflow-x: clip; /* the tilted receipt never makes the page scroll sideways */
+}
+.bill-text > * + * {
+  margin-top: 1rem;
+}
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--plum);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.kicker::before {
+  content: '';
+  width: 1.4rem;
+  height: 3px;
+  background: var(--coral-deep);
+}
+.bill-text h2 {
+  color: var(--plum);
+  font-size: var(--step-4);
+  line-height: 1.05;
+  text-transform: uppercase;
 }
 
 /* The receipt hangs from a printer slot; the shadow follows the torn edge */
@@ -582,7 +789,6 @@ details[open] > .bar::after,
   --electricity: #8a5a00;
   --water: #1d5d70;
   --carbon: #3d6b2c;
-  --money: #7a2f48;
   position: relative;
   padding: 1.75rem 1.6rem calc(2.25rem + var(--zigzag));
   background: #fffefa;
@@ -619,20 +825,14 @@ details[open] > .bar::after,
   font-size: 0.85rem;
   color: var(--ink-soft);
 }
+.receipt-question {
+  margin-top: 0.4rem;
+  font-style: italic;
+}
 .receipt-divider {
   border: 0;
   border-top: 1.5px dashed var(--ink-soft);
   margin: 0.9rem 0;
-}
-.receipt-divider--double {
-  border-top: 3px double var(--ink);
-}
-.receipt-section-title {
-  font-size: 0.8rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  margin-bottom: 0.3rem;
 }
 .receipt-line {
   display: grid;
@@ -644,10 +844,11 @@ details[open] > .bar::after,
 .receipt-line > strong {
   text-align: right;
   font-weight: 700;
+  white-space: nowrap;
 }
 .receipt-line .receipt-sub {
   grid-column: 1 / -1;
-  text-align: right;
+  margin-left: 1.05rem;
   font-size: 0.8rem;
   color: var(--ink-soft);
 }
@@ -665,60 +866,124 @@ details[open] > .bar::after,
 [data-resource='electricity'] { --resource: var(--electricity); }
 [data-resource='water'] { --resource: var(--water); }
 [data-resource='carbon'] { --resource: var(--carbon); }
-[data-resource='money'] { --resource: var(--money); }
-.receipt-line.total-line {
-  font-size: 1.1rem;
-  padding: 0.3rem 0;
-}
-.receipt-line.total-line > strong {
-  font-size: 1.5rem;
-}
-.receipt-line.sub-total {
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-.receipt-line.sub-total > strong {
-  font-weight: 500;
-}
-.receipt-note {
-  margin: 0.15rem 0 0.4rem;
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-.receipt-scale {
-  font-size: 0.9rem;
-}
 .receipt-footer {
   text-align: center;
   font-size: 0.8rem;
   color: var(--ink-soft);
 }
 
-/* ---------- How do we estimate this? ---------- */
+/* ---------- How do we estimate this? Four full-width colour bands ---------- */
 .estimate {
   margin-top: 4.5rem;
 }
 .estimate h2 {
+  margin-bottom: 2rem;
+  color: var(--plum);
   font-size: var(--step-3);
   text-align: center;
-  margin-bottom: 2rem;
 }
 .est-block {
-  max-width: 44rem;
-  margin: 1.1rem auto 0;
+  margin: 0 calc(50% - 50vw);
+  padding: 0 max(var(--gutter), calc(50vw - 34rem));
+  color: var(--plum);
 }
+.est-block:nth-of-type(1) { background: #b39ddb; }
+.est-block:nth-of-type(2) { background: #fbe38a; }
+.est-block:nth-of-type(3) { background: #7cc0f5; }
+.est-block:nth-of-type(4) { background: #93c8a8; }
+/* The bar: number, title, the visitor's result, and the arrow box */
+.est-block > .bar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+  min-height: 6.5rem;
+  padding: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+.est-block > .bar::-webkit-details-marker {
+  display: none;
+}
+:lang(ne) .est-block > .bar {
+  text-transform: none;
+}
+.est-block > .bar > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.step-num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.2rem;
+  border: 2px solid currentColor;
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.step-value {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  text-transform: none; /* exact units: mWh is not MWh */
+}
+/* the arrow in a white box; it lifts with a shadow on hover and when open */
+.est-block > .bar::after {
+  content: '';
+  flex: none;
+  width: 3rem;
+  height: 3rem;
+  border: 2px solid var(--plum);
+  background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c0a26' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") center / 1.3rem no-repeat;
+  transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1), box-shadow 0.22s ease;
+}
+.est-block[open] > .bar::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c0a26' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 15 6-6 6 6'/%3E%3C/svg%3E");
+}
+.est-block[open] > .bar::after,
+.est-block > .bar:hover::after,
+.est-block > .bar:focus-visible::after {
+  transform: translate(-3px, -3px);
+  box-shadow: 4px 4px 0 var(--plum);
+}
+
+/* An opened step: the words on the left, the visitor's numbers on the right */
 .est-body {
-  padding: 2rem 0.5rem 2.5rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: start;
+  padding: 0.5rem 0 3rem;
+  color: var(--ink);
 }
-.est-body > * + * {
+.est-text > * + * {
   margin-top: 1.3rem;
 }
-.est-body h3 {
-  margin-top: 2.75rem;
-  font-size: var(--step-1);
+.est-text .source {
+  padding: 0.9rem 1.1rem;
+  background: #fff6d8;
+  border-radius: 4px;
+}
+.your-numbers {
+  padding: 1.25rem 1.4rem;
+  background: #ffffff;
+  border-radius: 6px;
+}
+.your-numbers > * + * {
+  margin-top: 0.8rem;
 }
 .working-label {
+  font-size: var(--step--1);
   font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 .calc {
   font-family: var(--mono);
@@ -742,6 +1007,15 @@ details[open] > .bar::after,
   border-top: 1px solid var(--ink);
   font-weight: 700;
 }
+.est-range {
+  font-size: var(--step--1);
+  color: var(--ink-soft);
+}
+.est-compare {
+  padding: 0.7rem 0.9rem;
+  background: var(--panel);
+  border-radius: 4px;
+}
 .source {
   font-size: var(--step--1);
   color: var(--ink-soft);
@@ -761,7 +1035,13 @@ details[open] > .bar::after,
   padding: 0.3em 0.1em;
 }
 
-/* Tokens */
+/* The tokens step */
+.token-body {
+  gap: 3rem;
+}
+.token-body .est-text > * + * {
+  margin-top: 1.1rem;
+}
 .token-examples {
   display: grid;
   gap: 0.9rem;
@@ -774,24 +1054,36 @@ details[open] > .bar::after,
   margin-left: 0.5rem;
   color: var(--ink-soft);
 }
+.note-box {
+  padding: 0.9rem 1.1rem;
+  background: rgba(255, 255, 255, 0.5);
+  font-size: var(--step--1);
+}
 .token-cards {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 2.5rem;
+  gap: 1.25rem;
 }
 .token-card {
   min-width: 0;
-}
-.token-card + .token-card {
-  padding-left: 2.5rem;
-  border-left: 1px solid var(--rule);
+  padding: 1.1rem 1.25rem;
+  background: #ffffff;
 }
 .token-card-title {
-  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 0.4rem;
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.token-card-title strong {
+  font-family: var(--mono);
+  white-space: nowrap;
 }
 .token-display-box {
-  max-height: 16rem;
+  max-height: 14rem;
   overflow-y: auto;
   margin-top: 1rem;
   font-family: var(--mono);
@@ -847,23 +1139,68 @@ details[open] > .bar::after,
   font-style: normal;
 }
 
-/* ---------- References link and end buttons ---------- */
-.references-link {
-  margin-top: 4rem;
+/* ---------- The closing band ---------- */
+.closing-band {
+  margin: 4rem calc(50% - 50vw) -7rem;
+  padding: 5rem max(var(--gutter), calc(50vw - 30rem)) 6rem;
+  background: #fbc8b2;
+  color: var(--plum);
   text-align: center;
-  font-size: var(--step-1);
 }
-.references-link a {
-  display: inline-block;
-  padding: 0.4rem 0.25rem;
+.closing-band h2 {
+  font-size: var(--step-4);
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+.closing-band > p {
+  max-width: 34rem;
+  margin: 1.5rem auto 0;
+  font-size: var(--step-1);
 }
 .end-actions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: 1.25rem;
-  margin-top: 2.5rem;
+  margin-top: 2rem;
 }
+.closing-band .button-primary,
+.closing-band .button-quiet {
+  display: inline-flex;
+  align-items: center;
+  min-height: 3.2rem;
+  padding: 0.6rem 1.75rem;
+  border-radius: 0;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.closing-band .button-primary {
+  background: #e8473b;
+  color: #ffffff;
+}
+.closing-band .button-primary:hover {
+  background: #c9372c;
+}
+.closing-band .button-quiet {
+  border: 2px solid var(--plum);
+  color: var(--plum);
+}
+.closing-band .button-quiet:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+.button-text {
+  margin-top: 1.5rem;
+  min-height: 2.75rem;
+  background: none;
+  border: 0;
+  color: var(--plum);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* Buttons elsewhere (the "Still there?" dialog) */
 .button-primary,
 .button-quiet {
   min-height: 3rem;
@@ -872,12 +1209,12 @@ details[open] > .bar::after,
   font-weight: 600;
 }
 .button-primary {
-  background: var(--purple);
-  color: var(--on-purple);
+  background: var(--plum);
+  color: #ffffff;
   border: 0;
 }
 .button-primary:hover {
-  background: var(--purple-hover);
+  background: #44071c;
 }
 .button-quiet {
   background: transparent;
@@ -885,7 +1222,25 @@ details[open] > .bar::after,
   border: 2px solid var(--ink-soft);
 }
 
+/* Spaced capitals suit English only: Devanagari letters must stay joined */
+:lang(ne) .receipt-header h3,
+:lang(ne) .kicker,
+:lang(ne) .bill-text h2,
+:lang(ne) .token-card-title,
+:lang(ne) .closing-band .button-primary,
+:lang(ne) .closing-band .button-quiet {
+  letter-spacing: 0;
+}
+:lang(ne) .closing-band h2,
+:lang(ne) .closing-band .button-primary,
+:lang(ne) .closing-band .button-quiet {
+  text-transform: none;
+}
+
 /* ---------- References page ---------- */
+main.references {
+  padding: 1rem var(--gutter) 4rem;
+}
 .references .reader {
   max-width: 44rem;
   margin: 0 auto;
@@ -936,7 +1291,7 @@ details[open] > .bar::after,
 }
 .reference-number {
   font-weight: 700;
-  color: var(--purple);
+  color: var(--plum);
 }
 .reference-used,
 .reference-backlinks,
@@ -964,7 +1319,7 @@ details[open] > .bar::after,
   max-width: 30rem;
   padding: 2.25rem;
   background: var(--bg);
-  border-radius: 8px;
+  border-radius: 1.2rem;
   text-align: center;
 }
 .idle-dialog h2 {
@@ -981,33 +1336,34 @@ details[open] > .bar::after,
     --step-3: 1.6rem;
     --step-4: 2.1rem;
   }
-  .page {
-    padding-top: 4rem;
-  }
-  .page-controls {
-    position: absolute; /* stays at the top instead of covering the text */
-  }
   .lang-switch button,
   .text-size {
     padding-inline: 0.5rem;
   }
-  .answer-panel {
-    padding: 1.1rem 1rem;
+  .cost-card {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
   }
-  .bar--big {
-    font-size: var(--step-1);
+  .bill {
+    grid-template-columns: 1fr;
+    padding-block: 2.5rem;
   }
   .thermal-receipt {
     padding-inline: 1.1rem;
     font-size: 0.85rem;
   }
-  .token-cards {
-    grid-template-columns: 1fr;
+  .est-block > .bar {
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    font-size: 1.15rem;
   }
-  .token-card + .token-card {
-    padding: 1.25rem 0 0;
-    border-left: 0;
-    border-top: 1px solid var(--rule);
+  .step-value {
+    order: 3;
+    flex-basis: 100%;
+    margin-left: 3.4rem;
+  }
+  .est-body {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1015,6 +1371,9 @@ details[open] > .bar::after,
 @media (prefers-contrast: more) {
   :root {
     --bg: #ffffff;
+    --page-bg: #ffffff;
+    --hair: #555555;
+    --tint: #eeeeee;
     --ink: #000000;
     --ink-soft: #000000;
     --panel: #f0f0f0;
@@ -1030,15 +1389,4 @@ details[open] > .bar::after,
   .thermal-receipt.is-printing {
     animation: none;
   }
-}
-
-/* The References page has the same column and top room as the calculator */
-main.references {
-  padding: 4.5rem var(--gutter) 4rem;
-}
-
-/* Spaced capitals suit English only: Devanagari letters must stay joined */
-:lang(ne) .receipt-header h3,
-:lang(ne) .receipt-section-title {
-  letter-spacing: 0;
 }

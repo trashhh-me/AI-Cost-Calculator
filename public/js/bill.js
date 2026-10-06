@@ -5,6 +5,7 @@ import { STEPS } from './content.js';
 import { escapeHTML } from './markdown.js';
 import * as f from './format.js';
 import { t, pick } from './i18n.js';
+import { comparisons } from './calculate.js';
 
 const name = (key) => pick(STEPS.find((s) => s.key === key).name);
 
@@ -21,23 +22,31 @@ const line = (label, value, { id = '', cls = '', sub = '', resource = '' } = {})
 
 export function renderReceipt(turns, r) {
   version++;
-  const status = r.allLive ? t('r.live') : r.anyLive ? t('r.mixed') : t('r.sample');
+  const c = comparisons(r);
+  const question = turns[turns.length - 1]?.question || '';
+  const short = question.length > 60 ? `${question.slice(0, 57)}…` : question;
 
   $('thermal-receipt').innerHTML = `
     <header class="receipt-header">
-      <h3>${t('appTitle')}</h3>
+      <h3>${t('billTitle')}</h3>
       <p>${escapeHTML(f.dateTime())}</p>
-      <p>${status}</p>
+      <p class="receipt-question">“${escapeHTML(short)}”</p>
     </header>
     <hr class="receipt-divider">
-    <p class="receipt-section-title">${t('billTitle')}</p>
-    ${line(name('electricity'), f.str(f.energy(r.wh.mid)), { id: 'receipt-wh', resource: 'electricity' })}
-    ${line(name('water'), f.str(f.water(r.ml.mid)), { id: 'receipt-ml', resource: 'water' })}
-    ${line(name('carbon'), `${f.str(f.carbon(r.g.mid))} CO₂e`, { id: 'receipt-co2', resource: 'carbon' })}
+    ${line(t('tokensInOut'), `${f.int(r.input)} / ${f.int(r.output)}`)}
+    <hr class="receipt-divider">
+    ${line(name('electricity'), f.str(f.energy(r.wh.mid)), { id: 'receipt-wh', resource: 'electricity', sub: t('analogy.phone', { v: c.phone }) })}
+    ${line(name('water'), f.str(f.water(r.ml.mid)), { id: 'receipt-ml', resource: 'water', sub: t(c.water.key, { v: c.water.value }) })}
+    ${line(name('carbon'), `${f.str(f.carbon(r.g.mid))} CO₂e`, { id: 'receipt-co2', resource: 'carbon', sub: t('analogy.car', { v: c.car, cite: '' }) })}
     <hr class="receipt-divider">
     <footer class="receipt-footer">
-      <p>${t('r.thanks')}</p>
+      <p>${t('receiptFoot')}</p>
     </footer>`;
+
+  // The small receipt in the card under the answer
+  $('mini-electricity').textContent = f.str(f.energy(r.wh.mid));
+  $('mini-water').textContent = f.str(f.water(r.ml.mid));
+  $('mini-carbon').textContent = `${f.str(f.carbon(r.g.mid))} CO₂e`;
 }
 
 /** Print the receipt (paper feed) once per new bill, when it is on screen. */
