@@ -82,26 +82,12 @@
 
     <div id="cost-content" class="cost-content" hidden>
 
-      <!-- The bill: three readings -->
+      <!-- The bill: an itemised receipt -->
       <section id="bill" class="bill" aria-labelledby="bill-heading" tabindex="-1">
-        <h2 id="bill-heading" data-i18n="billTitle">Your AI query costs</h2>
-        <dl class="bill-rows">
-          <div class="bill-row" data-resource="electricity">
-            <dt data-i18n="electricity">Electricity</dt>
-            <dd class="bill-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M13.5 2 5 13.5h6L9.5 22 19 9.5h-6.2L13.5 2Z"/></svg></dd>
-            <dd class="bill-value" id="bill-electricity">–</dd>
-          </div>
-          <div class="bill-row" data-resource="water">
-            <dt data-i18n="water">Water</dt>
-            <dd class="bill-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 2.5S5 10.2 5 14.8A7 7 0 0 0 19 14.8C19 10.2 12 2.5 12 2.5Z"/></svg></dd>
-            <dd class="bill-value" id="bill-water">–</dd>
-          </div>
-          <div class="bill-row" data-resource="carbon">
-            <dt data-i18n="carbon">Carbon</dt>
-            <dd class="bill-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21v-8.5M12 12.5C12 8 8.5 5.5 4 5.5c0 4.5 3.5 7 8 7Zm0 0c0-4.5 3.5-7 8-7 0 4.5-3.5 7-8 7Z"/></svg></dd>
-            <dd class="bill-value" id="bill-carbon">–</dd>
-          </div>
-        </dl>
+        <h2 id="bill-heading" class="visually-hidden" data-i18n="billTitle">Your AI query costs</h2>
+        <div class="receipt-slot">
+          <article id="thermal-receipt" class="thermal-receipt" aria-label="Itemised receipt" data-i18n-attr="aria-label:receiptLabel"></article>
+        </div>
       </section>
 
       <!-- How do we estimate this? Each part opens only when wanted. -->

@@ -552,52 +552,144 @@ details[open] > .bar::after,
   margin-top: 1.5rem;
 }
 .bill {
-  width: fit-content;
-  min-width: min(26rem, 100%);
-  margin: 0 auto;
-  padding: 1.25rem 2.25rem 1.5rem;
-  background: var(--bill-bg);
-  border: 2px dashed var(--bill-edge);
+  display: flex;
+  justify-content: center;
+  overflow-x: clip; /* the tilted receipt never makes the page scroll sideways */
+}
+
+/* The receipt hangs from a printer slot; the shadow follows the torn edge */
+.receipt-slot {
+  width: 100%;
+  max-width: 26rem;
+  margin: 0.5rem 0 1rem;
+  transform: rotate(-0.6deg);
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.18)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+}
+.receipt-slot::before {
+  content: '';
+  display: block;
+  height: 10px;
+  margin: 0 -1rem;
+  background: #2b2a26;
+  border-radius: 3px;
+}
+.thermal-receipt {
+  --zigzag: 14px;
+  --ink: #1b1f1d;
+  --ink-soft: #4f564f;
+  --electricity: #8a5a00;
+  --water: #1d5d70;
+  --carbon: #3d6b2c;
+  --money: #7a2f48;
+  position: relative;
+  padding: 1.75rem 1.6rem calc(2.25rem + var(--zigzag));
+  background: #fffefa;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  text-align: left;
+  -webkit-mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--zigzag)) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--zigzag) var(--zigzag) repeat-x;
+  mask:
+    linear-gradient(#000 0 0) top / 100% calc(100% - var(--zigzag)) no-repeat,
+    conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / var(--zigzag) var(--zigzag) repeat-x;
+}
+/* Printing: the paper feeds out in steps, like a thermal printer */
+.thermal-receipt.is-printing {
+  animation: print-feed 1.3s steps(26, end) both;
+}
+@keyframes print-feed {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+.receipt-header {
   text-align: center;
 }
-.bill h2 {
-  font-size: var(--step-1);
-  letter-spacing: 0.04em;
+.receipt-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
-.bill-rows {
-  display: grid;
-  gap: 0.4rem;
-  margin-top: 1rem;
+.receipt-header p {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
 }
-.bill-row {
-  display: grid;
-  grid-template-columns: 1fr 1.6rem 1fr;
-  align-items: center;
-  column-gap: 0.75rem;
-  font-size: var(--step-1);
+.receipt-divider {
+  border: 0;
+  border-top: 1.5px dashed var(--ink-soft);
+  margin: 0.9rem 0;
 }
-.bill-row dt {
-  font-weight: 700;
+.receipt-divider--double {
+  border-top: 3px double var(--ink);
+}
+.receipt-section-title {
+  font-size: 0.8rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin-bottom: 0.3rem;
+}
+.receipt-line {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0 1rem;
+  padding: 0.3rem 0;
+  font-size: 1.1rem;
+}
+.receipt-line > strong {
   text-align: right;
+  font-weight: 700;
 }
-.bill-row .bill-value {
-  text-align: left;
-  white-space: nowrap;
+.receipt-line .receipt-sub {
+  grid-column: 1 / -1;
+  text-align: right;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
 }
-.bill-icon svg {
-  display: block;
-  width: 1.4rem;
-  height: 1.4rem;
+.receipt-resource {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
-[data-resource='electricity'] .bill-icon svg { fill: var(--electricity); }
-[data-resource='water'] .bill-icon svg { fill: var(--water); }
-[data-resource='carbon'] .bill-icon svg {
-  fill: none;
-  stroke: var(--carbon);
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.receipt-resource::before {
+  content: '';
+  width: 0.6rem;
+  height: 0.6rem;
+  background: var(--resource, var(--ink));
+}
+[data-resource='electricity'] { --resource: var(--electricity); }
+[data-resource='water'] { --resource: var(--water); }
+[data-resource='carbon'] { --resource: var(--carbon); }
+[data-resource='money'] { --resource: var(--money); }
+.receipt-line.total-line {
+  font-size: 1.1rem;
+  padding: 0.3rem 0;
+}
+.receipt-line.total-line > strong {
+  font-size: 1.5rem;
+}
+.receipt-line.sub-total {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.receipt-line.sub-total > strong {
+  font-weight: 500;
+}
+.receipt-note {
+  margin: 0.15rem 0 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.receipt-scale {
+  font-size: 0.9rem;
+}
+.receipt-footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
 }
 
 /* ---------- How do we estimate this? ---------- */
@@ -898,8 +990,9 @@ details[open] > .bar::after,
   .bar--big {
     font-size: var(--step-1);
   }
-  .bill {
-    padding-inline: 1rem;
+  .thermal-receipt {
+    padding-inline: 1.1rem;
+    font-size: 0.85rem;
   }
   .token-cards {
     grid-template-columns: 1fr;
@@ -927,9 +1020,18 @@ details[open] > .bar::after,
   html {
     scroll-behavior: auto;
   }
+  .thermal-receipt.is-printing {
+    animation: none;
+  }
 }
 
 /* The References page has the same column and top room as the calculator */
 main.references {
   padding: 4.5rem var(--gutter) 4rem;
+}
+
+/* Spaced capitals suit English only: Devanagari letters must stay joined */
+:lang(ne) .receipt-header h3,
+:lang(ne) .receipt-section-title {
+  letter-spacing: 0;
 }

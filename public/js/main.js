@@ -1,10 +1,11 @@
 // AI Cost Calculator: one page. The question box and the answer; after the
-// first answer, "See the Cost of Your Query" opens the bill (electricity,
-// water, carbon) and "How do we estimate this?", whose parts open one at a
+// first answer, "See the Cost of Your Query" opens the bill (a printed
+// receipt) and "How do we estimate this?", whose parts open one at a
 // time. Plus the language and text-size switches and the kiosk idle reset.
 import { createChat } from './chat.js';
 import { renderTokens, clearTokens } from './tokens.js';
-import { fillBill, fillExplainer } from './explainer.js';
+import { fillExplainer } from './explainer.js';
+import { renderReceipt, initPrinting, clearReceipt } from './bill.js';
 import { calculate } from './calculate.js';
 import { initKiosk } from './kiosk.js';
 import { initControls, onLangChange, resetLang, resetTextSize, getLang } from './i18n.js';
@@ -44,6 +45,7 @@ function setOpen(open) {
 let chat = null;
 // No language switch mid-answer: the answer being written would be cut off.
 initControls({ canSwitch: () => !chat?.isBusy() });
+initPrinting();
 
 /** The bill and the estimates, from the visit's finished turns. */
 function renderCost() {
@@ -54,7 +56,7 @@ function renderCost() {
     return;
   }
   const result = calculate(turns);
-  fillBill(result);
+  renderReceipt(turns, result);
   fillExplainer(result);
   $('ask-another').hidden = remaining <= 0;
   return renderTokens(turns);
@@ -106,6 +108,7 @@ async function resetAll() {
   kiosk?.dismiss();
   clearVisit();
   clearTokens();
+  clearReceipt();
   setOpen(false);
   for (const d of document.querySelectorAll('.est-block')) d.open = false;
   resetLang();

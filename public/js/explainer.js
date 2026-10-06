@@ -1,4 +1,4 @@
-// The bill (electricity, water, carbon) and "How do we estimate this?":
+// "How do we estimate this?":
 // one fold-out block per reading, each with a plain explanation, the sum
 // with the visitor's own tokens, and where the numbers come from.
 import { CONFIG } from './config.js';
@@ -7,19 +7,10 @@ import { cite } from './references.js';
 import { t, pick } from './i18n.js';
 import * as f from './format.js';
 
-const $ = (id) => document.getElementById(id);
-
 /** The readings shown on this page, in order. */
 export const SHOWN = ['electricity', 'water', 'carbon'];
 
 const co2 = (g) => `${f.str(f.carbon(g))} CO₂e`;
-
-/** The three lines of the bill. */
-export function fillBill(r) {
-  $('bill-electricity').textContent = f.str(f.energy(r.wh.mid));
-  $('bill-water').textContent = f.str(f.water(r.ml.mid));
-  $('bill-carbon').textContent = co2(r.g.mid);
-}
 
 // One line of a sum: the working on the left, the result on the right.
 const line = (expr, value = '', cls = '') =>
