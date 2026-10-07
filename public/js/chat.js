@@ -27,10 +27,6 @@ export function createChat({ onActivity, onTurnComplete }) {
   const list = $('conversation');
   const scroller = $('Chat-Page');
   const charCount = $('char-count');
-  const questionsLeft = $('questions-left');
-  const modelStatus = $('model-status');
-  const modelName = $('model-name');
-  const statusDot = document.querySelector('.status-dot');
   const announcer = $('answer-announcer');
   const seeCost = $('see-cost');
   const templates = $('templates');
@@ -143,10 +139,6 @@ export function createChat({ onActivity, onTurnComplete }) {
     sendBtn.hidden = on;
   }
 
-  function updateQuestionsLeft() {
-    questionsLeft.textContent = t('questionsLeft', { n: int(remaining), count: remaining });
-  }
-
   function allUsedNotice() {
     showNotice('allUsed', { n: int(CONFIG.limits.maxQuestionsPerVisit) }, 'info');
   }
@@ -165,16 +157,12 @@ export function createChat({ onActivity, onTurnComplete }) {
       // counting questions on this page.
       setLive(false);
     }
-    modelName.textContent = modelLabel;
-    updateQuestionsLeft();
     setBusy(false);
     if (remaining <= 0 && turns().length) allUsedNotice();
   }
 
   function setLive(isLive) {
     live = isLive;
-    statusDot.dataset.state = isLive ? 'live' : 'sample';
-    modelStatus.textContent = isLive ? t('live') : t('sampleAnswers');
   }
 
   /* ---------- Messages ---------- */
@@ -198,29 +186,24 @@ export function createChat({ onActivity, onTurnComplete }) {
     list.append(el);
   }
 
-  function addAnswerShell(n) {
+  // Each answer is headed, quietly, with the model that wrote it.
+  function addAnswerShell(n, label = modelLabel) {
     const el = document.createElement('article');
     el.className = 'message message--ai is-streaming';
     el.setAttribute('aria-label', t('answerN', { n: int(n) }));
     el.innerHTML = `
-      <p class="message-note" hidden></p>
+      <p class="answer-from"></p>
       <p class="thinking"></p>
       <div class="answer-body"></div>`;
+    el.querySelector('.answer-from').textContent = label;
     list.append(el);
     return el;
-  }
-
-  function markSample(el, reason) {
-    const note = el.querySelector('.message-note');
-    note.textContent = t(`sample.${reason}`) === `sample.${reason}` ? t('sample.error') : t(`sample.${reason}`);
-    note.hidden = false;
   }
 
   // The finishing touches under an answer: stopped note and the meter line.
   function finishAnswerEl(el, turn) {
     el.classList.remove('is-streaming');
     el.querySelector('.thinking')?.remove();
-    if (!turn.live) markSample(el, turn.reason || 'demo');
     if (turn.stopped) {
       const note = document.createElement('p');
       note.className = 'stopped-note';
@@ -241,7 +224,7 @@ export function createChat({ onActivity, onTurnComplete }) {
     list.replaceChildren();
     for (const turn of turns()) {
       addVisitorMessage(turn.question);
-      const el = addAnswerShell(turn.number);
+      const el = addAnswerShell(turn.number, turn.modelLabel || modelLabel);
       el.querySelector('.answer-body').innerHTML = renderMarkdown(turn.answer);
       finishAnswerEl(el, turn);
     }
@@ -322,7 +305,6 @@ export function createChat({ onActivity, onTurnComplete }) {
         remaining = 0;
         setRemaining(0);
         current = null;
-        updateQuestionsLeft();
         setBusy(false);
         allUsedNotice();
         return;
@@ -388,8 +370,10 @@ export function createChat({ onActivity, onTurnComplete }) {
         c.requestId = ev.requestId;
         c.live = ev.live;
         c.reason = ev.reason;
-        if (ev.modelLabel) modelLabel = ev.modelLabel;
-        if (!ev.live) markSample(c.el, ev.reason);
+        if (ev.modelLabel) {
+          modelLabel = ev.modelLabel;
+          c.el.querySelector('.answer-from').textContent = modelLabel;
+        }
         setLive(ev.live);
         break;
       case 'fallback':
@@ -397,7 +381,6 @@ export function createChat({ onActivity, onTurnComplete }) {
         c.live = false;
         c.reason = ev.reason;
         c.text = '';
-        markSample(c.el, ev.reason);
         renderAnswer();
         setLive(false);
         break;
@@ -439,7 +422,6 @@ export function createChat({ onActivity, onTurnComplete }) {
     const c = current;
     c.live = false;
     c.reason = 'offline';
-    markSample(c.el, 'offline');
     setLive(false);
     const answer = sampleAnswerFor(question);
     const pieces = answer.match(/\S+\s*/g) || [];
@@ -511,7 +493,6 @@ export function createChat({ onActivity, onTurnComplete }) {
     onTurnComplete?.(turn);
 
     announcer.textContent = `${t('answerComplete')} ${plainText(c.text)}`;
-    updateQuestionsLeft();
     setBusy(false);
     seeCost.hidden = false;
     if (remaining <= 0) allUsedNotice();
@@ -543,7 +524,6 @@ export function createChat({ onActivity, onTurnComplete }) {
     seeCost.hidden = true;
     app.dataset.state = 'start';
     remaining = getVisit().remaining;
-    updateQuestionsLeft();
     setBusy(false);
     return refreshStatus();
   }
@@ -556,14 +536,12 @@ export function createChat({ onActivity, onTurnComplete }) {
   onLangChange(() => {
     renderPresets();
     if (live !== null) setLive(live);
-    updateQuestionsLeft();
     if (noticeState) showNotice(noticeState.key, noticeState.vars, noticeState.kind);
     if (!busy) renderHistory();
   });
 
   renderPresets();
   renderHistory();
-  updateQuestionsLeft();
   refreshStatus();
   if (turns().length) scrollToEnd(true);
 
